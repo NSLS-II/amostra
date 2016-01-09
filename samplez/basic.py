@@ -1,6 +1,8 @@
 import jsonschema
+import json
 from doct import Document
 from uuid import uuid4
+
 
 def look_up_schema(schema):
     raise NotImplemented()
@@ -118,3 +120,18 @@ class SampleReference:
 
     def find_raw_mongo(self, mongo_query):
         raise NotImplemented()
+
+    def dump_to_json(self, fpath):
+        if isinstance(fpath, str):
+            with open(fpath, 'w') as fout:
+                json.dump(self._sample_list, fout)
+        else:
+            json.dump(self._sample_list, fpath)
+
+    def dump_to_yaml(self, fpath):
+        import yaml
+        if isinstance(fpath, str):
+            with open(fpath, 'w') as fout:
+                yaml.dump(self._sample_list, fout)
+        else:
+            yaml.dump(self._sample_list, fpath)
