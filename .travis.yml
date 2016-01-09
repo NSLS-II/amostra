@@ -1,0 +1,21 @@
+language: python
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+
+services:
+  - mongodb
+
+
+python:
+  - 3.5
+  - "nightly"
+
+install:
+  - pip install six pytest pytest-cov pymongo jsonschema pyyaml
+  - 'pip install https://github.com/NSLS-II/doct/zipball/master#egg=doct'
+  - pip install -e .
+
+script:
+  - py.test --cov=samplez --cov-report term-missing
