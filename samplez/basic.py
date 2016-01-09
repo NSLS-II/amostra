@@ -18,7 +18,12 @@ class SampleReference:
     def __init__(self, sample_dict=None):
         if sample_dict is None:
             sample_dict = []
-        self._sample_list = list(sample_dict)
+        self._sample_list = [dict(d) for d in sample_dict]
+        ln = len(self._sample_list)
+        if ln != len(set(d['name'] for d in self._sample_list)):
+            raise ValueError("duplicate names")
+        if ln != len(set(d['uid'] for d in self._sample_list)):
+            raise ValueError("duplicate uids")
 
     def add(self, name, schema=None, **kwargs):
         """Add a sample to the database
@@ -73,11 +78,13 @@ class SampleReference:
         old, new : doct.Document
             The old and new documents
         """
-        old, = [d for d in self._sample_list if
-                d['uid'] == uid]
+        if 'name' in kwargs:
+            raise ValueError("Can not change sample name")
+
+        old, = [d for d in self._sample_list if d['uid'] == uid]
 
         if not overwrite:
-            if any(kwargs.keys() in old):
+            if set(old) ^ set(kwargs):
                 raise ValueError("overlapping keys")
         old, new = dict(old), old
         new.update(**kwargs)
