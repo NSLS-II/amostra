@@ -1,6 +1,6 @@
 import pytest
 from .testing import _baseSM
-from samplez.basic import SampleReference
+from amostra.basic import SampleReference
 from io import StringIO
 import json
 import yaml

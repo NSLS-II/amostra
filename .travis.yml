@@ -18,4 +18,4 @@ install:
   - pip install -e .
 
 script:
-  - py.test --cov=samplez --cov-report term-missing
+  - py.test --cov=amostra --cov-report term-missing
