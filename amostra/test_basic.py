@@ -1,9 +1,11 @@
-import pytest
-from .testing import _baseSM
-from amostra.basic import SampleReference
-from io import StringIO
 import json
+from io import StringIO
+
+import pytest
 import yaml
+
+from amostra.server.basic import SampleReference
+from .testing import _baseSM
 
 
 class TestBasic(_baseSM):
