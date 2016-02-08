@@ -74,3 +74,18 @@ class SampleReferenceHandler(DefaultHandler):
         # in case smth goes wrong, return it to client alongside
         # attempted update and an error code
         pass
+
+
+class RequestReferenceHandler(DefaultHandler):
+    @tornado.web.asynchronous
+    def get(self):
+        pass
+
+    @tornado.web.asynchronous
+    def post(self):
+        pass
+
+    @tornado.web.asynchronous
+    def put(self):
+        # TODO: Implement upsert
+        pass

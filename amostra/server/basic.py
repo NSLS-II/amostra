@@ -63,7 +63,19 @@ class SampleReference:
         return uid
 
     def update(self, uid, overwrite=True, **kwargs):
-        """Update an existing sample in place.
+        """Update an exi
+            raise ValueError("Can not change sample name")
+
+        old, = [d for d in self._sample_list if d['uid'] == uid]
+
+        if not overwrite:
+            if set(old) ^ set(kwargs):
+                raise ValueError("overlapping keys")
+        old, new = dict(old), old
+        new.update(**kwargs)
+        return Document('sample', old), Document('sample', new)
+
+    def find(self, **kwargs):sting sample in place.
 
         kwargs are merged into the existing sample document
 
@@ -81,18 +93,6 @@ class SampleReference:
             The old and new documents
         """
         if 'name' in kwargs:
-            raise ValueError("Can not change sample name")
-
-        old, = [d for d in self._sample_list if d['uid'] == uid]
-
-        if not overwrite:
-            if set(old) ^ set(kwargs):
-                raise ValueError("overlapping keys")
-        old, new = dict(old), old
-        new.update(**kwargs)
-        return Document('sample', old), Document('sample', new)
-
-    def find(self, **kwargs):
         """Find samples by keys
 
         Yields all documents which have all of the keys equal
