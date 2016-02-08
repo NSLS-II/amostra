@@ -70,12 +70,7 @@ class SampleReference:
 
         if not overwrite:
             if set(old) ^ set(kwargs):
-                raise ValueError("overlapping keys")
-        old, new = dict(old), old
-        new.update(**kwargs)
-        return Document('sample', old), Document('sample', new)
-
-    def find(self, **kwargs):sting sample in place.
+                raise ValueError("overlapping keys")sting sample in place.
 
         kwargs are merged into the existing sample document
 
@@ -93,6 +88,11 @@ class SampleReference:
             The old and new documents
         """
         if 'name' in kwargs:
+        old, new = dict(old), old
+        new.update(**kwargs)
+        return Document('sample', old), Document('sample', new)
+
+    def find(self, **kwargs):
         """Find samples by keys
 
         Yields all documents which have all of the keys equal

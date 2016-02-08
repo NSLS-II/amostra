@@ -1,1 +1,1 @@
-from commands import *
+from amostra.client.commands import SampleReference
