@@ -8,7 +8,6 @@ import json
 from doct import Document
 from uuid import uuid4
 
-
 def look_up_schema(schema):
     raise NotImplemented()
 
@@ -33,7 +32,7 @@ class SampleReference:
             raise ValueError("duplicate uids")
 
     def add(self, name, schema=None, **kwargs):
-        """Add a sample to the database
+x        """Add a sample to the database
 
         All kwargs are collected and passed through to the documents
 
