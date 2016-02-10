@@ -14,6 +14,7 @@ import jsonschema
 class AmostraException(Exception): # gotta find a less general one for this
     pass
 
+
 def db_connect(database, host, port):
     """Helper function to deal with stateful connections to motor.
     Connection established lazily.
@@ -36,6 +37,7 @@ def db_connect(database, host, port):
         raise AmostraException("Unable to connect to MongoDB server. Make sure Mongo is up and running")
     database = client[database]
     return database
+
 
 class DefaultHandler(tornado.web.RequestHandler):
     """DefaultHandler which takes care of CORS. Javascript needs this"""
