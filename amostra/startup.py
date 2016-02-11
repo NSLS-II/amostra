@@ -1,7 +1,7 @@
 """ Startup script for the server."""
 import argparse
 import tornado.web
-from amostra.server.engine import (SampleReferenceHandler,
+from  ..engine import (SampleReferenceHandler,
                                    RequestHandler,
                                    loop, db_connect)
 
@@ -12,9 +12,7 @@ def start_server():
     config = {k: v for k, v in load_configuration('amostra', 'AMST',
                                                   ['host', 'port', 'timezone',
                                                    'database'],
-                                                  allow_missing=True).items()
-              if v is not None}
-
+                                                  allow_missing=True).items() if v is not None}
     parser = argparse.ArgumentParser()
     parser.add_argument('--database', dest='database', type=str,
                         help='name of database to use')
@@ -45,7 +43,7 @@ def start_server():
     print(db)
     application = tornado.web.Application([
         (r'/sample_ref', SampleReferenceHandler),
-        (r'/request_ref', RequestHandler))
+        (r'/request_ref', RequestHandler)
          ], db=db)
     application.listen(service_port)
     loop.start()
