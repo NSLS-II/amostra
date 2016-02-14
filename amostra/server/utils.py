@@ -14,7 +14,7 @@ SCHEMA_NAMES = {'sample': 'sample_reference.json',
 fn = '{}/{{}}'.format(SCHEMA_PATH)
 schemas = {}
 for name, filename in SCHEMA_NAMES.items():
-    with open(rs_fn('metadataservice',
+    with open(rs_fn('amostra',
                     resource_name=fn.format(filename))) as fin:
         schemas[name] = ujson.load(fin)
 

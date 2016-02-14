@@ -7,7 +7,6 @@ from  ..engine import (SampleReferenceHandler,
 
 from amostra.server.conf import load_configuration
 
-
 def start_server():
     config = {k: v for k, v in load_configuration('amostra', 'AMST',
                                                   ['host', 'port', 'timezone',
