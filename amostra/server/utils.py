@@ -39,15 +39,15 @@ def unpack_params(handler):
         Unpacked query in dict format.
     """
     if isinstance(handler, tornado.web.RequestHandler):
-        return ujson.loads(list(handler.request.arguments.keys())[0])
+        yield ujson.loads(list(handler.request.arguments.keys())[0])
     else:
         raise TypeError("Wrong type", handler)
 
 
 def return2client(handler, payload):
-    """Dump the result back to client's open socket. 
-    No need to worry about package size
-    or socket behavior as tornado handles this for us
+    """Home brew solution to dump the result back to client's open socket. 
+    No need to worry about package size or socket behavior as 
+    tornado handles this for us
     Parameters
     -----------
     handler: tornado.web.RequestHandler
@@ -55,8 +55,7 @@ def return2client(handler, payload):
     payload: dict, list
         Information to be sent to the client
     """
-    # TODO: Solve precision issue here
-
+    # TODO: Solve precision issue with json precision
     if isinstance(payload, pymongo.cursor.Cursor):
             l = []
             for p in payload:

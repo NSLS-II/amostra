@@ -4,6 +4,10 @@
             "type": "string",
             "description": "Name of project that this run is part of"
         },
+        "project": {
+            "type": "string",
+            "description": "Name of project that this run is part of"
+        },
         "beamline_id": {
             "type": "string",
             "description": "The beamline ID"
@@ -28,8 +32,7 @@
     "required": [
         "uid",
         "time",
-        "group",
-        "owner"
+        "name"
      ],
     "type": "object",
     "description": "Document created for group of samples."

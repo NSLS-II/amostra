@@ -4,10 +4,11 @@ import tornado.web
 from tornado import gen
 import pymongo
 import jsonschema
-import pymongo.errors as perr
+import pymongo.errors
 import ujson
 from amostra.server import utils
 from jsonschema.exceptions import ValidationError, SchemaError
+from pymongo.errors import PyMongoError
 
 
 def db_connect(database, host, port):
@@ -32,8 +33,8 @@ def db_connect(database, host, port):
     """
     try:
         client = pymongo.MongoClient(host=host, port=port)
-    except perr.ConnectionFailure:
-        raise AmostraException("Unable to connect to MongoDB server...")
+    except pymongo.errors.ConnectionFailure:
+        raise utils.AmostraException("Unable to connect to MongoDB server...")
     database = client[database]
     return database
 
@@ -80,14 +81,16 @@ class SampleReferenceHandler(DefaultHandler):
     Returns the total number of documents that are updated.
     """
     @tornado.web.asynchronous
+    @gen.coroutine # bc unpack_params yields
     def get(self):
         database = self.settings['db']
         query = utils.unpack_params(self)
         num = query.pop("num", None)
+        # TODO: Time should always be required!
         if num:
             try:
                 docs = database.sample_reference.find().sort('time',
-                                                             direction=pymongo.DESCENDING.limit(num))
+                                                             direction=pymongo.DESCENDING).limit(num))
             except pymongo.errors.PyMongoError:
                 raise utils._compose_err_msg(500, '', query)
         else:
