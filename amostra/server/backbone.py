@@ -1,6 +1,5 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-import tornado.ioloop
 import tornado.web
 from tornado import gen
 import pymongo
@@ -48,7 +47,6 @@ class DefaultHandler(tornado.web.RequestHandler):
     to transfer control back to the main thread before finishing the request.
     """
     @tornado.web.asynchronous
-    @gen.coroutine
     def set_default_headers(self):
         self.set_header('Access-Control-Allow-Origin', '*')
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
@@ -82,7 +80,6 @@ class SampleReferenceHandler(DefaultHandler):
     Returns the total number of documents that are updated.
     """
     @tornado.web.asynchronous
-    @gen.coroutine
     def get(self):
         database = self.settings['db']
         query = utils.unpack_params(self)
@@ -105,7 +102,6 @@ class SampleReferenceHandler(DefaultHandler):
             raise utils._compose_err_msg(500, 'No results found!')
 
     @tornado.web.asynchronous
-    @gen.coroutine
     def post(self):
         database = self.settings['db']
         data = ujson.loads(self.request.body.decode("utf-8"))
@@ -125,7 +121,6 @@ class SampleReferenceHandler(DefaultHandler):
         utils.return2client(res)
 
     @tornado.web.asynchronous
-    @gen.coroutine
     def put(self):
         # TODO: Check update documentation.
         database = self.settings['db']
@@ -139,37 +134,29 @@ class SampleReferenceHandler(DefaultHandler):
 
 class RequestReferenceHandler(DefaultHandler):
     @tornado.web.asynchronous
-    @gen.coroutine
     def get(self):
         pass
 
     @tornado.web.asynchronous
-    @gen.coroutine
     def post(self):
         pass
 
     @tornado.web.asynchronous
-    @gen.coroutine
     def put(self):
         # TODO: Implement upsert
         pass
 
 class SchemaHandler(DefaultHandler):
     @tornado.web.asynchronous
-    @gen.coroutine
     def get(self):
         raise NotImplementedError('Coming soon')
     
     @tornado.web.asynchronous
-    @gen.coroutine
     def put(self):
         raise utils._compose_err_msg(405, 
                                      status='Not allowed on server')
     
     @tornado.web.asynchronous
-    @gen.coroutine
     def post(self):
         raise utils._compose_err_msg(405, 
                                      status='Not allowed on server')
-    
-    

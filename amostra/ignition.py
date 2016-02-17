@@ -1,6 +1,7 @@
 """ Startup script for the server."""
 import argparse
 import tornado.web
+import tornado.ioloop
 from  amostra.server.backbone import (SampleReferenceHandler,
                                       RequestReferenceHandler,
                                       db_connect)
@@ -49,5 +50,4 @@ def start_server():
         (r'/request_ref', RequestReferenceHandler)
          ], db=db)
     application.listen(service_port)
-    loop = tornado.ioloop.IOLoop.instance()
-    loop.start()
+    tornado.ioloop.IOLoop.current().start()
