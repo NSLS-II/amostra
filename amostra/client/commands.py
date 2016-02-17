@@ -135,8 +135,7 @@ class SampleReference:
         r.raise_for_status()
         content = ujson.loads(r.text)
         # add all content to local sample list
-        
-        self._sample_list += content
+        self._sample_list.extend(content)
         for c in content:
             yield Document('sample', c)
             
@@ -161,7 +160,8 @@ class SampleReference:
         else:
             yaml.dump(self._sample_list, fpath)
 
-
-# class RequestReference(object):
-#     def __init__(self, sample, uid, timestamp, **kwargs):
-#         pass
+    def get_schema(self):
+        r = requests.get(self._server_path +
+                        '/schema_ref')
+        r.raise_for_status()
+        return ujson.loads(r.text)

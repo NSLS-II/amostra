@@ -4,6 +4,7 @@ import tornado.web
 import tornado.ioloop
 from  amostra.server.backbone import (SampleReferenceHandler,
                                       RequestReferenceHandler,
+                                      SchemaHandler,
                                       db_connect)
 
 from amostra.server.conf import load_configuration
@@ -47,7 +48,8 @@ def start_server():
     print(db)
     application = tornado.web.Application([
         (r'/sample_ref', SampleReferenceHandler),
-        (r'/request_ref', RequestReferenceHandler)
+        (r'/request_ref', RequestReferenceHandler,
+         r'/schema_ref', SchemaHandler)
          ], db=db)
     application.listen(service_port)
     tornado.ioloop.IOLoop.current().start()

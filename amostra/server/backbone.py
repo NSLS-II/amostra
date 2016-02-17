@@ -149,10 +149,13 @@ class RequestReferenceHandler(DefaultHandler):
         # TODO: Implement upsert
         pass
 
+
 class SchemaHandler(DefaultHandler):
+    
     @tornado.web.asynchronous
     def get(self):
-        raise NotImplementedError('Coming soon')
+        sch = utils.unpack_params(self)
+        utils.return2client(self, utils.schemas[sch])
     
     @tornado.web.asynchronous
     def put(self):
