@@ -1,9 +1,9 @@
 """ Startup script for the server."""
 import argparse
 import tornado.web
-from  ..engine import (SampleReferenceHandler,
-                                   RequestHandler,
-                                   loop, db_connect)
+from  amostra.server.backbone import (SampleReferenceHandler,
+                                    RequestHandler,
+                                    loop, db_connect)
 
 from amostra.server.conf import load_configuration
 

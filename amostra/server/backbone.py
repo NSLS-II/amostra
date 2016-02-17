@@ -11,10 +11,6 @@ from amostra.server import utils
 from jsonschema.exceptions import ValidationError, SchemaError
 
 
-class AmostraException(Exception):
-    pass
-
-
 def db_connect(database, host, port):
     """Helper function to deal with stateful connections to MongoDB
     Connection established lazily. Connects to the database on request.

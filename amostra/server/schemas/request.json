@@ -1,0 +1,38 @@
+{
+"properties": {
+        "instructions": {
+            "type": "string",
+            "description": "UID to point back to Descriptor for this event stream"
+        },
+        "owner": {
+            "type": "string",
+            "description": "Request owner"
+        },
+        "seq_num": {
+            "type": "integer",
+            "description": "Sequence number to identify the location of this Event in the Event stream"
+        },
+        "time": {
+            "type": "number",
+            "description": "The event time.  This maybe different than the timestamps on each of the data entries"
+        },
+        "sample": {
+            "type": "string",
+            "description": "The foreign key for sample this request belongs to"
+        },
+        "uid": {
+            "type": "string",
+            "description": "Globally unique identifier for this Event"
+        }
+    },
+    "required": [
+        "uid",
+        "time",
+        "sample",
+        "seq_num"
+    ],
+    "additionalProperties": false,
+    "type": "object",
+    "title": "event",
+    "description": "Document to record a quanta of collected data"
+ }

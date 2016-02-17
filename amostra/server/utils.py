@@ -6,18 +6,22 @@ import ujson
 import pymongo
 
 
+class AmostraException(Exception):
+    pass
+
+
 SCHEMA_PATH = 'schema'
 SCHEMA_NAMES = {'sample': 'sample_reference.json',
-                'request': 'request.json',
-                'event': 'event.json',
-                'bulk_events': 'bulk_events.json'}
+                'request': 'request.json'}
 fn = '{}/{{}}'.format(SCHEMA_PATH)
 schemas = {}
 for name, filename in SCHEMA_NAMES.items():
-    with open(rs_fn('amostra',
-                    resource_name=fn.format(filename))) as fin:
-        schemas[name] = ujson.load(fin)
-
+    try:
+        with open(rs_fn('amostra',
+                        resource_name=fn.format(filename))) as fin:
+            schemas[name] = ujson.load(fin)
+    except FileNotFoundError:
+        raise AmostraException('Schema file not found or does not exist')
 
 def _compose_err_msg(code, status, m_str=''):
     fmsg = status + str(m_str)
