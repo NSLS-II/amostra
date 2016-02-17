@@ -42,7 +42,8 @@ def start_server():
     print(db)
     application = tornado.web.Application([
         (r'/sample_ref', SampleReferenceHandler),
-        (r'/request_ref', RequestHandler)
+        (r'/request_ref', RequestReferenceHandler)
          ], db=db)
     application.listen(service_port)
+    loop = tornado.ioloop.IOLoop.instance()
     loop.start()
