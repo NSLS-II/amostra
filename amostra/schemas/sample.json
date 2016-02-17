@@ -1,0 +1,36 @@
+{
+    "properties": {
+        "project": {
+            "type": "string",
+            "description": "Name of project that this run is part of"
+        },
+        "beamline_id": {
+            "type": "string",
+            "description": "The beamline ID"
+        },
+        "time": {
+            "type": "number",
+            "description": "Time the run started.  Unix epoch time"
+        },
+        "uid": {
+            "type": "string",
+            "description": "Globally unique ID for tihs run"
+        },
+        "group": {
+            "type": "string",
+            "description": "Unix group to associate this data with"
+        },
+        "owner": {
+            "type": "string",
+            "description": "Unix owner to associate this data with"
+        }
+    },
+    "required": [
+        "uid",
+        "time",
+        "group",
+        "owner"
+     ],
+    "type": "object",
+    "description": "Document created for group of samples."
+}

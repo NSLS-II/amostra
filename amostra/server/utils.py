@@ -10,8 +10,8 @@ class AmostraException(Exception):
     pass
 
 
-SCHEMA_PATH = 'schema'
-SCHEMA_NAMES = {'sample': 'sample_reference.json',
+SCHEMA_PATH = 'schemas'
+SCHEMA_NAMES = {'sample': 'sample.json',
                 'request': 'request.json'}
 fn = '{}/{{}}'.format(SCHEMA_PATH)
 schemas = {}

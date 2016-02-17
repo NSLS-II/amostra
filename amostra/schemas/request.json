@@ -33,6 +33,6 @@
     ],
     "additionalProperties": false,
     "type": "object",
-    "title": "event",
-    "description": "Document to record a quanta of collected data"
+    "title": "request",
+    "description": "Set of instructions for a given sample"
  }

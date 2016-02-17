@@ -2,8 +2,8 @@
 import argparse
 import tornado.web
 from  amostra.server.backbone import (SampleReferenceHandler,
-                                    RequestHandler,
-                                    loop, db_connect)
+                                      RequestReferenceHandler,
+                                      db_connect)
 
 from amostra.server.conf import load_configuration
 
