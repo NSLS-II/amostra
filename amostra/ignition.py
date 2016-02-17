@@ -15,7 +15,11 @@ def start_server():
     parser = argparse.ArgumentParser()
     parser.add_argument('--database', dest='database', type=str,
                         help='name of database to use')
-    parser.add_argument('--host', dest='host', type=str,
+    parser.add_argument('--host',
+                        
+                         
+                         
+                         dest='host', type=str,
                         help='host to use')
     parser.add_argument('--timezone', dest='timezone', type=str,
                         help='Local timezone')

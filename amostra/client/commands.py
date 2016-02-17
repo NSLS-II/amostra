@@ -1,12 +1,13 @@
 # Essentiall basic.py with bunch of requests and http stuff
 
 from doct import Document
-from amostra.client.conf import connection_config
-
+from amostra.client.conf import connection_config as con
 import jsonschema
 import json
 from doct import Document
 from uuid import uuid4
+import requests
+
 
 def look_up_schema(schema):
     raise NotImplemented()
@@ -21,7 +22,10 @@ class SampleReference:
     used in production for very small numbers of samples.
 
     """
-    def __init__(self, sample_dict=None):
+    def __init__(self, sample_dict=None, host=con['host'], 
+                 port=con['port']):
+        """Handles connection configuration to the service backend."""
+        self._server_path = 'http://' + host + ':' + str(port)
         if sample_dict is None:
             sample_dict = []
         self._sample_list = [dict(d) for d in sample_dict]
@@ -31,7 +35,7 @@ class SampleReference:
         if ln != len(set(d['uid'] for d in self._sample_list)):
             raise ValueError("duplicate uids")
 
-    def add(self, name, schema=None, **kwargs):
+    def add(self, name, **kwargs):
 x        """Add a sample to the database
 
         All kwargs are collected and passed through to the documents
@@ -55,15 +59,21 @@ x        """Add a sample to the database
         if any(d['name'] == name for d in self._sample_list):
             raise ValueError(
                 "document with name {} already exists".format(name))
-
+        
         uid = str(uuid4())
         doc = {'uid': uid, 'name': name, **kwargs}
-        if schema is not None:
-            doc['schema'] = schema
-            schema = look_up_schema(schema)
-            jsonschema.validate(doc, schema)
+        #Schema validation is done on server side
+#         if schema is not None:
+#             doc['schema'] = schema
+            # schema = look_up_schema(schema)
+            # jsonschema.validate(doc, schema)
         # TODO: Send to client
+        
+        # let is serialize first. If it fails, do not add to list
+        domt = ujson.dumps(doc) 
         self._sample_list.append(doc)
+        r = requests.post(self._server_path + '/sample_ref',
+                          data=domt)
         return uid
 
     def update(self, uid, overwrite=True, **kwargs):
