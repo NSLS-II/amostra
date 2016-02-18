@@ -123,12 +123,6 @@ class SampleReference:
             Documents which have all keys with the given values
 
         """
-#         for d in self._sample_list:
-#             for k, v in kwargs.items():
-#                 if k not in d or d[k] != v:
-#                     break
-#                 else:
-#                     results.append(d)
         r = requests.get(self._server_path +
                         '/sample_ref',
                         params=ujson.dumps(kwargs))
@@ -165,3 +159,29 @@ class SampleReference:
                         '/schema_ref')
         r.raise_for_status()
         return ujson.loads(r.text)
+    
+    def get_requests(self):
+        raise NotImplementedError('In theaters Spring 2016')
+    
+    
+    
+class RequestReference:
+    """Reference implementation of generic request
+
+    For simplicity, built on top of a list of dicts.
+
+    """
+    def __init__(self, sample):
+        """Handles connection configuration to the service backend."""
+        if not isinstance(sample, SampleReference):
+            raise TypeError('Requires a sample')
+        self._server_path = sample._server_path
+        
+    def create_request(self):
+        pass
+    
+    def find_request(self, state='Active', sort_by='', **kwargs):
+        pass
+    
+    def update_request(self, **kwargs):
+        pass

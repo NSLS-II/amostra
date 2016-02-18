@@ -16,6 +16,11 @@
             "type": "number",
             "description": "The event time.  This maybe different than the timestamps on each of the data entries"
         },
+        "state": {
+            "type": "string",
+            "enum": ["active", "inactive"],
+            "description": "The state of the request"
+        },
         "sample": {
             "type": "string",
             "description": "The foreign key for sample this request belongs to"
@@ -29,6 +34,7 @@
         "uid",
         "time",
         "sample",
+        "state",
         "seq_num"
     ],
     "additionalProperties": false,

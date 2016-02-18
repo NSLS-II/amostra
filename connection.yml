@@ -1,0 +1,6 @@
+# amostra configuration
+#  EDIT 
+host: localhost
+port: 7770
+timezone: US/Eastern
+protocol: http
