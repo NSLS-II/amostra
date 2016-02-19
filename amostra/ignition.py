@@ -2,10 +2,9 @@
 import argparse
 import tornado.web
 import tornado.ioloop
-from  amostra.server.backbone import (SampleReferenceHandler,
-                                      RequestReferenceHandler,
-                                      SchemaHandler,
-                                      db_connect)
+from  amostra.server.engine import (SampleReferenceHandler, 
+                                    RequestReferenceHandler,
+                                    SchemaHandler, db_connect)
 
 from amostra.server.conf import load_configuration
 
@@ -44,9 +43,9 @@ def start_server():
                     config['port'])
     print(db)
     application = tornado.web.Application([
-        (r'/sample_ref', SampleReferenceHandler),
-        (r'/request_ref', RequestReferenceHandler,
-         r'/schema_ref', SchemaHandler)
+        (r'/sample', SampleReferenceHandler),
+        (r'/request', RequestReferenceHandler,
+         r'/schema', SchemaHandler)
          ], db=db)
     application.listen(service_port)
     tornado.ioloop.IOLoop.current().start()

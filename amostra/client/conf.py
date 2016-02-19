@@ -30,7 +30,7 @@ def load_configuration(name, prefix, fields, allow_missing=False):
     filenames = [os.path.join('/etc', name + '.yml'),
                  os.path.join(os.path.expanduser('~'), '.config',
                               name, 'connection.yml'),
-                ]
+                 ]
     if 'CONDA_ETC_' in os.environ:
         filenames.insert(0, os.path.join(os.environ['CONDA_ETC_'],
                                          name + '.yml'))

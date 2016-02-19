@@ -1,9 +1,8 @@
 # Essentiall basic.py with bunch of requests and http stuff
 
 from doct import Document
-from amostra.client.conf import connection_config as con
 import jsonschema
-import json
+import ujson
 from doct import Document
 from uuid import uuid4
 import requests
@@ -20,16 +19,11 @@ def look_up_schema(schema):
 
 class SampleReference:
     """Reference implementation of generic sample manager
-
-    For simplicity, built on top of a list of dicts.
-
     This is primarily a reference implementation / for testing but can be
     used in production for very small numbers of samples.
 
     """
-    def __init__(self, sample_dict=None, host=con['host'], 
-                 port=con['port']):
-        """Handles connection configuration to the service backend."""
+    def __init__(self, sample_dict=None, host, port):
         self._server_path = 'http://{}:{}/' .format(host, port)
         if sample_dict is None:
             sample_dict = []
@@ -67,31 +61,24 @@ class SampleReference:
         # let is serialize first. If it fails, do not add to list
         domt = ujson.dumps(doc) 
         self._sample_list.append(doc)
-        r = requests.post(self._server_path + '/sample_ref',
+        r = requests.post(self._server_path + '/sample',
                           data=domt)
         return uid
 
     def create_index(self, fields):
-        raise NotImplementedError('Not sure whether this is a good idea, most likely it is not')
-        UserWarning('Indexes created')
-        enums = ["ascending", 'descending']
-        for k, v in fields.items():
-            if v not in enums:
-                raise ValueError('Choose either ascending or descending')
-                
+        raise NotImplementedError('I do not think this is a good idea')
 
     def update(self, uid, overwrite=True, **kwargs):
         """Update an existing Sample
             raise ValueError("Can not change sample name")
-        
         old, = [d for d in self._sample_list if d['uid'] == uid]
-        
+
         if not overwrite:
             if set(old) ^ set(kwargs):
                 raise ValueError("overlapping keys")sting sample in place.
-        
+
         kwargs are merged into the existing sample document
-        
+
         Parameters
         ----------
         uid : str
