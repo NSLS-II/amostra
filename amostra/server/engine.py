@@ -90,7 +90,7 @@ class SampleReferenceHandler(DefaultHandler):
         if num:
             try:
                 docs = database.sample_reference.find().sort('time',
-                                                             direction=pymongo.DESCENDING).limit(num))
+                                                             direction=pymongo.DESCENDING).limit(num)
             except pymongo.errors.PyMongoError:
                 raise utils._compose_err_msg(500, '', query)
         else:
@@ -151,11 +151,11 @@ class RequestReferenceHandler(DefaultHandler):
 
 
 class SchemaHandler(DefaultHandler):
-    
+    """Provides the json used for schema validation provided collection name"""
     @tornado.web.asynchronous
     def get(self):
-        sch = utils.unpack_params(self)
-        utils.return2client(self, utils.schemas[sch])
+        col = utils.unpack_params(self)
+        utils.return2client(self, utils.schemas[col])
     
     @tornado.web.asynchronous
     def put(self):

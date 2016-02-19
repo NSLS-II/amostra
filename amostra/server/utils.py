@@ -23,6 +23,7 @@ for name, filename in SCHEMA_NAMES.items():
     except FileNotFoundError:
         raise AmostraException('Schema file not found or does not exist')
 
+
 def _compose_err_msg(code, status, m_str=''):
     fmsg = status + str(m_str)
     return tornado.web.HTTPError(code, fmsg)

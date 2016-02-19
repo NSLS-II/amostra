@@ -27,6 +27,10 @@
         "owner": {
             "type": "string",
             "description": "Unix owner to associate this data with"
+        },
+        "item_list":{
+        	"type": "",
+        	"description": "List of items contained in a sample reference"
         }
     },
     "required": [

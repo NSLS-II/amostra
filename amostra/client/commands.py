@@ -13,7 +13,7 @@ def look_up_schema(schema):
     raise NotImplemented("Gotta implement a schema handler")
 
 # To be discussed: 
-# _sample_list should be a dict keyed on uids
+# _sample_list could be a list of uids. 
 # how should the caching mechanism behave, what queries shld it support
 # should all request related funcs be handled via SampleReference class
 # what mechanism do we use for caching
@@ -30,7 +30,7 @@ class SampleReference:
     def __init__(self, sample_dict=None, host=con['host'], 
                  port=con['port']):
         """Handles connection configuration to the service backend."""
-        self._server_path = 'http://' + host + ':' + str(port)
+        self._server_path = 'http://{}:{}/' .format(host, port)
         if sample_dict is None:
             sample_dict = []
         self._sample_list = [dict(d) for d in sample_dict]
@@ -70,6 +70,15 @@ class SampleReference:
         r = requests.post(self._server_path + '/sample_ref',
                           data=domt)
         return uid
+
+    def create_index(self, fields):
+        raise NotImplementedError('Not sure whether this is a good idea, most likely it is not')
+        UserWarning('Indexes created')
+        enums = ["ascending", 'descending']
+        for k, v in fields.items():
+            if v not in enums:
+                raise ValueError('Choose either ascending or descending')
+                
 
     def update(self, uid, overwrite=True, **kwargs):
         """Update an existing Sample
@@ -156,7 +165,7 @@ class SampleReference:
 
     def get_schema(self):
         r = requests.get(self._server_path +
-                        '/schema_ref')
+                        '/schema_ref', params=ujson.dumps('sample'))
         r.raise_for_status()
         return ujson.loads(r.text)
     
@@ -173,15 +182,14 @@ class RequestReference:
     """
     def __init__(self, sample):
         """Handles connection configuration to the service backend."""
-        if not isinstance(sample, SampleReference):
-            raise TypeError('Requires a sample')
-        self._server_path = sample._server_path
+        self.sample_uid = sample.uid
+        self._server_path 
         
     def create_request(self):
-        pass
+        raise NotImplementedError('In theaters Spring 2016')
     
-    def find_request(self, state='Active', sort_by='', **kwargs):
-        pass
+    def find_request(self, sort_by=None, **kwargs):
+        raise NotImplementedError('In theaters Spring 2016')
     
     def update_request(self, **kwargs):
         pass

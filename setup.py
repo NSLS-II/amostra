@@ -5,5 +5,5 @@ setup(name='amostra',
       py_modules=['amostra'],
       description='Reference implementation of SampleManager',
       url='http://github.com/tacaswell/amostra',
-      requires=['six', 'json', 'jsonschema']
+      requires=['six', 'ujson', 'jsonschema']
       )
