@@ -108,6 +108,7 @@ class SampleReferenceHandler(DefaultHandler):
     def post(self):
         database = self.settings['db']
         data = ujson.loads(self.request.body.decode("utf-8"))
+        uids = []
         if isinstance(data, list):
             for d in data:
                 try:
@@ -118,13 +119,31 @@ class SampleReferenceHandler(DefaultHandler):
                                                  "Invalid schema on document(s)", d)
                 try:
                     res = database.sample_reference.insert(d)
+                    uids.append(d['uid'])
                 except pymongo.errors.PyMongoError:
                     raise utils._compose_err_msg(500,
                                                  'Validated data can not be inserted',
                                                  data)
                 # database.sample_reference.create_index([()])
-        
-        #utils.return2client(res)
+        elif isinstance(data, dict):
+            try:
+                jsonschema.validate(data,
+                                    utils.schemas['sample'])
+            except (ValidationError, SchemaError):
+                raise utils._compose_err_msg(400,
+                                             "Invalid schema on document(s)", data)
+            try:
+                res = database.sample_reference.insert(data)
+                uids.append(data['uid'])
+            except pymongo.errors.PyMongoError:
+                raise utils._compose_err_msg(500,
+                                             'Validated data can not be inserted',
+                                             data)
+            # database.sample_reference.create_index([()])
+        else:
+            raise utils._compose_err_msg(500,
+                                         status='SampleHandler expects list or dict')        
+        self.finish(ujson.dumps(uids))
 
     @tornado.web.asynchronous
     def put(self):

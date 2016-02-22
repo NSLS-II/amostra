@@ -27,6 +27,8 @@ class SampleReference:
         r = requests.post(self._server_path + 'sample',
                           data=domt)
         r.raise_for_status()
+        print(r.text)
+        
 
     def add(self, name, time=time.time(), **kwargs):
         """Add a sample to the database
