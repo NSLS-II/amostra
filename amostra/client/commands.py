@@ -27,10 +27,9 @@ class SampleReference:
         r = requests.post(self._server_path + 'sample',
                           data=domt)
         r.raise_for_status()
-        print(r.text)
-        
 
-    def add(self, name, time=time.time(), **kwargs):
+    def add(self, name, time=time.time(), uid=str(uuid4()),
+            **kwargs):
         """Add a sample to the database
         All kwargs are collected and passed through to the documents
 
@@ -52,15 +51,14 @@ class SampleReference:
         if any(d['name'] == name for d in self._sample_list):
             raise ValueError(
                 "document with name {} already exists".format(name))
-        uid = str(uuid4())
-        doc = dict(uid=uid, name=name, **kwargs)
-        # let is serialize first. If it fails, do not add to list
+        doc = dict(uid=uid, name=name, time=time, 
+                   **kwargs)
         domt = ujson.dumps(doc)
-        self._sample_list.append(doc)
         r = requests.post(self._server_path + 'sample',
                           data=domt)
         r.raise_for_status()
-        return uid
+        self._sample_list.append(doc)
+        return ujson.loads(r.text)[0]
 
     def update(self, uid, overwrite=True, **kwargs):
         """Update an existing Sample
