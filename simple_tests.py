@@ -20,5 +20,4 @@ crsr = s1.find(name='m_sample')
 
 samp = next(crsr)
 
-    
 req1 = RequestReference(samp, host='localhost', port=7770)

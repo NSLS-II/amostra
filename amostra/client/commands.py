@@ -138,9 +138,9 @@ class SampleReference:
         # Seems done
         if isinstance(fpath, str):
             with open(fpath, 'w') as fout:
-                json.dump(self._sample_list, fout)
+                ujson.dump(self._sample_list, fout)
         else:
-            json.dump(self._sample_list, fpath)
+            ujson.dump(self._sample_list, fpath)
 
     def dump_to_yaml(self, fpath):
         """For those who don't want to write into the database or work offline."""
@@ -169,12 +169,16 @@ class RequestReference:
     For simplicity, built on top of a list of dicts.
 
     """
-    def __init__(self, sample, host, port, **kwargs):
+    def __init__(self, sample, host, port, time=time.time(), 
+                 uid=str(uuid4()), **kwargs):
         """Handles connection configuration to the service backend."""
         self._server_path = 'http://{}:{}/' .format(host, port)
-        self.sample_uid = sample.uid
-        self._request_url = self._server_path + 'request'
-        print(self._request_url)
+        payload = dict(uid=uid, sample=sample['uid'], time=time, **kwargs)
+        domt = ujson.dumps(payload)
+        print(domt)
+        r = requests.post(self._server_path + 'sample',
+                          data=domt)
+        r.raise_for_status()
 
     def create_request(self, **kwargs):
         r = requests.post(url=self._request_url, 
