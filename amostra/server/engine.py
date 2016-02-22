@@ -186,7 +186,45 @@ class RequestReferenceHandler(DefaultHandler):
 
     @tornado.web.asynchronous
     def post(self):
-        pass
+        database = self.settings['db']
+        data = ujson.loads(self.request.body.decode("utf-8"))
+        uids = []
+        print(data)
+        if isinstance(data, list):
+            for d in data:
+                try:
+                    jsonschema.validate(d,
+                                        utils.schemas['reference'])
+                except (ValidationError, SchemaError):
+                    raise utils._compose_err_msg(400,
+                                                 "Invalid schema on document(s)", d)
+                try:
+                    res = database.reference.insert(d)
+                    uids.append(d['uid'])
+                except pymongo.errors.PyMongoError:
+                    raise utils._compose_err_msg(500,
+                                                 'Validated data can not be inserted',
+                                                 data)
+                # database.sample.create_index([()])
+        elif isinstance(data, dict):
+            try:
+                jsonschema.validate(data,
+                                    utils.schemas['reference'])
+            except (ValidationError, SchemaError):
+                raise utils._compose_err_msg(400,
+                                             "Invalid schema on document(s)", data)
+            try:
+                res = database.reference.insert(data)
+                uids.append(data['uid'])
+            except pymongo.errors.PyMongoError:
+                raise utils._compose_err_msg(500,
+                                             'Validated data can not be inserted',
+                                             data)
+            # database.sample.create_index([()])
+        else:
+            raise utils._compose_err_msg(500,
+                                         status='SampleHandler expects list or dict')        
+        self.finish(ujson.dumps(uids))
 
     @tornado.web.asynchronous
     def put(self):

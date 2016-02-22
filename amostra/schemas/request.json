@@ -1,15 +1,7 @@
 {
 "properties": {
-        "instructions": {
-            "type": "string",
-            "description": "UID to point back to Descriptor for this event stream"
-        },
-        "owner": {
-            "type": "string",
-            "description": "Request owner"
-        },
         "seq_num": {
-            "type": "integer",
+            "type": "number",
             "description": "Sequence number to identify the location of this Event in the Event stream"
         },
         "time": {
@@ -18,7 +10,6 @@
         },
         "state": {
             "type": "string",
-            "enum": ["active", "inactive"],
             "description": "The state of the request"
         },
         "sample": {
@@ -34,8 +25,7 @@
         "uid",
         "time",
         "sample",
-        "state",
-        "seq_num"
+        "state"
     ],
     "additionalProperties": false,
     "type": "object",

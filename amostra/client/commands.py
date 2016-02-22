@@ -169,11 +169,13 @@ class RequestReference:
     For simplicity, built on top of a list of dicts.
 
     """
-    def __init__(self, sample, host, port, time=time.time(), 
-                 uid=str(uuid4()), **kwargs):
+    def __init__(self, sample, host, port, time=time.time(),
+                 uid=str(uuid4()), state='active',seq_num=0, **kwargs):
         """Handles connection configuration to the service backend."""
         self._server_path = 'http://{}:{}/' .format(host, port)
-        payload = dict(uid=uid, sample=sample['uid'], time=time, **kwargs)
+        payload = dict(uid=uid, sample=sample['uid'], time=time,state=state,
+                       seq_num=seq_num,**kwargs)
+        print(payload)
         domt = ujson.dumps(payload)
         print(domt)
         r = requests.post(self._server_path + 'sample',
