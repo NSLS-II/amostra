@@ -106,13 +106,15 @@ class SampleReferenceHandler(DefaultHandler):
 
     @tornado.web.asynchronous
     def post(self):
+        print('Here I am!!')
         database = self.settings['db']
         data = ujson.loads(self.request.body.decode("utf-8"))
+        print(utils.schemas)
         try:
             jsonschema.validate(data,
-                                utils.schemas['sample_reference'])
+                                utils.schemas['sample'])
         except (ValidationError, SchemaError):
-            raise self._compose_err_msg(400,
+            raise utils._compose_err_msg(400,
                                         "Invalid schema on document(s)", data)
         try:
             res = database.sample_reference.insert(data)

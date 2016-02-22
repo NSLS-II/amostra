@@ -5,8 +5,8 @@ import tornado.ioloop
 from  amostra.server.engine import (SampleReferenceHandler, 
                                     RequestReferenceHandler,
                                     SchemaHandler, db_connect)
-
 from amostra.server.conf import load_configuration
+
 
 def start_server():
     config = {k: v for k, v in load_configuration('amostra', 'AMST',
@@ -16,7 +16,7 @@ def start_server():
     parser = argparse.ArgumentParser()
     parser.add_argument('--database', dest='database', type=str,
                         help='name of database to use')
-    parser.add_argument('--host',                  
+    parser.add_argument('--host',
                          dest='host', type=str,
                         help='host to use')
     parser.add_argument('--timezone', dest='timezone', type=str,

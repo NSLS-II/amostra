@@ -11,16 +11,21 @@ class SampleReference:
     used in production for very small numbers of samples.
 
     """
-    def __init__(self, sample_dict=None, host, port):
+    def __init__(self, sample_list, host, port):
         self._server_path = 'http://{}:{}/' .format(host, port)
-        if sample_dict is None:
-            sample_dict = []
-        self._sample_list = [dict(d) for d in sample_dict]
+        if sample_list is None:
+            sample_list = []
+        self._sample_list = [dict(d) for d in sample_list]
         ln = len(self._sample_list)
         if ln != len(set(d['name'] for d in self._sample_list)):
             raise ValueError("duplicate names")
         if ln != len(set(d['uid'] for d in self._sample_list)):
             raise ValueError("duplicate uids")
+        domt = ujson.dumps(self._sample_list)
+        print(domt)
+        print(self._server_path)
+        r = requests.post(self._server_path + 'sample',
+                          data=domt)
 
     def add(self, name, time=time.time(), **kwargs):
         """Add a sample to the database
@@ -49,13 +54,10 @@ class SampleReference:
         # let is serialize first. If it fails, do not add to list
         domt = ujson.dumps(doc)
         self._sample_list.append(doc)
-        r = requests.post(self._server_path + '/sample',
+        r = requests.post(self._server_path + 'sample',
                           data=domt)
         r.raise_for_status()
         return uid
-
-    def create_index(self, fields):
-        raise NotImplementedError('I do not think this is a good idea')
 
     def update(self, uid, overwrite=True, **kwargs):
         """Update an existing Sample
@@ -83,6 +85,8 @@ class SampleReference:
         """
         if 'name' in kwargs:
             raise ValueError("Can not change sample name")
+
+
         old, new = dict(old), old
         new.update(**kwargs)
         return Document('sample', old), Document('sample', new)
