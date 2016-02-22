@@ -4,10 +4,6 @@
             "type": "string",
             "description": "Name of project that this run is part of"
         },
-        "project": {
-            "type": "string",
-            "description": "Name of project that this run is part of"
-        },
         "beamline_id": {
             "type": "string",
             "description": "The beamline ID"
@@ -20,17 +16,13 @@
             "type": "string",
             "description": "Globally unique ID for tihs run"
         },
-        "group": {
-            "type": "string",
-            "description": "Unix group to associate this data with"
-        },
         "owner": {
             "type": "string",
             "description": "Unix owner to associate this data with"
         },
-        "item_list":{
-        	"type": "",
-        	"description": "List of items contained in a sample reference"
+        "name": {
+            "type": "string",
+            "description": "Sample name!"
         }
     },
     "required": [
