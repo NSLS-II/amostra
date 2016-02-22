@@ -1,21 +1,9 @@
-# Essentiall basic.py with bunch of requests and http stuff
-
 from doct import Document
-import jsonschema
 import ujson
-from doct import Document
 from uuid import uuid4
 import requests
-import itertools
+import time
 
-def look_up_schema(schema):
-    raise NotImplemented("Gotta implement a schema handler")
-
-# To be discussed: 
-# _sample_list could be a list of uids. 
-# how should the caching mechanism behave, what queries shld it support
-# should all request related funcs be handled via SampleReference class
-# what mechanism do we use for caching
 
 class SampleReference:
     """Reference implementation of generic sample manager
@@ -34,7 +22,7 @@ class SampleReference:
         if ln != len(set(d['uid'] for d in self._sample_list)):
             raise ValueError("duplicate uids")
 
-    def add(self, name, **kwargs):
+    def add(self, name, time=time.time(), **kwargs):
         """Add a sample to the database
         All kwargs are collected and passed through to the documents
 
@@ -57,12 +45,13 @@ class SampleReference:
             raise ValueError(
                 "document with name {} already exists".format(name))
         uid = str(uuid4())
-        doc = dict(uid=uid, name= name, **kwargs)
+        doc = dict(uid=uid, name=name, **kwargs)
         # let is serialize first. If it fails, do not add to list
-        domt = ujson.dumps(doc) 
+        domt = ujson.dumps(doc)
         self._sample_list.append(doc)
         r = requests.post(self._server_path + '/sample',
                           data=domt)
+        r.raise_for_status()
         return uid
 
     def create_index(self, fields):
@@ -83,10 +72,10 @@ class SampleReference:
         ----------
         uid : str
             Unique id for the sample.
-        
+
         overwrite : bool, optional
             If true the upddate
-        
+
         Returns
         -------
         old, new : doct.Document
@@ -96,7 +85,6 @@ class SampleReference:
             raise ValueError("Can not change sample name")
         old, new = dict(old), old
         new.update(**kwargs)
-        #TODO: Update on server side
         return Document('sample', old), Document('sample', new)
 
     def find(self, **kwargs):
@@ -105,7 +93,7 @@ class SampleReference:
         if sample not found, makes the trip to the server.
         Yields all documents which have all of the keys equal
         to the kwargs.  ex ::
-        
+
             for k, v in kwargs:
                 assert d[k] == v
 
@@ -115,12 +103,12 @@ class SampleReference:
 
         Yields
         ------
-        doc : doct.Document
+        c : dict
             Documents which have all keys with the given values
 
         """
         r = requests.get(self._server_path +
-                        '/sample_ref',
+                        '/sample',
                         params=ujson.dumps(kwargs))
         r.raise_for_status()
         content = ujson.loads(r.text)
@@ -128,10 +116,18 @@ class SampleReference:
         self._sample_list.extend(content)
         for c in content:
             yield Document('sample', c)
-            
-    def find_raw_mongo(self, mongo_query):
-        #TODO: Send to server and get query results
-        raise NotImplemented()
+
+    def find_raw_mongo(self, mongo_query, json=False):
+        """Return raw dicts or json instead of doct"""
+        r = requests.get(self._server_path +
+                        '/sample',
+                        params=ujson.dumps(kwargs))
+        r.raise_for_status()
+        content = ujson.loads(r.text)
+        # add all content to local sample list
+        self._sample_list.extend(content)
+        for c in content:
+            yield c
 
     def dump_to_json(self, fpath):
         # Seems done
@@ -142,7 +138,7 @@ class SampleReference:
             json.dump(self._sample_list, fpath)
 
     def dump_to_yaml(self, fpath):
-        # Yup
+        """For those who don't want to write into the database or work offline."""
         import yaml
         if isinstance(fpath, str):
             with open(fpath, 'w') as fout:
@@ -151,16 +147,17 @@ class SampleReference:
             yaml.dump(self._sample_list, fpath)
 
     def get_schema(self):
+        """Get information about schema from the server side"""
         r = requests.get(self._server_path +
                         '/schema_ref', params=ujson.dumps('sample'))
         r.raise_for_status()
         return ujson.loads(r.text)
-    
+
     def get_requests(self):
+        """Get all active requests given a sample"""
         raise NotImplementedError('In theaters Spring 2016')
-    
-    
-    
+
+
 class RequestReference:
     """Reference implementation of generic request
 
@@ -170,10 +167,12 @@ class RequestReference:
     def __init__(self, sample):
         """Handles connection configuration to the service backend."""
         self.sample_uid = sample.uid
-        self._server_path 
+        self._request_url = sample._sample_path + '/request'
         
-    def create_request(self):
-        raise NotImplementedError('In theaters Spring 2016')
+    def create_request(self, **kwargs):
+        r = requests.post(url=self._request_url, 
+                          data=ujson.dumps(kwargs))
+        r.raise_for_status()
     
     def find_request(self, sort_by=None, **kwargs):
         raise NotImplementedError('In theaters Spring 2016')
