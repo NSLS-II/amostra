@@ -15,3 +15,8 @@ s1 = SampleReference([m_sample],
 
 r = s1.add(name='2nd')
 print(r)
+
+crsr = s1.find(name='m_sample')
+
+for c in crsr:
+    print(c)

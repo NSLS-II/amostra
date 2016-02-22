@@ -40,7 +40,7 @@ def unpack_params(handler):
         Unpacked query in dict format.
     """
     if isinstance(handler, tornado.web.RequestHandler):
-        yield ujson.loads(list(handler.request.arguments.keys())[0])
+        return ujson.loads(list(handler.request.arguments.keys())[0])
     else:
         raise TypeError("Wrong type", handler)
 

@@ -84,6 +84,7 @@ class SampleReference:
         old, new : doct.Document
             The old and new documents
         """
+        raise NotImplementedError('Coming soon.')
         if 'name' in kwargs:
             raise ValueError("Can not change sample name")
 
@@ -112,9 +113,8 @@ class SampleReference:
             Documents which have all keys with the given values
 
         """
-        r = requests.get(self._server_path +
-                        '/sample',
-                        params=ujson.dumps(kwargs))
+        r = requests.get(self._server_path + 'sample',
+                         params=ujson.dumps(kwargs))
         r.raise_for_status()
         content = ujson.loads(r.text)
         # add all content to local sample list

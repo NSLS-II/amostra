@@ -81,10 +81,10 @@ class SampleReferenceHandler(DefaultHandler):
     Returns the total number of documents that are updated.
     """
     @tornado.web.asynchronous
-    @gen.coroutine # bc unpack_params yields
     def get(self):
         database = self.settings['db']
         query = utils.unpack_params(self)
+        print(query)
         num = query.pop("num", None)
         # TODO: Time should always be required!
         if num:
@@ -96,8 +96,8 @@ class SampleReferenceHandler(DefaultHandler):
         else:
             try:
                 docs = database.sample_reference.find(query).sort('time',
-                                                                  direction=pymongo.DESCENDING).limit(num)
-            except pymongo.error.PyMongoError:
+                                                                  direction=pymongo.DESCENDING)
+            except pymongo.errors.PyMongoError:
                 raise utils._compose_err_msg(500, 'Query Failed: ', query)
         if docs:
             utils.return2client(self, docs)
