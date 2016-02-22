@@ -169,18 +169,20 @@ class RequestReference:
     For simplicity, built on top of a list of dicts.
 
     """
-    def __init__(self, sample):
+    def __init__(self, sample, host, port, **kwargs):
         """Handles connection configuration to the service backend."""
+        self._server_path = 'http://{}:{}/' .format(host, port)
         self.sample_uid = sample.uid
-        self._request_url = sample._sample_path + '/request'
-        
+        self._request_url = self._server_path + 'request'
+        print(self._request_url)
+
     def create_request(self, **kwargs):
         r = requests.post(url=self._request_url, 
                           data=ujson.dumps(kwargs))
         r.raise_for_status()
-    
+
     def find_request(self, sort_by=None, **kwargs):
         raise NotImplementedError('In theaters Spring 2016')
-    
+
     def update_request(self, **kwargs):
         pass

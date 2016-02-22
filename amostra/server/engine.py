@@ -71,10 +71,10 @@ class SampleReferenceHandler(DefaultHandler):
     Pass 'num' in order to obtain the last 'num' sample references.
 
     post()
-        Insert 'sample_reference' documents
+        Insert 'sample' documents
 
     put()
-        Update or Insert if 'sample_reference' document does not exist.
+        Update or Insert if 'sample' document does not exist.
     Update supports both field update and document replacement. If you
     would like to replace a document, simply provide a full doc in update
     field. Otherwise, provide a dict that holds the new value and field name.
@@ -89,13 +89,13 @@ class SampleReferenceHandler(DefaultHandler):
         # TODO: Time should always be required!
         if num:
             try:
-                docs = database.sample_reference.find().sort('time',
+                docs = database.sample.find().sort('time',
                                                              direction=pymongo.DESCENDING).limit(num)
             except pymongo.errors.PyMongoError:
                 raise utils._compose_err_msg(500, '', query)
         else:
             try:
-                docs = database.sample_reference.find(query).sort('time',
+                docs = database.sample.find(query).sort('time',
                                                                   direction=pymongo.DESCENDING)
             except pymongo.errors.PyMongoError:
                 raise utils._compose_err_msg(500, 'Query Failed: ', query)
@@ -118,13 +118,13 @@ class SampleReferenceHandler(DefaultHandler):
                     raise utils._compose_err_msg(400,
                                                  "Invalid schema on document(s)", d)
                 try:
-                    res = database.sample_reference.insert(d)
+                    res = database.sample.insert(d)
                     uids.append(d['uid'])
                 except pymongo.errors.PyMongoError:
                     raise utils._compose_err_msg(500,
                                                  'Validated data can not be inserted',
                                                  data)
-                # database.sample_reference.create_index([()])
+                # database.sample.create_index([()])
         elif isinstance(data, dict):
             try:
                 jsonschema.validate(data,
@@ -133,13 +133,13 @@ class SampleReferenceHandler(DefaultHandler):
                 raise utils._compose_err_msg(400,
                                              "Invalid schema on document(s)", data)
             try:
-                res = database.sample_reference.insert(data)
+                res = database.sample.insert(data)
                 uids.append(data['uid'])
             except pymongo.errors.PyMongoError:
                 raise utils._compose_err_msg(500,
                                              'Validated data can not be inserted',
                                              data)
-            # database.sample_reference.create_index([()])
+            # database.sample.create_index([()])
         else:
             raise utils._compose_err_msg(500,
                                          status='SampleHandler expects list or dict')        
@@ -152,7 +152,7 @@ class SampleReferenceHandler(DefaultHandler):
         incoming = utils.unpack_params(self)
         query = incoming['query']
         update = incoming['update']
-        database.sample_reference.update_many(query,
+        database.sample.update_many(query,
                                               {'$set': update},
                                               upsert=False)
 
@@ -160,7 +160,29 @@ class SampleReferenceHandler(DefaultHandler):
 class RequestReferenceHandler(DefaultHandler):
     @tornado.web.asynchronous
     def get(self):
-        pass
+        database = self.settings['db']
+        query = utils.unpack_params(self)
+        print(query)
+        num = query.pop("num", None)
+        # TODO: Time should always be required!
+        if num:
+            try:
+                docs = database.reference.find().\
+                                        sort('time',
+                                             direction=pymongo.DESCENDING).\
+                                                       limit(num)
+            except pymongo.errors.PyMongoError:
+                raise utils._compose_err_msg(500, '', query)
+        else:
+            try:
+                docs = database.reference.find(query).sort('time',
+                                                           direction=pymongo.DESCENDING)
+            except pymongo.errors.PyMongoError:
+                raise utils._compose_err_msg(500, 'Query Failed: ', query)
+        if docs:
+            utils.return2client(self, docs)
+        else:
+            raise utils._compose_err_msg(500, 'No results found!')
 
     @tornado.web.asynchronous
     def post(self):
@@ -178,12 +200,12 @@ class SchemaHandler(DefaultHandler):
     def get(self):
         col = utils.unpack_params(self)
         utils.return2client(self, utils.schemas[col])
-    
+
     @tornado.web.asynchronous
     def put(self):
         raise utils._compose_err_msg(405, 
                                      status='Not allowed on server')
-    
+
     @tornado.web.asynchronous
     def post(self):
         raise utils._compose_err_msg(405, 

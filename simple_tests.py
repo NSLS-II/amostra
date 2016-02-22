@@ -3,7 +3,7 @@ Created on Feb 22, 2016
 
 @author: arkilic
 '''
-from amostra.client.commands import SampleReference
+from amostra.client.commands import SampleReference, RequestReference
 import uuid
 import time
 m_sample = dict(name='m_sample', uid=str(uuid.uuid4()), 
@@ -18,5 +18,7 @@ print(r)
 
 crsr = s1.find(name='m_sample')
 
-for c in crsr:
-    print(c)
+samp = next(crsr)
+
+    
+req1 = RequestReference(samp, host='localhost', port=7770)
