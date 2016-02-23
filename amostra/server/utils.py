@@ -19,6 +19,7 @@ for name, filename in SCHEMA_NAMES.items():
     try:
         with open(rs_fn('amostra',
                         resource_name=fn.format(filename))) as fin:
+            print(name)
             schemas[name] = ujson.load(fin)
     except FileNotFoundError:
         raise AmostraException('Schema file not found or does not exist')

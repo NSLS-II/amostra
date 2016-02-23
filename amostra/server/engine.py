@@ -86,7 +86,6 @@ class SampleReferenceHandler(DefaultHandler):
         query = utils.unpack_params(self)
         print(query)
         num = query.pop("num", None)
-        # TODO: Time should always be required!
         if num:
             try:
                 docs = database.sample.find().sort('time',
@@ -175,7 +174,7 @@ class RequestReferenceHandler(DefaultHandler):
                 raise utils._compose_err_msg(500, '', query)
         else:
             try:
-                docs = database.reference.find(query).sort('time',
+                docs = database.request.find(query).sort('time',
                                                            direction=pymongo.DESCENDING)
             except pymongo.errors.PyMongoError:
                 raise utils._compose_err_msg(500, 'Query Failed: ', query)
@@ -189,17 +188,16 @@ class RequestReferenceHandler(DefaultHandler):
         database = self.settings['db']
         data = ujson.loads(self.request.body.decode("utf-8"))
         uids = []
-        print(data)
         if isinstance(data, list):
             for d in data:
                 try:
                     jsonschema.validate(d,
-                                        utils.schemas['reference'])
+                                        utils.schemas['request'])
                 except (ValidationError, SchemaError):
                     raise utils._compose_err_msg(400,
                                                  "Invalid schema on document(s)", d)
                 try:
-                    res = database.reference.insert(d)
+                    res = database.request.insert(d)
                     uids.append(d['uid'])
                 except pymongo.errors.PyMongoError:
                     raise utils._compose_err_msg(500,
@@ -209,12 +207,12 @@ class RequestReferenceHandler(DefaultHandler):
         elif isinstance(data, dict):
             try:
                 jsonschema.validate(data,
-                                    utils.schemas['reference'])
+                                    utils.schemas['request'])
             except (ValidationError, SchemaError):
                 raise utils._compose_err_msg(400,
                                              "Invalid schema on document(s)", data)
             try:
-                res = database.reference.insert(data)
+                res = database.request.insert(data)
                 uids.append(data['uid'])
             except pymongo.errors.PyMongoError:
                 raise utils._compose_err_msg(500,
@@ -223,9 +221,8 @@ class RequestReferenceHandler(DefaultHandler):
             # database.sample.create_index([()])
         else:
             raise utils._compose_err_msg(500,
-                                         status='SampleHandler expects list or dict')        
+                                         status='SampleHandler expects list or dict')
         self.finish(ujson.dumps(uids))
-
     @tornado.web.asynchronous
     def put(self):
         # TODO: Implement upsert

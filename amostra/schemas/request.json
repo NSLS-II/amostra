@@ -1,34 +1,35 @@
 {
-"properties": {
-        "seq_num": {
-            "type": "number",
-            "description": "Sequence number to identify the location of this Event in the Event stream"
+    "properties": {
+        "project": {
+            "type": "string",
+            "description": "Name of project that this run is part of"
+        },
+        "beamline_id": {
+            "type": "string",
+            "description": "The beamline ID"
         },
         "time": {
             "type": "number",
-            "description": "The event time.  This maybe different than the timestamps on each of the data entries"
-        },
-        "state": {
-            "type": "string",
-            "description": "The state of the request"
-        },
-        "sample": {
-            "type": "string",
-            "description": "The foreign key for sample this request belongs to"
+            "description": "Time the run started.  Unix epoch time"
         },
         "uid": {
             "type": "string",
-            "description": "Globally unique identifier for this Event"
+            "description": "Globally unique ID for tihs run"
+        },
+        "owner": {
+            "type": "string",
+            "description": "Unix owner to associate this data with"
+        },
+        "sample": {
+            "type": "string",
+            "description": "Sample name!"
         }
     },
     "required": [
         "uid",
         "time",
-        "sample",
-        "state"
-    ],
-    "additionalProperties": false,
+        "sample"
+     ],
     "type": "object",
-    "title": "request",
-    "description": "Set of instructions for a given sample"
- }
+    "description": "Document created for group of samples."
+}

@@ -124,9 +124,8 @@ class SampleReference:
 
     def find_raw_mongo(self, mongo_query, json=False):
         """Return raw dicts or json instead of doct"""
-        r = requests.get(self._server_path +
-                        '/sample',
-                        params=ujson.dumps(kwargs))
+        r = requests.get(self._server_path + '/sample',
+                         params=ujson.dumps(mongo_query))
         r.raise_for_status()
         content = ujson.loads(r.text)
         # add all content to local sample list
@@ -170,16 +169,15 @@ class RequestReference:
 
     """
     def __init__(self, sample, host, port, time=time.time(),
-                 uid=str(uuid4()), state='active',seq_num=0, **kwargs):
+                 uid=str(uuid4()), state='active',seq_num=0):
         """Handles connection configuration to the service backend."""
         self._server_path = 'http://{}:{}/' .format(host, port)
         payload = dict(uid=uid, sample=sample['uid'], time=time,state=state,
-                       seq_num=seq_num,**kwargs)
+                       seq_num=seq_num)
+        print(self._server_path)
         print(payload)
-        domt = ujson.dumps(payload)
-        print(domt)
-        r = requests.post(self._server_path + 'sample',
-                          data=domt)
+        r = requests.post(self._server_path + 'request',
+                        data=ujson.dumps(payload))
         r.raise_for_status()
 
     def create_request(self, **kwargs):
