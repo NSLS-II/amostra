@@ -163,13 +163,12 @@ class RequestReferenceHandler(DefaultHandler):
         query = utils.unpack_params(self)
         print(query)
         num = query.pop("num", None)
-        # TODO: Time should always be required!
         if num:
             try:
                 docs = database.reference.find().\
                                         sort('time',
                                              direction=pymongo.DESCENDING).\
-                                                       limit(num)
+                                        limit(num)
             except pymongo.errors.PyMongoError:
                 raise utils._compose_err_msg(500, '', query)
         else:

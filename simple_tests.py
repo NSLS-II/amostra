@@ -1,8 +1,3 @@
-'''
-Created on Feb 22, 2016
-
-@author: arkilic
-'''
 from amostra.client.commands import SampleReference, RequestReference
 import uuid
 import time
@@ -21,4 +16,5 @@ crsr = s1.find(name='m_sample')
 samp = next(crsr)
 
 print(samp)
-req1 = RequestReference(samp, host='localhost', port=7770)
+req1 = RequestReference(sample=samp, host='localhost', port=7770)
+req1.create_request(sample=samp, host='localhost', port=7770)

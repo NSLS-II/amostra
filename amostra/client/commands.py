@@ -3,6 +3,7 @@ import ujson
 from uuid import uuid4
 import requests
 import time
+from amostra.client import conf
 
 
 class SampleReference:
@@ -11,7 +12,19 @@ class SampleReference:
     used in production for very small numbers of samples.
 
     """
-    def __init__(self, sample_list, host, port):
+    def __init__(self, sample_list, host=conf.conn_config['host'],
+                 port=conf.conn_config['port']):
+        """
+        Parameters
+        ----------
+        sample_list:List of desired sample(s) to be created
+        host
+        port
+
+        Returns
+        -------
+
+        """
         self._server_path = 'http://{}:{}/' .format(host, port)
         if sample_list is None:
             sample_list = []
@@ -21,12 +34,12 @@ class SampleReference:
             raise ValueError("duplicate names")
         if ln != len(set(d['uid'] for d in self._sample_list)):
             raise ValueError("duplicate uids")
-        domt = ujson.dumps(self._sample_list)
-        print(domt)
-        print(self._server_path)
-        r = requests.post(self._server_path + 'sample',
-                          data=domt)
-        r.raise_for_status()
+        if sample_list:
+            # if there is a list in mind, create it
+            domt = ujson.dumps(self._sample_list)
+            r = requests.post(self._server_path + 'sample',
+                              data=domt)
+            r.raise_for_status()
 
     def add(self, name, time=time.time(), uid=str(uuid4()),
             **kwargs):
@@ -87,8 +100,6 @@ class SampleReference:
         raise NotImplementedError('Coming soon.')
         if 'name' in kwargs:
             raise ValueError("Can not change sample name")
-
-
         old, new = dict(old), old
         new.update(**kwargs)
         return Document('sample', old), Document('sample', new)
@@ -168,21 +179,53 @@ class RequestReference:
     For simplicity, built on top of a list of dicts.
 
     """
-    def __init__(self, sample, host, port, time=time.time(),
+    def __init__(self, host=conf.conn_config['host'],
+                 port=conf.conn_config['port'], sample=None, time=time.time(),
+                 uid=str(uuid4()), state='active', seq_num=0):
+        """Handles connection configuration to the service backend.
+        Either initiate with a request or use purely as a client for requests.
+        """
+        self._server_path = 'http://{}:{}/' .format(host, port)
+        self._request_list = []
+        if sample:
+            payload = dict(uid=uid, sample=sample['uid'], time=time,state=state,
+                           seq_num=seq_num)
+            print(self._server_path)
+            print(payload)
+            r = requests.post(self._server_path + 'request',
+                            data=ujson.dumps(payload))
+            r.raise_for_status()
+            self._request_list.append(payload)
+
+    def create_request(self, host=conf.conn_config['host'],
+                 port=conf.conn_config['port'], sample=None, time=time.time(),
                  uid=str(uuid4()), state='active',seq_num=0):
-        """Handles connection configuration to the service backend."""
+        """
+
+        Parameters
+        ----------
+        host: str
+            Amostra server host machine
+        port: int
+            Amost server port on the host machine
+        sample: dict, doct.Document
+            The sample this reference refers to
+        time: float
+            Time request got created
+        uid: str
+            Unique identifier for
+        state
+        seq_num
+
+        Returns
+        -------
+
+        """
         self._server_path = 'http://{}:{}/' .format(host, port)
         payload = dict(uid=uid, sample=sample['uid'], time=time,state=state,
-                       seq_num=seq_num)
-        print(self._server_path)
-        print(payload)
-        r = requests.post(self._server_path + 'request',
-                        data=ujson.dumps(payload))
-        r.raise_for_status()
-
-    def create_request(self, **kwargs):
-        r = requests.post(url=self._request_url, 
-                          data=ujson.dumps(kwargs))
+                           seq_num=seq_num)
+        r = requests.post(url=self._server_path + 'request',
+                          data=ujson.dumps(payload))
         r.raise_for_status()
 
     def find_request(self, sort_by=None, **kwargs):
