@@ -146,15 +146,18 @@ class SampleReferenceHandler(DefaultHandler):
 
     @tornado.web.asynchronous
     def put(self):
-        # TODO: Check update documentation.
         database = self.settings['db']
         incoming = utils.unpack_params(self)
-        query = incoming['query']
-        update = incoming['update']
-        database.sample.update_many(query,
-                                              {'$set': update},
-                                              upsert=False)
-
+        try:
+            filter = incoming.pop('filter')
+            update = incoming.pop('update')
+        except KeyError:
+            raise utils._compose_err_msg(500, 
+                                         status='filter and update are both required fields')
+        res = database.sample.update_many(filter=filter,
+                                          update={'$set': update},
+                                          upsert=False)
+        self.finish(ujson.dumps(res.raw_result))
 
 class RequestReferenceHandler(DefaultHandler):
     @tornado.web.asynchronous
@@ -222,10 +225,23 @@ class RequestReferenceHandler(DefaultHandler):
             raise utils._compose_err_msg(500,
                                          status='SampleHandler expects list or dict')
         self.finish(ujson.dumps(uids))
+    
     @tornado.web.asynchronous
     def put(self):
-        # TODO: Implement upsert
-        pass
+        database = self.settings['db']
+        print(self)
+
+        incoming = utils.unpack_params(self)
+        try:
+            filter = incoming.pop('filter')
+            update = incoming.pop('update')
+        except KeyError:
+            raise utils._compose_err_msg(500, 
+                                         status='filter and update are both required fields')
+        res = database.request.update_many(filter=filter,
+                                           update={'$set': update},
+                                           upsert=False)
+        self.finish(ujson.dumps(res.raw_result))
 
 
 class SchemaHandler(DefaultHandler):
