@@ -73,11 +73,11 @@ class SampleReference:
         self._sample_list.append(doc)
         return ujson.loads(r.text)[0]
 
-    def update(self, filter, update, host=conf.conn_config['host'], 
-               port=conf.conn_config['port']):
-        payload = dict(filter=filter, update=update)
+    def update(self, query, update, host=conf.conn_config['host'], 
+             port=conf.conn_config['port']):
+        payload = dict(query=query, update=update)
         r = requests.put(url=self._server_path + 'sample',
-                          data=ujson.dumps(payload))
+                         data=ujson.dumps(payload))
         
     def find(self, **kwargs):
         """Find samples by keys
@@ -156,7 +156,7 @@ class RequestReference:
     """
     def __init__(self, host=conf.conn_config['host'],
                  port=conf.conn_config['port'], sample=None, time=time.time(),
-                 uid=str(uuid4()), state='active', seq_num=0):
+                 uid=str(uuid4()), state='active', seq_num=0, **kwargs):
         """Handles connection configuration to the service backend.
         Either initiate with a request or use purely as a client for requests.
         """
@@ -164,15 +164,13 @@ class RequestReference:
         self._request_list = []
         if sample:
             payload = dict(uid=uid, sample=sample['uid'], time=time,state=state,
-                           seq_num=seq_num)
-            print(self._server_path)
-            print(payload)
+                           seq_num=seq_num, **kwargs)
             r = requests.post(self._server_path + 'request',
                             data=ujson.dumps(payload))
             r.raise_for_status()
             self._request_list.append(payload)
 
-    def create_request(self, host=conf.conn_config['host'],
+    def create(self, host=conf.conn_config['host'],
                  port=conf.conn_config['port'], sample=None, time=time.time(),
                  uid=str(uuid4()), state='active', seq_num=0, **kwargs):
         """
@@ -207,7 +205,7 @@ class RequestReference:
         r.raise_for_status()
         return payload['uid']
 
-    def find_request(self, **kwargs):
+    def find(self, **kwargs):
         r = requests.get(self._server_path + 'request',
                          params=ujson.dumps(kwargs))
         r.raise_for_status()
@@ -217,8 +215,8 @@ class RequestReference:
         for c in content:
             yield Document('request', c)        
 
-    def update(self, filter, update, host=conf.conn_config['host'], 
+    def update(self, query, update, host=conf.conn_config['host'], 
              port=conf.conn_config['port']):
-        payload = dict(filter=filter, update=update)
+        payload = dict(query=query, update=update)
         r = requests.put(url=self._server_path + 'request',
-                          data=ujson.dumps(payload))
+                         data=ujson.dumps(payload))

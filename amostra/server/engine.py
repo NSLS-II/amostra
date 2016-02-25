@@ -84,7 +84,6 @@ class SampleReferenceHandler(DefaultHandler):
     def get(self):
         database = self.settings['db']
         query = utils.unpack_params(self)
-        print(query)
         num = query.pop("num", None)
         if num:
             try:
@@ -146,25 +145,26 @@ class SampleReferenceHandler(DefaultHandler):
 
     @tornado.web.asynchronous
     def put(self):
+        # TODO: Make sure no unique field gets updated!
         database = self.settings['db']
-        incoming = utils.unpack_params(self)
+        incoming = ujson.loads(self.request.body)
         try:
-            filter = incoming.pop('filter')
+            query = incoming.pop('query')
             update = incoming.pop('update')
         except KeyError:
             raise utils._compose_err_msg(500, 
                                          status='filter and update are both required fields')
-        res = database.sample.update_many(filter=filter,
-                                          update={'$set': update},
-                                          upsert=False)
+        res = database.sample.update_many(filter=query,
+                                           update={'$set': update},
+                                           upsert=False)
         self.finish(ujson.dumps(res.raw_result))
+
 
 class RequestReferenceHandler(DefaultHandler):
     @tornado.web.asynchronous
     def get(self):
         database = self.settings['db']
         query = utils.unpack_params(self)
-        print(query)
         num = query.pop("num", None)
         if num:
             try:
@@ -187,6 +187,7 @@ class RequestReferenceHandler(DefaultHandler):
 
     @tornado.web.asynchronous
     def post(self):
+        # TODO: Make sure sample exists before creating request 
         database = self.settings['db']
         data = ujson.loads(self.request.body.decode("utf-8"))
         uids = []
@@ -220,7 +221,6 @@ class RequestReferenceHandler(DefaultHandler):
                 raise utils._compose_err_msg(500,
                                              'Validated data can not be inserted',
                                              data)
-            # database.sample.create_index([()])
         else:
             raise utils._compose_err_msg(500,
                                          status='SampleHandler expects list or dict')
@@ -228,20 +228,20 @@ class RequestReferenceHandler(DefaultHandler):
     
     @tornado.web.asynchronous
     def put(self):
+        # TODO: Make sure no unique field gets updated!
         database = self.settings['db']
-        print(self)
-
-        incoming = utils.unpack_params(self)
+        incoming = ujson.loads(self.request.body)
         try:
-            filter = incoming.pop('filter')
+            query = incoming.pop('query')
             update = incoming.pop('update')
         except KeyError:
             raise utils._compose_err_msg(500, 
                                          status='filter and update are both required fields')
-        res = database.request.update_many(filter=filter,
+        res = database.request.update_many(filter=query,
                                            update={'$set': update},
                                            upsert=False)
         self.finish(ujson.dumps(res.raw_result))
+        
 
 
 class SchemaHandler(DefaultHandler):
