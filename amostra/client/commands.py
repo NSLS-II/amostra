@@ -75,9 +75,24 @@ class SampleReference:
 
     def update(self, query, update, host=conf.conn_config['host'], 
              port=conf.conn_config['port']):
+        """Update a request given a query and name value pair to be updated.
+        No upsert(s). If doc does not exist, simply do not update
+        
+        Parameters
+        -----------
+        query: dict
+            Allows finding Sample documents to be updated
+        update: dict
+            Name/value pair that is to be replaced within an existing Request doc
+        host: str
+            Backend machine id to be connected. Not mongo, tornado
+        port: int
+            Backend port id. Again, tornado, not mongo daemon
+        """
         payload = dict(query=query, update=update)
         r = requests.put(url=self._server_path + 'sample',
                          data=ujson.dumps(payload))
+        r.raise_for_status()
         
     def find(self, **kwargs):
         """Find samples by keys
@@ -206,6 +221,7 @@ class RequestReference:
         return payload['uid']
 
     def find(self, **kwargs):
+        """Given a set of mongo search parameters, return a requests iterator"""
         r = requests.get(self._server_path + 'request',
                          params=ujson.dumps(kwargs))
         r.raise_for_status()
@@ -217,6 +233,21 @@ class RequestReference:
 
     def update(self, query, update, host=conf.conn_config['host'], 
              port=conf.conn_config['port']):
+        """Update a request given a query and name value pair to be updated.
+        No upsert(s). If doc does not exist, simply do not update
+        
+        Parameters
+        -----------
+        query: dict
+            Allows finding Request documents to be updated
+        update: dict
+            Name/value pair that is to be replaced within an existing Request doc
+        host: str
+            Backend machine id to be connected. Not mongo, tornado
+        port: int
+            Backend port id. Again, tornado, not mongo daemon
+        """
         payload = dict(query=query, update=update)
         r = requests.put(url=self._server_path + 'request',
                          data=ujson.dumps(payload))
+        r.raise_for_status()

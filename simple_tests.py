@@ -21,3 +21,8 @@ req1.update(query={'sample': m_sample['uid']}, update={'time': 1})
 
 print(next(req1.find(time=1)))
 print(next(s1.find(time=0.00003)))
+
+t = time.time()
+
+res = s1.update(query={'time': 0.00003}, update={'time': t})
+print(list(s1.find(time=t)))

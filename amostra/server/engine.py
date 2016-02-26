@@ -122,7 +122,10 @@ class SampleReferenceHandler(DefaultHandler):
                     raise utils._compose_err_msg(500,
                                                  'Validated data can not be inserted',
                                                  data)
-                # database.sample.create_index([()])
+                database.sample.create_index([('uid', pymongo.DESCENDING)], unique=True, 
+                                             background=True)
+                database.sample.create_index([('time', pymongo.DESCENDING)], unique=False,
+                                             background=True)
         elif isinstance(data, dict):
             try:
                 jsonschema.validate(data,
@@ -154,6 +157,9 @@ class SampleReferenceHandler(DefaultHandler):
         except KeyError:
             raise utils._compose_err_msg(500, 
                                          status='filter and update are both required fields')
+        if any(x in update.keys() for x in ['uid', 'time']):
+            raise utils._compose_err_msg(500,
+                                   status='Time and uid cannot be updated')
         res = database.sample.update_many(filter=query,
                                            update={'$set': update},
                                            upsert=False)
@@ -237,6 +243,9 @@ class RequestReferenceHandler(DefaultHandler):
         except KeyError:
             raise utils._compose_err_msg(500, 
                                          status='filter and update are both required fields')
+        if any(x in update.keys() for x in ['uid', 'time']):
+            raise utils._compose_err_msg(500,
+                                         status='Time and uid cannot be updated')
         res = database.request.update_many(filter=query,
                                            update={'$set': update},
                                            upsert=False)
