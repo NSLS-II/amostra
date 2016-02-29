@@ -19,7 +19,7 @@ def amostra_setup():
     ttime.sleep(1)
 
 
-def mds_teardown():
+def amostra_teardown():
     conn = MongoClient(TESTING_CONFIG['mongo_server'],
                        TESTING_CONFIG.get('mongo_port', None))
     conn.drop_database(TESTING_CONFIG['database'])
