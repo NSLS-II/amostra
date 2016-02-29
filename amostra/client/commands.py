@@ -7,18 +7,16 @@ from amostra.client import conf
 
 
 class SampleReference:
-    """Reference implementation of generic sample manager
-    This is primarily a reference implementation / for testing but can be
-    used in production for very small numbers of samples.
-
-    """
+    """Reference implementation of generic sample manager"""
     def __init__(self, sample_list=[], host=conf.conn_config['host'],
                  port=conf.conn_config['port']):
         """
         Parameters
         ----------
-        sample_list:List of desired sample(s) to be created
-        host
+        sample_list: list
+            List of desired sample(s) to be created
+        host: str
+            Machine name/address for tornado instance
         port
 
         Returns

@@ -33,16 +33,21 @@ def test_sample_constructor():
 
 def test_sample_create():
     samp = SampleReference()
-    samp.create(name='test1')
-    samp.create(name='test2', uid=str(uuid.uuid4()))
+    r1 = samp.create(name='test1')
+    r2 = samp.create(name='test2', uid=str(uuid.uuid4()))
     m_kwargs = dict(owner='test', level='inferno', type='automated',
                     material='CoFeB')
-    samp.create(name='test3', uid=str(uuid.uuid4()), **m_kwargs)
+    r3 = samp.create(name='test3', uid=str(uuid.uuid4()), **m_kwargs)
 
 def test_duplicate_sample():
+    # d = dict(name='test_dup')
     s = SampleReference()
-    s.create(name='m')
-    # pytest.raises(HTTPError, s.create, name='test_dup')
+    r1 = s.create(name='test_dup', uid=str(uuid.uuid4()))
+    pytest.raises(ValueError, s.create, name='test_dup')
+
+def test_invalid_sample():
+    s = SampleReference()
+    pytest.raises(TypeError, s.create)
 
 def setup():
     amostra_setup()

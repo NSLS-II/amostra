@@ -94,7 +94,7 @@ class SampleReferenceHandler(DefaultHandler):
         else:
             try:
                 docs = database.sample.find(query).sort('time',
-                                                                  direction=pymongo.DESCENDING)
+                                                        direction=pymongo.DESCENDING)
             except pymongo.errors.PyMongoError:
                 raise utils._compose_err_msg(500, 'Query Failed: ', query)
         if docs:
@@ -115,13 +115,8 @@ class SampleReferenceHandler(DefaultHandler):
                 except (ValidationError, SchemaError):
                     raise utils._compose_err_msg(400,
                                                  "Invalid schema on document(s)", d)
-                try:
-                    res = database.sample.insert(d)
-                    uids.append(d['uid'])
-                except pymongo.errors.PyMongoError:
-                    raise utils._compose_err_msg(500,
-                                                 'Validated data can not be inserted',
-                                                 data)
+                uids.append(d['uid'])
+                res = database.sample.insert(d)
                 database.sample.create_index([('uid', pymongo.DESCENDING)], unique=True, 
                                              background=True)
                 database.sample.create_index([('time', pymongo.DESCENDING)], unique=False,
@@ -133,13 +128,10 @@ class SampleReferenceHandler(DefaultHandler):
             except (ValidationError, SchemaError):
                 raise utils._compose_err_msg(400,
                                              "Invalid schema on document(s)", data)
-            try:
-                res = database.sample.insert(data)
-                uids.append(data['uid'])
-            except pymongo.errors.PyMongoError:
-                raise utils._compose_err_msg(500,
-                                             'Validated data can not be inserted',
-                                             data)
+            uids.append(data['uid'])
+            
+            res = database.sample.insert(data)
+            
             # database.sample.create_index([()])
         else:
             raise utils._compose_err_msg(500,
