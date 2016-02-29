@@ -1,28 +1,10 @@
 # Smoketest the api
 
-from collections import deque
-import time as ttime
-import datetime
-import pytz
-from nose.tools import assert_equal, assert_raises, raises, assert_true
+from amostra.client.api import SampleReference
+from amostra.client.api import RequestReference
 
-sample_uid = None
-document_insert_time = None
-
-def tearDown():
-    pass
-
-def setup():
-    global sample_uid, document_insert_time
-    document_insert_time = ttime.time()
-    
-
-
-
-
-
-
-
-if __name__ == "__main__":
-    import nose
-    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
+s_create = SampleReference.create
+s_find = SampleReference.find
+s_update = SampleReference.update
+s_getyaml = SampleReference.dump_to_yaml
+s_getjson = SampleReference.dump_to_json
