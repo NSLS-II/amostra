@@ -1,4 +1,4 @@
-""" Startup script for the server."""
+from __future__ import (absolute_import, print_function, unicode_literals)
 import argparse
 import tornado.web
 import tornado.ioloop
@@ -10,7 +10,9 @@ from amostra.server.conf import load_configuration
 
 def start_server(config=None):
     """
-    Returns
+    Amostra service startup script.
+    Returns tornado event loop provided configuration.
+
     Parameters
     ----------
     config: dict
@@ -56,6 +58,6 @@ def start_server(config=None):
         (r'/request', RequestReferenceHandler),
         (r'/schema', SchemaHandler)
          ], db=db)
-    print('Starting Amostra service on ', config)
+    print('Starting Amostra service with configuration ', config)
     application.listen(service_port)
     tornado.ioloop.IOLoop.current().start()

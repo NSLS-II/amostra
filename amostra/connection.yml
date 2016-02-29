@@ -1,7 +1,7 @@
 # amostra configuration
 #  EDIT 
-host: localhost
-port: 27017
+mongo_host: localhost
+mongo_port: 27017
 timezone: US/Eastern
 protocol: http
 service_port: 7770
