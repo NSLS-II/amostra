@@ -1,6 +1,7 @@
 # amostra configuration
 #  EDIT 
 host: localhost
-port: 7770
+port: 27017
 timezone: US/Eastern
 protocol: http
+service_port: 7770

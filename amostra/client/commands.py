@@ -41,8 +41,8 @@ class SampleReference:
                               data=domt)
             r.raise_for_status()
 
-    def add(self, name, time=time.time(), uid=str(uuid4()),
-            **kwargs):
+    def create(self, name, time=time.time(), uid=str(uuid4()),
+               **kwargs):
         """Add a sample to the database
         All kwargs are collected and passed through to the documents
 

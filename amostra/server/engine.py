@@ -11,7 +11,7 @@ from jsonschema.exceptions import ValidationError, SchemaError
 from pymongo.errors import PyMongoError
 
 
-def db_connect(database, host, port):
+def db_connect(database, mongo_host, mongo_port):
     """Helper function to deal with stateful connections to MongoDB
     Connection established lazily. Connects to the database on request.
     Same connection pool is used for all clients per recommended by
@@ -32,7 +32,7 @@ def db_connect(database, host, port):
     to pymongo
     """
     try:
-        client = pymongo.MongoClient(host=host, port=port)
+        client = pymongo.MongoClient(host=mongo_host, port=mongo_port)
     except pymongo.errors.ConnectionFailure:
         raise utils.AmostraException("Unable to connect to MongoDB server...")
     database = client[database]

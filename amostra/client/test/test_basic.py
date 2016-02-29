@@ -3,9 +3,9 @@ from io import StringIO
 
 import pytest
 import yaml
-
 from amostra.server.basic import SampleReference
-from .testing import _baseSM
+
+from amostra.client.testing import _baseSM
 
 
 class TestBasic(_baseSM):
