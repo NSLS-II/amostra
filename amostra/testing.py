@@ -14,7 +14,7 @@ TESTING_CONFIG = {
 
 
 def amostra_setup():
-    start_server(config=TESTING_CONFIG)
+    #start_server(config=TESTING_CONFIG)
     # ensure tornado server started prior to tests
     ttime.sleep(1)
 

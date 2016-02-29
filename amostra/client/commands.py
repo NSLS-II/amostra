@@ -28,6 +28,8 @@ class SampleReference:
         self._server_path = 'http://{}:{}/' .format(host, port)
         if sample_list is None:
             sample_list = []
+        if not isinstance(sample_list, list):
+            raise TypeError('Not a correct type for the constructor. Expecting list')
         self._sample_list = [dict(d) for d in sample_list]
         ln = len(self._sample_list)
         if ln != len(set(d['name'] for d in self._sample_list)):
