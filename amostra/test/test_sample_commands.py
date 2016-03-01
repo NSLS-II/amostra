@@ -95,8 +95,8 @@ def test_update_sample_illegal():
                   samp.update, query={'name': test_sample['name']}, update={'time': 'illegal'})
     pytest.raises(HTTPError,
                   samp.update, query={'name': test_sample['name']}, update={'name': 'illegal'})
-    # updated_samp = next(samp.find(name='up_sam'))
-    # assert updated_samp['updated']
+    pytest.raises(HTTPError,
+                  samp.update, query={'name': test_sample['name']}, update={'uid': 'illegal'})
 
 
 def setup():

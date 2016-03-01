@@ -1,0 +1,34 @@
+{
+    "properties": {
+        "uid": {
+            "type": "string",
+            "description": "Globally unique ID for this container"
+        },        
+        "owner": {
+            "type": "string",
+            "description": "Unix owner to associate this data with"
+        },
+        "kind": {
+            "type": "string",
+            "description": "Type of the container"
+        },
+        "name": {
+            "type": "string",
+            "description": "Container name!"
+        },
+        "content": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "The items of this container"
+        }
+    },
+    "required": [
+        "uid",
+        "kind",
+        "name"
+     ],
+    "type": "object",
+    "description": "Document created for group of containers."
+}

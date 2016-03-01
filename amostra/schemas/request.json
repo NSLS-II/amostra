@@ -22,7 +22,7 @@
         },
         "sample": {
             "type": "string",
-            "description": "Sample name!"
+            "description": "Sample uid"
         }
     },
     "required": [

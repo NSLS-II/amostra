@@ -244,6 +244,103 @@ class RequestReferenceHandler(DefaultHandler):
         self.finish(ujson.dumps(res.raw_result))
         
 
+class ContainerReferenceHandler(DefaultHandler):
+    """Handler for SampleReference insert, update, and querying.
+    A RESTful handler, nothing fancy or stateful about this
+
+    Methods
+    --------
+    get()
+        Query 'container' documents given certain parameters.
+    Pass 'num' in order to obtain the last 'num' sample references.
+
+    post()
+        Insert 'sample' documents
+
+    put()
+        Update or Insert if 'sample' document does not exist.
+    Update supports both field update and document replacement. If you
+    would like to replace a document, simply provide a full doc in update
+    field. Otherwise, provide a dict that holds the new value and field name.
+    Returns the total number of documents that are updated.
+    """
+    @tornado.web.asynchronous
+    def get(self):
+        database = self.settings['db']
+        query = utils.unpack_params(self)
+        num = query.pop("num", None)
+        if num:
+            try:
+                docs = database.sample.find().sort('time',
+                                                             direction=pymongo.DESCENDING).limit(num)
+            except pymongo.errors.PyMongoError:
+                raise utils._compose_err_msg(500, '', query)
+        else:
+            try:
+                docs = database.container.find(query).sort('time',
+                                                        direction=pymongo.DESCENDING)
+            except pymongo.errors.PyMongoError:
+                raise utils._compose_err_msg(500, 'Query Failed: ', query)
+        if docs:
+            utils.return2client(self, docs)
+        else:
+            raise utils._compose_err_msg(500, 'No results found!')
+
+    @tornado.web.asynchronous
+    def post(self):
+        database = self.settings['db']
+        data = ujson.loads(self.request.body.decode("utf-8"))
+        uids = []
+        if isinstance(data, list):
+            for d in data:
+                try:
+                    jsonschema.validate(d,
+                                        utils.schemas['sample'])
+                except (ValidationError, SchemaError):
+                    raise utils._compose_err_msg(400,
+                                                 "Invalid schema on document(s)", d)
+                uids.append(d['uid'])
+                res = database.container.insert(d)
+                database.container.create_index([('uid', pymongo.DESCENDING)], unique=True, 
+                                             background=True)
+                database.container.create_index([('time', pymongo.DESCENDING)], unique=False,
+                                             background=True)
+        elif isinstance(data, dict):
+            try:
+                jsonschema.validate(data,
+                                    utils.schemas['sample'])
+            except (ValidationError, SchemaError):
+                raise utils._compose_err_msg(400,
+                                             "Invalid schema on document(s)", data)
+            uids.append(data['uid'])
+            
+            res = database.container.insert(data)
+            
+            # database.sample.create_index([()])
+        else:
+            raise utils._compose_err_msg(500,
+                                         status='SampleHandler expects list or dict')        
+        self.finish(ujson.dumps(uids))
+
+    @tornado.web.asynchronous
+    def put(self):
+        # TODO: Make sure no unique field gets updated!
+        database = self.settings['db']
+        incoming = ujson.loads(self.request.body)
+        try:
+            query = incoming.pop('query')
+            update = incoming.pop('update')
+        except KeyError:
+            raise utils._compose_err_msg(500, 
+                                         status='filter and update are both required fields')
+        if any(x in update.keys() for x in ['uid', 'time', 'name']):
+            raise utils._compose_err_msg(500,
+                                   status='Time and uid cannot be updated')
+        res = database.container.update_many(filter=query,
+                                           update={'$set': update},
+                                           upsert=False)
+        self.finish(ujson.dumps(res.raw_result))
+
 
 class SchemaHandler(DefaultHandler):
     """Provides the json used for schema validation provided collection name"""

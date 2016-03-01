@@ -12,7 +12,8 @@ class AmostraException(Exception):
 
 SCHEMA_PATH = 'schemas'
 SCHEMA_NAMES = {'sample': 'sample.json',
-                'request': 'request.json'}
+                'request': 'request.json',
+                'container': 'container.json'}
 fn = '{}/{{}}'.format(SCHEMA_PATH)
 schemas = {}
 for name, filename in SCHEMA_NAMES.items():
