@@ -271,8 +271,7 @@ class ContainerReferenceHandler(DefaultHandler):
         num = query.pop("num", None)
         if num:
             try:
-                docs = database.sample.find().sort('time',
-                                                   direction=pymongo.DESCENDING).limit(num)
+                docs = database.sample.find().sort('time', direction=pymongo.DESCENDING).limit(num)
             except pymongo.errors.PyMongoError:
                 raise utils._compose_err_msg(500, '', query)
         else:

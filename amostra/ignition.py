@@ -58,7 +58,7 @@ def start_server(config=None):
     application = tornado.web.Application([
         (r'/sample', SampleReferenceHandler),
         (r'/request', RequestReferenceHandler),
-        (r'/container', ContainerReferenceHandler)
+        (r'/container', ContainerReferenceHandler),
         (r'/schema', SchemaHandler)
          ], db=db)
     print('Starting Amostra service with configuration ', config)

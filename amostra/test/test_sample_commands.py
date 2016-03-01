@@ -70,7 +70,7 @@ def test_find_sample_as_doc():
                     beamline_id='trial_b')
     s1 = SampleReference([m_sample],
                          host='localhost', port=7770)
-    s_ret = next(s1.find_as_doc(uid=m_sample['uid']))
+    s_ret = next(s1.find(uid=m_sample['uid'], as_document=True))
     assert s_ret == Document('sample', m_sample)
 
 
