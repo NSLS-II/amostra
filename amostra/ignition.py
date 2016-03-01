@@ -4,7 +4,9 @@ import tornado.web
 import tornado.ioloop
 from  amostra.server.engine import (SampleReferenceHandler, 
                                     RequestReferenceHandler,
-                                    SchemaHandler, db_connect)
+                                    SchemaHandler,
+                                    ContainerReferenceHandler,
+                                    db_connect)
 from amostra.server.conf import load_configuration
 
 
@@ -56,6 +58,7 @@ def start_server(config=None):
     application = tornado.web.Application([
         (r'/sample', SampleReferenceHandler),
         (r'/request', RequestReferenceHandler),
+        (r'/container', ContainerReferenceHandler)
         (r'/schema', SchemaHandler)
          ], db=db)
     print('Starting Amostra service with configuration ', config)

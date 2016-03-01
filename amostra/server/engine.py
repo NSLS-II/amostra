@@ -272,7 +272,7 @@ class ContainerReferenceHandler(DefaultHandler):
         if num:
             try:
                 docs = database.sample.find().sort('time',
-                                                             direction=pymongo.DESCENDING).limit(num)
+                                                   direction=pymongo.DESCENDING).limit(num)
             except pymongo.errors.PyMongoError:
                 raise utils._compose_err_msg(500, '', query)
         else:
@@ -295,7 +295,7 @@ class ContainerReferenceHandler(DefaultHandler):
             for d in data:
                 try:
                     jsonschema.validate(d,
-                                        utils.schemas['sample'])
+                                        utils.schemas['container'])
                 except (ValidationError, SchemaError):
                     raise utils._compose_err_msg(400,
                                                  "Invalid schema on document(s)", d)
@@ -308,15 +308,13 @@ class ContainerReferenceHandler(DefaultHandler):
         elif isinstance(data, dict):
             try:
                 jsonschema.validate(data,
-                                    utils.schemas['sample'])
+                                    utils.schemas['container'])
             except (ValidationError, SchemaError):
                 raise utils._compose_err_msg(400,
                                              "Invalid schema on document(s)", data)
             uids.append(data['uid'])
             
             res = database.container.insert(data)
-            
-            # database.sample.create_index([()])
         else:
             raise utils._compose_err_msg(500,
                                          status='SampleHandler expects list or dict')        

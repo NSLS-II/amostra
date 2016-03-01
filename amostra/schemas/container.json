@@ -8,6 +8,10 @@
             "type": "string",
             "description": "Unix owner to associate this data with"
         },
+        "time": {
+            "type": "number",
+            "description": "Time the run started.  Unix epoch time"
+        },
         "kind": {
             "type": "string",
             "description": "Type of the container"
@@ -27,7 +31,8 @@
     "required": [
         "uid",
         "kind",
-        "name"
+        "name",
+        "time"
      ],
     "type": "object",
     "description": "Document created for group of containers."
