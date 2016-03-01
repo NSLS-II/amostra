@@ -121,18 +121,37 @@ class SampleReference:
         # add all content to local sample list
         self._sample_list.extend(content)
         for c in content:
-            yield Document('sample', c)
+            # yield Document('sample', c)
+            yield c
+            
+    def find_as_doc(self, **kwargs):
+        """Find samples by keys
+        First iterates over samples created by this instance,
+        if sample not found, makes the trip to the server.
+        Yields all documents which have all of the keys equal
+        to the kwargs.  ex ::
 
-    def find_raw_mongo(self, mongo_query, json=False):
-        """Return raw dicts or json instead of doct"""
-        r = requests.get(self._server_path + '/sample',
-                         params=ujson.dumps(mongo_query))
+            for k, v in kwargs:
+                assert d[k] == v
+
+        for all `d` yielded.
+
+        No kwargs yields matches all samples.
+
+        Yields
+        ------
+        c : dict
+            Documents which have all keys with the given values
+
+        """
+        r = requests.get(self._server_path + 'sample',
+                         params=ujson.dumps(kwargs))
         r.raise_for_status()
         content = ujson.loads(r.text)
         # add all content to local sample list
         self._sample_list.extend(content)
         for c in content:
-            yield c
+            yield Document('sample', c)
 
     def dump_to_json(self, fpath):
         # Seems done
@@ -158,10 +177,6 @@ class SampleReference:
         r.raise_for_status()
         return ujson.loads(r.text)
 
-    def get_requests(self):
-        """Get all active requests given a sample"""
-        raise NotImplementedError('In theaters Spring 2016')
-
 
 class RequestReference:
     """Reference implementation of generic request
@@ -169,9 +184,9 @@ class RequestReference:
     For simplicity, built on top of a list of dicts.
 
     """
-    def __init__(self, host=conf.conn_config['host'],
-                 port=conf.conn_config['port'], sample=None, time=time.time(),
-                 uid=str(uuid4()), state='active', seq_num=0, **kwargs):
+    def __init__(self, host=conf.conn_config['host'], port=conf.conn_config['port'],
+                 sample=None, time=time.time(), uid=str(uuid4()), state='active',
+                 seq_num=0, **kwargs):
         """Handles connection configuration to the service backend.
         Either initiate with a request or use purely as a client for requests.
         """
