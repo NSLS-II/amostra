@@ -6,11 +6,11 @@
         },        
         "owner": {
             "type": "string",
-            "description": "Unix owner to associate this data with"
+            "description": "String descriptor to associate this request with. Can be user or process"
         },
         "time": {
             "type": "number",
-            "description": "Time the run started.  Unix epoch time"
+            "description": "Time the container was created.  Unix epoch time"
         },
         "kind": {
             "type": "string",
@@ -18,7 +18,7 @@
         },
         "name": {
             "type": "string",
-            "description": "Container name!"
+            "description": "Container name"
         },
         "content": {
             "type": "array",

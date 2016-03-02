@@ -2,7 +2,7 @@
     "properties": {
         "project": {
             "type": "string",
-            "description": "Name of project that this run is part of"
+            "description": "Name of project that this request is part of"
         },
         "beamline_id": {
             "type": "string",
@@ -10,19 +10,19 @@
         },
         "time": {
             "type": "number",
-            "description": "Time the run started.  Unix epoch time"
+            "description": "Time request created.  Unix epoch time"
         },
         "uid": {
             "type": "string",
-            "description": "Globally unique ID for tihs run"
+            "description": "Globally unique ID for this request"
         },
         "owner": {
             "type": "string",
-            "description": "Unix owner to associate this data with"
+            "description": "String descriptor to associate this request with. Can be user or process"
         },
         "sample": {
             "type": "string",
-            "description": "Sample uid"
+            "description": "sample uid. samples are unaware of requests but requests know about samples"
         }
     },
     "required": [
@@ -31,5 +31,5 @@
         "sample"
      ],
     "type": "object",
-    "description": "Document created for group of samples."
+    "description": "Document created for a single request."
 }

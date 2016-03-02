@@ -2,7 +2,7 @@
     "properties": {
         "project": {
             "type": "string",
-            "description": "Name of project that this run is part of"
+            "description": "Name of project that this sample is part of"
         },
         "beamline_id": {
             "type": "string",
@@ -10,7 +10,7 @@
         },
         "time": {
             "type": "number",
-            "description": "Time the run started.  Unix epoch time"
+            "description": "Time the sample was created.  Unix epoch time"
         },
         "uid": {
             "type": "string",
@@ -18,7 +18,7 @@
         },
         "owner": {
             "type": "string",
-            "description": "Unix owner to associate this data with"
+            "description": "String identifier that denotes the owner of this sample. Process/project/user"
         },
         "name": {
             "type": "string",
@@ -31,5 +31,5 @@
         "name"
      ],
     "type": "object",
-    "description": "Document created for group of samples."
+    "description": "Document created for a single sample"
 }
