@@ -77,7 +77,7 @@ class SampleReference(object):
                           data=domt)
         r.raise_for_status()
         self._sample_list.append(doc)
-        return ujson.loads(r.text)[0]
+        return doc
 
     def update(self, query, update, host=conf.conn_config['host'], 
              port=conf.conn_config['port']):
@@ -206,16 +206,16 @@ class RequestReference(object):
             uid of the payload created
         """
         self._server_path = 'http://{}:{}/' .format(self.host, self.port)
-        if uid is None:
-            uid = str(uuid4()) # if default in function def, it does not get picked
-        payload = dict(uid=uid, sample=sample['uid'], time=time,state=state,
-                           seq_num=seq_num, **kwargs)
+        payload = dict(uid=uid if uid else str(uuid4()), 
+                       sample=sample['uid'] if sample else 'NULL',
+                       time=time,state=state,
+                       seq_num=seq_num, **kwargs)
         r = requests.post(url=self._server_path + 'request',
                           data=ujson.dumps(payload))
         r.raise_for_status()
-        return payload['uid']
+        return payload
 
-    def find(self, **kwargs):
+    def find(self, as_document=False, **kwargs):
         """Given a set of mongo search parameters, return a requests iterator"""
         self._server_path = 'http://{}:{}/' .format(self.host, self.port) 
         r = requests.get(self._server_path + 'request',
@@ -224,11 +224,14 @@ class RequestReference(object):
         content = ujson.loads(r.text)
         # add all content to local sample list
         self._request_list.extend(content)
-        for c in content:
-            yield Document('request', c)        
-
-    def update(self, query, update, host=conf.conn_config['host'], 
-             port=conf.conn_config['port']):
+        if as_document:        
+            for c in content:
+                yield Document('request', c)
+        else:
+            for c in content:
+                yield c
+                
+    def update(self, query, update):
         """Update a request given a query and name value pair to be updated.
         No upsert(s). If doc does not exist, simply do not update
         

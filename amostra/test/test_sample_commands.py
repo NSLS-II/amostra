@@ -90,9 +90,7 @@ def test_update_sample():
     samp.update(query={'name': test_sample['name']}, 
                        update={'state': 'inactive'})
     updated_samp = next(samp.find(name='up_sam'))
-    expected = deepcopy(test_sample)
-    expected['state'] = 'inactive'
-    assert expected == updated_samp    
+    assert updated_samp['state'] == 'inactive'   
     
 
 def test_update_sample_illegal():
