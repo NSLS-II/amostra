@@ -6,7 +6,7 @@ import time
 from amostra.client import conf
 
 
-class SampleReference:
+class SampleReference(object):
     """Reference implementation of generic sample manager"""
     def __init__(self, sample_list=[], host=conf.conn_config['host'],
                  port=conf.conn_config['port']):
@@ -44,7 +44,7 @@ class SampleReference:
                               data=domt)
             r.raise_for_status()
 
-    def create(self, name, time=time.time(), uid=str(uuid4()),
+    def create(self, name, time=time.time(), uid=None,
                **kwargs):
         """Add a sample to the database
         All kwargs are collected and passed through to the documents
@@ -68,6 +68,8 @@ class SampleReference:
         if any(d['name'] == name for d in self._sample_list):
             raise ValueError(
                 "document with name {} already exists".format(name))
+        if uid is None:
+            uid = str(uuid4())
         doc = dict(uid=uid, name=name, time=time, 
                    **kwargs)
         domt = ujson.dumps(doc)
@@ -158,7 +160,7 @@ class SampleReference:
         return ujson.loads(r.text)
 
 
-class RequestReference:
+class RequestReference(object):
     """Reference implementation of generic request
 
     For simplicity, built on top of a list of dicts.
@@ -183,7 +185,7 @@ class RequestReference:
             self._request_list.append(payload)
 
     def create(self, sample=None, time=time.time(),
-               uid=str(uuid4()), state='active', seq_num=0, **kwargs):
+               uid=None, state='active', seq_num=0, **kwargs):
         """ Create a sample entry in the dataase
         Parameters
         ----------
@@ -204,6 +206,8 @@ class RequestReference:
             uid of the payload created
         """
         self._server_path = 'http://{}:{}/' .format(self.host, self.port)
+        if uid is None:
+            uid = str(uuid4()) # if default in function def, it does not get picked
         payload = dict(uid=uid, sample=sample['uid'], time=time,state=state,
                            seq_num=seq_num, **kwargs)
         r = requests.post(url=self._server_path + 'request',
@@ -246,7 +250,7 @@ class RequestReference:
         r.raise_for_status()
         
 
-class Container:
+class ContainerReference(object):
     """Reference implementation of generic container"""
     def __init__(self, host=conf.conn_config['host'], port=conf.conn_config['port'],
                  **kwargs):
@@ -263,34 +267,17 @@ class Container:
             r.raise_for_status()
             self._request_list.append(kwargs)
     
-    def create(self, host=conf.conn_config['host'],
-                 port=conf.conn_config['port'], **kwargs):
-        """
-    
-        Parameters
-        ----------
-        host: str
-            Amostra server host machine
-        port: int
-            Amost server port on the host machine
-        sample: dict, doct.Document
-            The sample this reference refers to
-        time: float
-            Time request got created
-        uid: str
-            Unique identifier for
-        state: str
-            Enum 'active' or 'inactive' that displays the state of a request    
-        seq_num: int
-            Sequence number for creation of the request. Not indexed but can be updated
-    
+    def create(self, uid=None, time=time.time(), **kwargs):
+        """    
         Returns
         -------
         payload['uid']
             uid of the payload created
         """
-        self._server_path = 'http://{}:{}/' .format(host, port)
-        payload = kwargs
+        self._server_path = 'http://{}:{}/' .format(self.host, self.port)
+        if uid is None:
+            uid = str(uuid4())        
+        payload = dict(uid=uid, time=time, **kwargs)
         r = requests.post(url=self._server_path + 'container',
                           data=ujson.dumps(payload))
         r.raise_for_status()
@@ -298,6 +285,7 @@ class Container:
     
     def find(self, as_document=False, **kwargs):
         """Given a set of mongo search parameters, return a requests iterator"""
+        self._server_path = 'http://{}:{}/' .format(self.host, self.port)        
         r = requests.get(self._server_path + 'container',
                          params=ujson.dumps(kwargs))
         r.raise_for_status()
@@ -311,15 +299,14 @@ class Container:
             for c in content:
                 yield c
     
-    def update(self, query, update, host=conf.conn_config['host'], 
-             port=conf.conn_config['port']):
+    def update(self, query, update):
         """Update a request given a query and name value pair to be updated.
         No upsert(s). If doc does not exist, simply do not update
         
         Parameters
         -----------
         query: dict
-        Allows finding Request documents to be updated
+            Allows finding Container documents to be updated
         update: dict
             Name/value pair that is to be replaced within an existing Request doc
         host: str
@@ -327,6 +314,7 @@ class Container:
         port: int
             Backend port id. Again, tornado, not mongo daemon
         """
+        self._server_path = 'http://{}:{}/' .format(self.host, self.port)
         payload = dict(query=query, update=update)
         r = requests.put(url=self._server_path + 'container',
                          data=ujson.dumps(payload))

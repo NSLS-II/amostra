@@ -20,9 +20,12 @@ import uuid
 def teardown():
     amostra_teardown()
 
+
 def test_request_constructor():
     r1 = RequestReference(host='localhost', port=7770)
-        
+    assert r1.host == 'localhost'
+    assert r1.port == 7770
+    
     
 def setup():
     amostra_setup()

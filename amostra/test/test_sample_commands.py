@@ -10,7 +10,7 @@ from copy import deepcopy
 import amostra.client.commands as amc
 from amostra.testing import amostra_setup, amostra_teardown
 from amostra.client.api import SampleReference, RequestReference
-from requests.exceptions import HTTPError
+from requests.exceptions import HTTPError, RequestException
 import sys
 from doct import Document
 
@@ -23,7 +23,7 @@ document_insertion_times = []
 def teardown():
     amostra_teardown()
 
-
+    
 def test_sample_constructor():
     pytest.raises(TypeError, SampleReference, 'InvalidTypeForStr')
     m_sample = dict(name='m_sample', uid=str(uuid.uuid4()), 
@@ -33,6 +33,13 @@ def test_sample_constructor():
                          host='localhost', port=7770)
     s2 = SampleReference()
 
+
+def test_connection_switch():
+    s = SampleReference()
+    s.host = 'bogus_paigh'
+    pytest.raises(RequestException, s.create, 'asterix')
+    s.host = 'localhost'
+    s.create(name='asterix')
 
 def test_sample_create():
     samp = SampleReference()

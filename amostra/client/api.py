@@ -1,1 +1,2 @@
-from amostra.client.commands import SampleReference, RequestReference
+from amostra.client.commands import (SampleReference, RequestReference, 
+                                    ContainerReference)
