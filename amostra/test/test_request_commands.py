@@ -22,6 +22,7 @@ def teardown():
 
 def test_request_constructor():
     r1 = RequestReference(host='localhost', port=7770)
+        
     
 def setup():
     amostra_setup()

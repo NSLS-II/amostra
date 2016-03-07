@@ -6,6 +6,7 @@ import datetime
 import uuid
 import pytest
 import pytz
+from copy import deepcopy
 import amostra.client.commands as amc
 from amostra.testing import amostra_setup, amostra_teardown
 from amostra.client.api import SampleReference, RequestReference
@@ -59,8 +60,7 @@ def test_find_sample():
                     beamline_id='trial_b')
     s1 = SampleReference([m_sample],
                          host='localhost', port=7770)
-    s_ret = next(s1.find(uid=m_sample['uid']))
-    
+    s_ret = next(s1.find(uid=m_sample['uid']))    
     assert s_ret == m_sample
 
 
@@ -77,13 +77,16 @@ def test_find_sample_as_doc():
 def test_update_sample():
     test_sample = dict(name='up_sam', uid=str(uuid.uuid4()), 
                     time=ttime.time(), owner='arkilic', project='trial',
-                    beamline_id='trial_b', updated=False)
+                    beamline_id='trial_b', state='active')
     samp = SampleReference([test_sample],
                          host='localhost', port=7770)
-    samp.update(query={'name': test_sample['name']}, update={'updated': True})
+    samp.update(query={'name': test_sample['name']}, 
+                       update={'state': 'inactive'})
     updated_samp = next(samp.find(name='up_sam'))
-    print(updated_samp)
-
+    expected = deepcopy(test_sample)
+    expected['state'] = 'inactive'
+    assert expected == updated_samp    
+    
 
 def test_update_sample_illegal():
     test_sample = dict(name='up_sam', uid=str(uuid.uuid4()), 
@@ -92,11 +95,14 @@ def test_update_sample_illegal():
     samp = SampleReference([test_sample],
                          host='localhost', port=7770)
     pytest.raises(HTTPError,
-                  samp.update, query={'name': test_sample['name']}, update={'time': 'illegal'})
+                  samp.update, query={'name': test_sample['name']},
+                                      update={'time': 'illegal'})
     pytest.raises(HTTPError,
-                  samp.update, query={'name': test_sample['name']}, update={'name': 'illegal'})
+                  samp.update, query={'name': test_sample['name']},
+                                      update={'name': 'illegal'})
     pytest.raises(HTTPError,
-                  samp.update, query={'name': test_sample['name']}, update={'uid': 'illegal'})
+                  samp.update, query={'name': test_sample['name']},
+                                      update={'uid': 'illegal'})
 
 
 def setup():

@@ -10,24 +10,27 @@ class SampleReference:
     """Reference implementation of generic sample manager"""
     def __init__(self, sample_list=[], host=conf.conn_config['host'],
                  port=conf.conn_config['port']):
-        """
+        """Constructor. 
+
         Parameters
         ----------
         sample_list: list
             List of desired sample(s) to be created
         host: str
             Machine name/address for tornado instance
-        port
-
-        Returns
-        -------
-
+        port: int
+            Port tornado server runs on
         """
-        self._server_path = 'http://{}:{}/' .format(host, port)
+        self.host = host
+        self.port = port        
+        self._server_path = 'http://{}:{}/' .format(self.host, self.port)
+#        The sample_list here holds all samples created by
+#        this SampleReference client. It is useful for a single shot session but
+#        I am fine if you guys want to drop it.         
         if sample_list is None:
             sample_list = []
         if not isinstance(sample_list, list):
-            raise TypeError('Not a correct type for the constructor. Expecting list')
+            raise TypeError('Not a correct type for the constructor.Expects list')
         self._sample_list = [dict(d) for d in sample_list]
         ln = len(self._sample_list)
         if ln != len(set(d['name'] for d in self._sample_list)):
@@ -61,6 +64,7 @@ class SampleReference:
         uid : str
             uid of the inserted document.
         """
+        self._server_path = 'http://{}:{}/' .format(self.host, self.port)
         if any(d['name'] == name for d in self._sample_list):
             raise ValueError(
                 "document with name {} already exists".format(name))
@@ -89,6 +93,7 @@ class SampleReference:
         port: int
             Backend port id. Again, tornado, not mongo daemon
         """
+        self._server_path = 'http://{}:{}/' .format(self.host, self.port)
         payload = dict(query=query, update=update)
         r = requests.put(url=self._server_path + 'sample',
                          data=ujson.dumps(payload))
@@ -114,6 +119,7 @@ class SampleReference:
             Documents which have all keys with the given values
 
         """
+        self._server_path = 'http://{}:{}/' .format(self.host, self.port)
         r = requests.get(self._server_path + 'sample',
                          params=ujson.dumps(kwargs))
         r.raise_for_status()
@@ -164,7 +170,9 @@ class RequestReference:
         """Handles connection configuration to the service backend.
         Either initiate with a request or use purely as a client for requests.
         """
-        self._server_path = 'http://{}:{}/' .format(host, port)
+        self.host = host
+        self.port = port
+        self._server_path = 'http://{}:{}/' .format(self.host, self.port)
         self._request_list = []
         if sample:
             payload = dict(uid=uid, sample=sample['uid'], time=time,state=state,
@@ -174,18 +182,12 @@ class RequestReference:
             r.raise_for_status()
             self._request_list.append(payload)
 
-    def create(self, host=conf.conn_config['host'],
-                 port=conf.conn_config['port'], sample=None, time=time.time(),
-                 uid=str(uuid4()), state='active', seq_num=0, **kwargs):
-        """
-
+    def create(self, sample=None, time=time.time(),
+               uid=str(uuid4()), state='active', seq_num=0, **kwargs):
+        """ Create a sample entry in the dataase
         Parameters
         ----------
-        host: str
-            Amostra server host machine
-        port: int
-            Amost server port on the host machine
-        sample: dict, doct.Document
+        sample: dict, doct.Document, optional
             The sample this reference refers to
         time: float
             Time request got created
@@ -201,7 +203,7 @@ class RequestReference:
         payload['uid']
             uid of the payload created
         """
-        self._server_path = 'http://{}:{}/' .format(host, port)
+        self._server_path = 'http://{}:{}/' .format(self.host, self.port)
         payload = dict(uid=uid, sample=sample['uid'], time=time,state=state,
                            seq_num=seq_num, **kwargs)
         r = requests.post(url=self._server_path + 'request',
@@ -211,6 +213,7 @@ class RequestReference:
 
     def find(self, **kwargs):
         """Given a set of mongo search parameters, return a requests iterator"""
+        self._server_path = 'http://{}:{}/' .format(self.host, self.port) 
         r = requests.get(self._server_path + 'request',
                          params=ujson.dumps(kwargs))
         r.raise_for_status()
@@ -236,11 +239,13 @@ class RequestReference:
         port: int
             Backend port id. Again, tornado, not mongo daemon
         """
+        self._server_path = 'http://{}:{}/' .format(self.host, self.port)
         payload = dict(query=query, update=update)
         r = requests.put(url=self._server_path + 'request',
                          data=ujson.dumps(payload))
         r.raise_for_status()
         
+
 class Container:
     """Reference implementation of generic container"""
     def __init__(self, host=conf.conn_config['host'], port=conf.conn_config['port'],
@@ -248,14 +253,15 @@ class Container:
         """Handles connection configuration to the service backend.
         Either initiate with a request or use purely as a client for requests.
         """
+        self.port = port
+        self.host = host
         self._server_path = 'http://{}:{}/' .format(host, port)
         self._request_list = []
-        if sample:
-            payload = kwargs
+        if kwargs:
             r = requests.post(self._server_path + 'container',
-                            data=ujson.dumps(payload))
+                            data=ujson.dumps(kwargs))
             r.raise_for_status()
-            self._request_list.append(payload)
+            self._request_list.append(kwargs)
     
     def create(self, host=conf.conn_config['host'],
                  port=conf.conn_config['port'], **kwargs):

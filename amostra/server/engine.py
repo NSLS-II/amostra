@@ -4,7 +4,6 @@ import tornado.web
 from tornado import gen
 import pymongo
 import jsonschema
-import pymongo.errors
 import ujson
 from amostra.server import utils
 from jsonschema.exceptions import ValidationError, SchemaError
@@ -156,6 +155,8 @@ class SampleReferenceHandler(DefaultHandler):
         if any(x in update.keys() for x in ['uid', 'time', 'name']):
             raise utils._compose_err_msg(500,
                                    status='Time and uid cannot be updated')
+        print('update query', query)
+        print('update field', update)
         res = database.sample.update_many(filter=query,
                                            update={'$set': update},
                                            upsert=False)
