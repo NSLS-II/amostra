@@ -88,7 +88,7 @@ class SampleReferenceHandler(DefaultHandler):
         if num:
             try:
                 docs = database.sample.find().sort('time',
-                                                             direction=pymongo.DESCENDING).limit(num)
+                                        direction=pymongo.DESCENDING).limit(num)
             except pymongo.errors.PyMongoError:
                 raise utils._compose_err_msg(500, '', query)
         else:
@@ -131,8 +131,12 @@ class SampleReferenceHandler(DefaultHandler):
             uids.append(data['uid'])
             
             res = database.sample.insert(data)
-            
-            # database.sample.create_index([()])
+            # if inserted, create indices that are certainly being indexed            
+            if res:
+                database.sample.create_index([('uid', pymongo.DESCENDING)],
+                                             unique=True, background=True)
+                database.sample.create_index([('time', pymongo.DESCENDING)],
+                                             unique=False, background=True)
         else:
             raise utils._compose_err_msg(500,
                                          status='SampleHandler expects list or dict')        
@@ -204,7 +208,10 @@ class RequestReferenceHandler(DefaultHandler):
                     raise utils._compose_err_msg(500,
                                                  'Validated data can not be inserted',
                                                  data)
-                # database.sample.create_index([()])
+                database.request.create_index([('uid', pymongo.DESCENDING)],
+                                             unique=True, background=True)
+                database.request.create_index([('time', pymongo.DESCENDING)],
+                                             unique=False, background=True)
         elif isinstance(data, dict):
             try:
                 jsonschema.validate(data,
@@ -219,6 +226,10 @@ class RequestReferenceHandler(DefaultHandler):
                 raise utils._compose_err_msg(500,
                                              'Validated data can not be inserted',
                                              data)
+            database.request.create_index([('uid', pymongo.DESCENDING)],
+                                             unique=True, background=True)
+            database.request.create_index([('time', pymongo.DESCENDING)],
+                                             unique=False, background=True)
         else:
             raise utils._compose_err_msg(500,
                                          status='SampleHandler expects list or dict')
@@ -300,10 +311,10 @@ class ContainerReferenceHandler(DefaultHandler):
                                                  "Invalid schema on document(s)", d)
                 uids.append(d['uid'])
                 res = database.container.insert(d)
-                database.container.create_index([('uid', pymongo.DESCENDING)], unique=True, 
-                                             background=True)
-                database.container.create_index([('time', pymongo.DESCENDING)], unique=False,
-                                             background=True)
+                database.container.create_index([('uid', pymongo.DESCENDING)],
+                                                unique=True, background=True)
+                database.container.create_index([('time', pymongo.DESCENDING)],
+                                                unique=False, background=True)
         elif isinstance(data, dict):
             try:
                 jsonschema.validate(data,
@@ -312,8 +323,12 @@ class ContainerReferenceHandler(DefaultHandler):
                 raise utils._compose_err_msg(400,
                                              "Invalid schema on document(s)", data)
             uids.append(data['uid'])
-            
             res = database.container.insert(data)
+            if res:
+                database.request.create_index([('uid', pymongo.DESCENDING)],
+                                                 unique=True, background=True)
+                database.request.create_index([('time', pymongo.DESCENDING)],
+                                            unique=False, background=True)
         else:
             raise utils._compose_err_msg(500,
                                          status='SampleHandler expects list or dict')        
