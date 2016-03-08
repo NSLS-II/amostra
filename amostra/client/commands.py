@@ -24,11 +24,8 @@ class SampleReference(object):
         self.host = host
         self.port = port        
         self._server_path = 'http://{}:{}/' .format(self.host, self.port)
-#        The sample_list here holds all samples created by
-#        this SampleReference client. It is useful for a single shot session but
-#        I am fine if you guys want to drop it.         
-        if sample_list is None:
-            sample_list = []
+        if not isinstance(sample_list, list):
+            raise TypeError("sample_list must be a list")
         if not isinstance(sample_list, list):
             raise TypeError('Not a correct type for the constructor.Expects list')
         self._sample_list = [dict(d) for d in sample_list]
@@ -238,20 +235,16 @@ class RequestReference(object):
         Parameters
         -----------
         query: dict
-            Allows finding Request documents to be updated
+            Allows finding Request documents to be updated.
         update: dict
-            Name/value pair that is to be replaced within an existing Request doc
-        host: str
-            Backend machine id to be connected. Not mongo, tornado
-        port: int
-            Backend port id. Again, tornado, not mongo daemon
+            Name/value pair that is to be replaced within an existing Request doc.
         """
         self._server_path = 'http://{}:{}/' .format(self.host, self.port)
         payload = dict(query=query, update=update)
         r = requests.put(url=self._server_path + 'request',
                          data=ujson.dumps(payload))
         r.raise_for_status()
-        
+
 
 class ContainerReference(object):
     """Reference implementation of generic container"""
@@ -271,7 +264,17 @@ class ContainerReference(object):
             self._request_list.append(kwargs)
     
     def create(self, uid=None, time=time.time(), **kwargs):
-        """    
+        """Insert a container document. Schema validation done
+        on the server side. No native Python object (e.g. np.ndarray)
+        due to performance constraints. 
+        
+        Parameters
+        ----------
+        uid: str
+            Unique identifier for a Container document
+        time: float
+            Time document created. Client side timestamp
+      
         Returns
         -------
         payload['uid']
@@ -309,13 +312,9 @@ class ContainerReference(object):
         Parameters
         -----------
         query: dict
-            Allows finding Container documents to be updated
+            Allows finding Container documents to be updated.
         update: dict
-            Name/value pair that is to be replaced within an existing Request doc
-        host: str
-            Backend machine id to be connected. Not mongo, tornado
-        port: int
-            Backend port id. Again, tornado, not mongo daemon
+            Name/value pair that is to be replaced within an existing Request doc.
         """
         self._server_path = 'http://{}:{}/' .format(self.host, self.port)
         payload = dict(query=query, update=update)
