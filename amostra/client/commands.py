@@ -253,15 +253,18 @@ class ContainerReference(object):
         """Handles connection configuration to the service backend.
         Either initiate with a request or use purely as a client for requests.
         """
+        self._container_list = []
         self.port = port
         self.host = host
         self._server_path = 'http://{}:{}/' .format(host, port)
-        self._request_list = []
-        if kwargs:
+        if kwargs:        
+            _cont_dict = dict(uid=kwargs.pop('uid', str(uuid4())), 
+                              time=kwargs.pop('time', time.time()),
+                              **kwargs)        
             r = requests.post(self._server_path + 'container',
-                            data=ujson.dumps(kwargs))
+                            data=ujson.dumps(_cont_dict))
             r.raise_for_status()
-            self._request_list.append(kwargs)
+            self._container_list.append(_cont_dict)
     
     def create(self, uid=None, time=time.time(), **kwargs):
         """Insert a container document. Schema validation done
@@ -287,7 +290,8 @@ class ContainerReference(object):
         r = requests.post(url=self._server_path + 'container',
                           data=ujson.dumps(payload))
         r.raise_for_status()
-        return payload['uid']
+        self._container_list.append(payload)        
+        return payload
     
     def find(self, as_document=False, **kwargs):
         """Given a set of mongo search parameters, return a requests iterator"""
@@ -297,7 +301,7 @@ class ContainerReference(object):
         r.raise_for_status()
         content = ujson.loads(r.text)
         # add all content to local sample list
-        self._request_list.extend(content)
+        self._container_list.extend(content)
         if as_document:
             for c in content:
                 yield Document('container', c)

@@ -9,7 +9,8 @@ import pytz
 from copy import deepcopy
 import amostra.client.commands as amc
 from amostra.testing import amostra_setup, amostra_teardown
-from amostra.client.api import SampleReference, RequestReference
+from amostra.client.api import (SampleReference, RequestReference,
+                                ContainerReference)
 from requests.exceptions import HTTPError, RequestException
 import sys
 from doct import Document

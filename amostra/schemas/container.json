@@ -30,8 +30,6 @@
     },
     "required": [
         "uid",
-        "kind",
-        "name",
         "time"
      ],
     "type": "object",
