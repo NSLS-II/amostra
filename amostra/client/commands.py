@@ -2,7 +2,7 @@ from doct import Document
 import ujson
 from uuid import uuid4
 import requests
-import time
+import time as ttime
 from amostra.client import conf
 
 
@@ -14,11 +14,11 @@ class SampleReference(object):
 
         Parameters
         ----------
-        sample_list: list
+        sample_list: list, optional
             List of desired sample(s) to be created
-        host: str
+        host: str, optional
             Machine name/address for tornado instance
-        port: int
+        port: int, optional
             Port tornado server runs on
         """
         self.host = host
@@ -35,17 +35,19 @@ class SampleReference(object):
         if ln != len(set(d['uid'] for d in self._sample_list)):
             raise ValueError("duplicate uids")
         if sample_list:
-            # if there is a list in mind, create it
             domt = ujson.dumps(self._sample_list)
             r = requests.post(self._server_path + 'sample',
                               data=domt)
             r.raise_for_status()
 
-    def create(self, name, time=time.time(), uid=None,
+    def create(self, name, time=None, uid=None,
                **kwargs):
         """Add a sample to the database
         All kwargs are collected and passed through to the documents
-
+        In order to modify which tornao server this routine talks to,
+        simply set self.host and self.port to the correct host and port.
+        Do not mess with _server_path variable alone.
+        
         Parameters
         ----------
         name : str
@@ -66,7 +68,9 @@ class SampleReference(object):
             raise ValueError(
                 "document with name {} already exists".format(name))
         if uid is None:
-            uid = str(uuid4())
+            uid = kwargs.pop('uid', str(uuid4()))
+        if time is None:
+            kwargs.pop('time', ttime.time())
         doc = dict(uid=uid, name=name, time=time, 
                    **kwargs)
         domt = ujson.dumps(doc)
@@ -76,10 +80,12 @@ class SampleReference(object):
         self._sample_list.append(doc)
         return doc
 
-    def update(self, query, update, host=conf.conn_config['host'], 
-             port=conf.conn_config['port']):
+    def update(self, query, update):
         """Update a request given a query and name value pair to be updated.
         No upsert(s). If doc does not exist, simply do not update
+        In order to modify which tornao server this routine talks to,
+        simply set self.host and self.port to the correct host and port.
+        Do not mess with _server_path variable.
         
         Parameters
         -----------
@@ -87,30 +93,21 @@ class SampleReference(object):
             Allows finding Sample documents to be updated
         update: dict
             Name/value pair that is to be replaced within an existing Request doc
-        host: str
-            Backend machine id to be connected. Not mongo, tornado
-        port: int
-            Backend port id. Again, tornado, not mongo daemon
         """
         self._server_path = 'http://{}:{}/' .format(self.host, self.port)
         payload = dict(query=query, update=update)
         r = requests.put(url=self._server_path + 'sample',
                          data=ujson.dumps(payload))
         r.raise_for_status()
+        return True
         
-    def find(self, as_document=False, **kwargs):
-        """Find samples by keys
-        First iterates over samples created by this instance,
-        if sample not found, makes the trip to the server.
-        Yields all documents which have all of the keys equal
-        to the kwargs.  ex ::
-
-            for k, v in kwargs:
-                assert d[k] == v
-
-        for all `d` yielded.
-
-        No kwargs yields matches all samples.
+    def find(self, as_document=False, as_json=False, **kwargs):
+        """
+        Parameters
+        ----------
+        
+        as_document: bool
+            Return doct.Document if True else return a dict
 
         Yields
         ------
@@ -123,11 +120,12 @@ class SampleReference(object):
                          params=ujson.dumps(kwargs))
         r.raise_for_status()
         content = ujson.loads(r.text)
-        # add all content to local sample list
         self._sample_list.extend(content)
+        if as_json:
+            return r.text
         if as_document:        
             for c in content:
-                yield Document('sample', c)
+                yield Document('Sample', c)
         else:
             for c in content:
                 yield c
@@ -164,7 +162,7 @@ class RequestReference(object):
 
     """
     def __init__(self, host=conf.conn_config['host'], port=conf.conn_config['port'],
-                 sample=None, time=time.time(), uid=str(uuid4()), state='active',
+                 sample=None, time=ttime.time(), uid=str(uuid4()), state='active',
                  seq_num=0, **kwargs):
         """Handles connection configuration to the service backend.
         Either initiate with a request or use purely as a client for requests.
@@ -181,7 +179,7 @@ class RequestReference(object):
             r.raise_for_status()
             self._request_list.append(payload)
 
-    def create(self, sample=None, time=time.time(),
+    def create(self, sample=None, time=None,
                uid=None, state='active', seq_num=0, **kwargs):
         """ Create a sample entry in the dataase
         Parameters
@@ -205,7 +203,7 @@ class RequestReference(object):
         self._server_path = 'http://{}:{}/' .format(self.host, self.port)
         payload = dict(uid=uid if uid else str(uuid4()), 
                        sample=sample['uid'] if sample else 'NULL',
-                       time=time,state=state,
+                       time=time if time else ttime.time(),state=state,
                        seq_num=seq_num, **kwargs)
         r = requests.post(url=self._server_path + 'request',
                           data=ujson.dumps(payload))
@@ -223,7 +221,7 @@ class RequestReference(object):
         self._request_list.extend(content)
         if as_document:        
             for c in content:
-                yield Document('request', c)
+                yield Document('Request', c)
         else:
             for c in content:
                 yield c
@@ -259,14 +257,14 @@ class ContainerReference(object):
         self._server_path = 'http://{}:{}/' .format(host, port)
         if kwargs:        
             _cont_dict = dict(uid=kwargs.pop('uid', str(uuid4())), 
-                              time=kwargs.pop('time', time.time()),
+                              time=kwargs.pop('time', ttime.time()),
                               **kwargs)        
             r = requests.post(self._server_path + 'container',
                             data=ujson.dumps(_cont_dict))
             r.raise_for_status()
             self._container_list.append(_cont_dict)
     
-    def create(self, uid=None, time=time.time(), **kwargs):
+    def create(self, uid=None, time=None, **kwargs):
         """Insert a container document. Schema validation done
         on the server side. No native Python object (e.g. np.ndarray)
         due to performance constraints. 
@@ -283,10 +281,9 @@ class ContainerReference(object):
         payload['uid']
             uid of the payload created
         """
-        self._server_path = 'http://{}:{}/' .format(self.host, self.port)
-        if uid is None:
-            uid = str(uuid4())        
-        payload = dict(uid=uid, time=time, **kwargs)
+        self._server_path = 'http://{}:{}/' .format(self.host, self.port)        
+        payload = dict(uid=uid if uid else str(uuid4()),
+                       time=time if time else ttime.time(), **kwargs)
         r = requests.post(url=self._server_path + 'container',
                           data=ujson.dumps(payload))
         r.raise_for_status()
@@ -300,7 +297,6 @@ class ContainerReference(object):
                          params=ujson.dumps(kwargs))
         r.raise_for_status()
         content = ujson.loads(r.text)
-        # add all content to local sample list
         self._container_list.extend(content)
         if as_document:
             for c in content:
@@ -321,7 +317,7 @@ class ContainerReference(object):
             Name/value pair that is to be replaced within an existing Request doc.
         """
         self._server_path = 'http://{}:{}/' .format(self.host, self.port)
-        payload = dict(query=query, update=update)
+        payload = dict(query=dict(query), update=update)
         r = requests.put(url=self._server_path + 'container',
                          data=ujson.dumps(payload))
         r.raise_for_status()
