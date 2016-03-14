@@ -105,9 +105,6 @@ def test_update_sample_illegal():
                                       update={'time': 'illegal'})
     pytest.raises(HTTPError,
                   samp.update, query={'name': test_sample['name']},
-                                      update={'name': 'illegal'})
-    pytest.raises(HTTPError,
-                  samp.update, query={'name': test_sample['name']},
                                       update={'uid': 'illegal'})
 
 

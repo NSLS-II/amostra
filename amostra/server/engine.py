@@ -153,7 +153,7 @@ class SampleReferenceHandler(DefaultHandler):
         except KeyError:
             raise utils._compose_err_msg(500, 
                                          status='filter and update are both required fields')
-        if any(x in update.keys() for x in ['uid', 'time', 'name']):
+        if any(x in update.keys() for x in ['uid', 'time']):
             raise utils._compose_err_msg(500,
                                    status='Time and uid cannot be updated')
         print('update query', query)
