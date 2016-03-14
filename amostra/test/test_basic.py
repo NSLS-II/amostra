@@ -1,6 +1,6 @@
 import pytest
-from .testing import _baseSM
-from amostra.basic import SampleReference
+from amostra.testing import _baseSM
+from amostra.client.commands import SampleReference
 from io import StringIO
 import json
 import yaml
