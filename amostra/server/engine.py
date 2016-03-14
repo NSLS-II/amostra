@@ -121,6 +121,8 @@ class SampleReferenceHandler(DefaultHandler):
                 database.sample.create_index([('time', pymongo.DESCENDING),
                                               ('name', pymongo.DESCENDING)], unique=False,
                                              background=True)
+                database.sample.create_index([('container', pymongo.DESCENDING)],
+                                               unique=False, sparse=True)
         elif isinstance(data, dict):
             try:
                 jsonschema.validate(data,
@@ -213,6 +215,8 @@ class RequestReferenceHandler(DefaultHandler):
                                              unique=True, background=True)
                 database.request.create_index([('time', pymongo.DESCENDING)],
                                              unique=False, background=True)
+                database.request.create_index([('sample', pymongo.DESCENDING)],
+                                             unique=False, background=True, sparse=True)
         elif isinstance(data, dict):
             try:
                 jsonschema.validate(data,
@@ -231,6 +235,8 @@ class RequestReferenceHandler(DefaultHandler):
                                              unique=True, background=True)
             database.request.create_index([('time', pymongo.DESCENDING)],
                                              unique=False, background=True)
+            database.request.create_index([('sample', pymongo.DESCENDING)],
+                                             unique=False, background=True, sparse=True)
         else:
             raise utils._compose_err_msg(500,
                                          status='SampleHandler expects list or dict')
@@ -316,6 +322,8 @@ class ContainerReferenceHandler(DefaultHandler):
                                                 unique=True, background=True)
                 database.container.create_index([('time', pymongo.DESCENDING)],
                                                 unique=False, background=True)
+                database.container.create_index([('container', pymongo.DESCENDING)],
+                                                unique=False, background=True, sparse=True)
         elif isinstance(data, dict):
             try:
                 jsonschema.validate(data,
