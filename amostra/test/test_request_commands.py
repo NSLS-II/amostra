@@ -7,12 +7,11 @@ import uuid
 import pytest
 import pytz
 import time
-import amostra.client.commands as amc
 from amostra.testing import amostra_setup, amostra_teardown
 from amostra.client.api import (SampleReference, RequestReference,
                                 ContainerReference)
 from requests.exceptions import RequestException
-import sys
+from amostra.testing import TESTING_CONFIG
 from uuid import uuid4
 from doct import Document
 
@@ -25,9 +24,10 @@ def teardown():
 
 
 def test_request_constructor():
-    r1 = RequestReference()
-    assert r1.host == 'localhost'
-    assert r1.port == 7770
+    r1 = RequestReference(host=TESTING_CONFIG['host'],
+                          port=TESTING_CONFIG['port'])
+    assert r1.host == TESTING_CONFIG['host']
+    assert r1.port == TESTING_CONFIG['port']
     
 
 def test_req_connection_switch():

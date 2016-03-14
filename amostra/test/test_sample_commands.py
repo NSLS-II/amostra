@@ -14,6 +14,7 @@ from amostra.client.api import (SampleReference, RequestReference,
 from requests.exceptions import HTTPError, RequestException
 import sys
 from doct import Document
+from amostra.testing import TESTING_CONFIG
 
 from amostra.sample_data import *
 import uuid
@@ -31,19 +32,22 @@ def test_sample_constructor():
                     time=ttime.time(), owner='arkilic', project='trial',
                     beamline_id='trial_b')
     s1 = SampleReference([m_sample],
-                         host='localhost', port=7770)
-    s2 = SampleReference()
+                         host=TESTING_CONFIG['host'],
+                         port=TESTING_CONFIG['port'])
+    s2 = SampleReference() # attempt empty reference create
 
 
 def test_connection_switch():
     s = SampleReference()
-    s.host = 'bogus_paigh'
+    s.host = 'caesar'
     pytest.raises(RequestException, s.create, 'asterix')
-    s.host = 'localhost'
+    s.host = TESTING_CONFIG['host']
     s.create(name='asterix')
 
 def test_sample_create():
     samp = SampleReference()
+    samp.host = TESTING_CONFIG['host']
+    samp.port = TESTING_CONFIG['port']
     r1 = samp.create(name='test1')
     r2 = samp.create(name='test2', uid=str(uuid.uuid4()))
     m_kwargs = dict(owner='test', level='inferno', type='automated',
@@ -52,7 +56,8 @@ def test_sample_create():
 
 
 def test_duplicate_sample():
-    s = SampleReference()
+    s = SampleReference(host=TESTING_CONFIG['host'],
+                        port=TESTING_CONFIG['port'])
     r1 = s.create(name='test_dup', uid=str(uuid.uuid4()))
     pytest.raises(ValueError, s.create, name='test_dup')
 
