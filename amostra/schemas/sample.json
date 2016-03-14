@@ -23,6 +23,10 @@
         "name": {
             "type": "string",
             "description": "Sample name!"
+        },
+        "container": {
+            "type": "string",
+            "description": "Name of the container/group sample is contained within.Can be virtual or real. Sparsely indexed, not required"
         }
     },
     "required": [

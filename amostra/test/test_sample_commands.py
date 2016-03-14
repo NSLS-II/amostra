@@ -63,7 +63,8 @@ def test_duplicate_sample():
 
 
 def test_invalid_sample():
-    s = SampleReference()
+    s = SampleReference(host=TESTING_CONFIG['host'],
+                        port=TESTING_CONFIG['port'])
     pytest.raises(RequestException, s.create)
 
 
@@ -72,7 +73,8 @@ def test_find_sample():
                     time=ttime.time(), owner='arkilic', project='trial',
                     beamline_id='trial_b')
     s1 = SampleReference([m_sample],
-                         host='localhost', port=7770)
+                         host=TESTING_CONFIG['host'],
+                        port=TESTING_CONFIG['port'])
     s_ret = next(s1.find(uid=m_sample['uid']))    
     assert s_ret == m_sample
 
@@ -82,7 +84,8 @@ def test_find_sample_as_doc():
                     time=ttime.time(), owner='arkilic', project='trial',
                     beamline_id='trial_b')
     s1 = SampleReference([m_sample],
-                         host='localhost', port=7770)
+                        host=TESTING_CONFIG['host'],
+                        port=TESTING_CONFIG['port'])
     s_ret = next(s1.find(uid=m_sample['uid'], as_document=True))
     assert s_ret == Document('Sample', m_sample)
 
@@ -92,7 +95,8 @@ def test_update_sample():
                     time=ttime.time(), owner='arkilic', project='trial',
                     beamline_id='trial_b', state='active')
     samp = SampleReference([test_sample],
-                         host='localhost', port=7770)
+                        host=TESTING_CONFIG['host'],
+                        port=TESTING_CONFIG['port'])
     samp.update(query={'name': test_sample['name']}, 
                        update={'state': 'inactive'})
     updated_samp = next(samp.find(name='up_sam'))
@@ -104,7 +108,8 @@ def test_update_sample_illegal():
                     time=ttime.time(), owner='arkilic', project='trial',
                     beamline_id='trial_b', updated=False)
     samp = SampleReference([test_sample],
-                         host='localhost', port=7770)
+                            host=TESTING_CONFIG['host'],
+                            port=TESTING_CONFIG['port'])
     pytest.raises(HTTPError,
                   samp.update, query={'name': test_sample['name']},
                                       update={'time': 'illegal'})

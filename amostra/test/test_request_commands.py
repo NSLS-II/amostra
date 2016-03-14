@@ -39,28 +39,33 @@ def test_req_connection_switch():
     
 
 def test_request_create():
-    req1= RequestReference()
+    req1= RequestReference(host=TESTING_CONFIG['host'],
+                           port=TESTING_CONFIG['port'])
     req1.create()
-    req2 = RequestReference()
+    req2 = RequestReference(host=TESTING_CONFIG['host'],
+                           port=TESTING_CONFIG['port'])
     req2.create(sample=None, time=time.time(),
                uid=None, state='active', seq_num=0, foo='bar',
                hero='asterix', antihero='romans')
-    req2.host = 'bogus_paigh'
+    req2.host = 'hail_caesar'
     pytest.raises(RequestException, req2.create)               
              
 def test_duplicate_request():
     m_uid = str(uuid4())
-    req1= RequestReference()
+    req1= RequestReference(host=TESTING_CONFIG['host'],
+                           port=TESTING_CONFIG['port'])
     req1.create(sample=None, time=time.time(),
                uid=m_uid, state='active', seq_num=0, foo='bar',
                hero='asterix', antihero='romans')
-    req2 = RequestReference()
+    req2 = RequestReference(host=TESTING_CONFIG['host'],
+                           port=TESTING_CONFIG['port'])
     pytest.raises(RequestException, req2.create, sample=None, time=time.time(),
                uid=m_uid, state='active', seq_num=0, foo='bar',
                hero='asterix', antihero='romans')
 
 def test_request_find():
-    r = RequestReference()
+    r = RequestReference(host=TESTING_CONFIG['host'],
+                        port=TESTING_CONFIG['port'])
     req_dict = dict(sample=None, time=time.time(),
                     uid=None, state='active', seq_num=0, foo='bar',
                     hero='obelix', antihero='romans')     
@@ -70,7 +75,8 @@ def test_request_find():
 
 
 def test_update_request():
-    r = RequestReference()    
+    r = RequestReference(host=TESTING_CONFIG['host'],
+                        port=TESTING_CONFIG['port'])    
     m_uid = str(uuid4())
     req_dict = dict(sample=None, time=time.time(),
                     uid=m_uid, state='active', seq_num=0, foo='bar',
