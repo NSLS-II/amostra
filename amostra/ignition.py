@@ -1,7 +1,9 @@
 from __future__ import (absolute_import, print_function, unicode_literals)
 import argparse
 import tornado.web
+import sys
 import tornado.ioloop
+import tornado.options
 from  amostra.server.engine import (SampleReferenceHandler, 
                                     RequestReferenceHandler,
                                     SchemaHandler,
@@ -40,6 +42,8 @@ def start_server(config=None):
                         help='port to use to talk to mongo')
     parser.add_argument('--service-port', dest='service_port', type=int,
                         help='port listen to for clients')
+    parser.add_argument('--log_file_prefix', dest='log_file_prefix', type=str,
+                        help='Log file name that tornado logs are dumped')
     args = parser.parse_args()
     if args.database is not None:
         config['database'] = args.database
@@ -52,6 +56,7 @@ def start_server(config=None):
     service_port = args.service_port
     if service_port is None:
         service_port = 7770
+    tornado.options.parse_command_line({'log_file_prefix': args.log_file_prefix})
     db = db_connect(config['database'],
                     config['mongo_host'],
                     config['mongo_port'])
