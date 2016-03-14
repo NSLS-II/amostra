@@ -89,7 +89,7 @@ class SampleReferenceHandler(DefaultHandler):
                 docs = database.sample.find().sort('time',
                                         direction=pymongo.DESCENDING).limit(num)
             except pymongo.errors.PyMongoError:
-                raise utils._compose_err_msg(500, '', query)
+                raise utils._compose_err_msg(500, 'Query on sample has failed', query)
         else:
             try:
                 docs = database.sample.find(query).sort('time',
@@ -118,7 +118,8 @@ class SampleReferenceHandler(DefaultHandler):
                 res = database.sample.insert(d)
                 database.sample.create_index([('uid', pymongo.DESCENDING)], unique=True, 
                                              background=True)
-                database.sample.create_index([('time', pymongo.DESCENDING)], unique=False,
+                database.sample.create_index([('time', pymongo.DESCENDING),
+                                              ('name', pymongo.DESCENDING)], unique=False,
                                              background=True)
         elif isinstance(data, dict):
             try:
@@ -190,7 +191,6 @@ class RequestReferenceHandler(DefaultHandler):
 
     @tornado.web.asynchronous
     def post(self):
-        # TODO: Make sure sample exists before creating request 
         database = self.settings['db']
         data = ujson.loads(self.request.body.decode("utf-8"))
         uids = []

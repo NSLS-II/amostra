@@ -40,7 +40,7 @@ class SampleReference(object):
                               data=domt)
             r.raise_for_status()
 
-    def create(self, name, time=None, uid=None,
+    def create(self, name=None, time=None, uid=None, container=None,
                **kwargs):
         """Add a sample to the database
         All kwargs are collected and passed through to the documents
@@ -67,11 +67,9 @@ class SampleReference(object):
         if any(d['name'] == name for d in self._sample_list):
             raise ValueError(
                 "document with name {} already exists".format(name))
-        if uid is None:
-            uid = kwargs.pop('uid', str(uuid4()))
-        if time is None:
-            kwargs.pop('time', ttime.time())
-        doc = dict(uid=uid, name=name, time=time, 
+        doc = dict(uid=uid if uid else str(uuid4()),
+                   name=name, time=time if time else ttime.time(),
+                   container=container if container else 'NULL',
                    **kwargs)
         domt = ujson.dumps(doc)
         r = requests.post(self._server_path + 'sample',
@@ -162,7 +160,7 @@ class RequestReference(object):
 
     """
     def __init__(self, host=conf.conn_config['host'], port=conf.conn_config['port'],
-                 sample=None, time=ttime.time(), uid=str(uuid4()), state='active',
+                 sample=None, time=None, uid=None, state='active',
                  seq_num=0, **kwargs):
         """Handles connection configuration to the service backend.
         Either initiate with a request or use purely as a client for requests.
@@ -172,10 +170,11 @@ class RequestReference(object):
         self._server_path = 'http://{}:{}/' .format(self.host, self.port)
         self._request_list = []
         if sample:
-            payload = dict(uid=uid, sample=sample['uid'], time=time,state=state,
+            payload = dict(uid=uid if uid else str(uuid4()),
+                           sample=sample['uid'] if sample else 'NULL',
+                           time=time if time else ttime.time(), state=state,
                            seq_num=seq_num, **kwargs)
-            r = requests.post(self._server_path + 'request',
-                            data=ujson.dumps(payload))
+            r = requests.post(self._server_path + 'request', data=ujson.dumps(payload))
             r.raise_for_status()
             self._request_list.append(payload)
 
@@ -246,7 +245,7 @@ class RequestReference(object):
 
 class ContainerReference(object):
     """Reference implementation of generic container"""
-    def __init__(self, host=conf.conn_config['host'], port=conf.conn_config['port'],
+    def __init__(self, uid=None, time=None, host=conf.conn_config['host'], port=conf.conn_config['port'],
                  **kwargs):
         """Handles connection configuration to the service backend.
         Either initiate with a request or use purely as a client for requests.
@@ -256,8 +255,8 @@ class ContainerReference(object):
         self.host = host
         self._server_path = 'http://{}:{}/' .format(host, port)
         if kwargs:        
-            _cont_dict = dict(uid=kwargs.pop('uid', str(uuid4())), 
-                              time=kwargs.pop('time', ttime.time()),
+            _cont_dict = dict(uid=uid if uid else str(uuid4()), 
+                              time=time if time else ttime.time(),
                               **kwargs)        
             r = requests.post(self._server_path + 'container',
                             data=ujson.dumps(_cont_dict))

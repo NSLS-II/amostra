@@ -59,7 +59,7 @@ def test_duplicate_sample():
 
 def test_invalid_sample():
     s = SampleReference()
-    pytest.raises(TypeError, s.create)
+    pytest.raises(RequestException, s.create)
 
 
 def test_find_sample():
@@ -79,7 +79,7 @@ def test_find_sample_as_doc():
     s1 = SampleReference([m_sample],
                          host='localhost', port=7770)
     s_ret = next(s1.find(uid=m_sample['uid'], as_document=True))
-    assert s_ret == Document('sample', m_sample)
+    assert s_ret == Document('Sample', m_sample)
 
 
 def test_update_sample():
