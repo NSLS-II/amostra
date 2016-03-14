@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 from doct import Document
 import ujson
 from uuid import uuid4
