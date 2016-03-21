@@ -13,19 +13,16 @@ class TestBasicSampleRef(_baseSM):
     db_class.host = TESTING_CONFIG['host']
     db_class.port = TESTING_CONFIG['port']
     
-    def test_blank_ref(self):
-        pass
-    # def test_disk_round_trip(self):
-    #     db = self.db_class(*self.args, **self.kwargs)
-    #     tt = StringIO()
-    # 
-    #     def _helper(doc_list):
-    #         db2 = SampleReference(doc_list)
-    #         for doc in db.find():
-    #             doc_id = doc['uid']
-    #             rl_doc = db2.find(uid=doc_id)
-    #             assert doc == rl_doc
-    # 
+    def test_disk_round_trip(self):
+        db = self.db_class(*self.args, **self.kwargs)
+        tt = StringIO()
+        def _helper(doc_list):
+            db2 = SampleReference(doc_list)
+            for doc in db.find():
+                doc_id = doc['uid']
+                rl_doc = db2.find(uid=doc_id)
+                assert doc == rl_doc
+
     #     for exp, imp in ((db.dump_to_json, json.loads),
     #                      (db.dump_to_yaml, yaml.load)):
     #         tt = StringIO()

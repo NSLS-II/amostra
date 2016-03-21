@@ -3,7 +3,7 @@ import time as ttime
 from amostra.ignition import start_server
 import uuid
 import pytest
-
+import subprocess
 
 
 TESTING_CONFIG = {
@@ -18,25 +18,21 @@ TESTING_CONFIG = {
 def amostra_setup():
     #start_server(config=TESTING_CONFIG)
     # ensure tornado server started prior to tests
+    # TODO: Replace this with Popen instead of command line
     ttime.sleep(1)
 
 
 def amostra_teardown():
-    conn = MongoClient(TESTING_CONFIG['mongo_server'],
-                       TESTING_CONFIG.get('mongo_port', None))
-    conn.drop_database(TESTING_CONFIG['database'])
+    conn = MongoClient('{}:{}'.format(TESTING_CONFIG['mongo_server'],
+                                      TESTING_CONFIG['mongo_port']))
+    conn.amostra.drop_collection('sample')
 
 
 class _baseSM:    
     @classmethod
     def setup_class(cls):
         db = cls.db = cls.db_class(*cls.args, **cls.kwargs)
-        # for n in ['squeekalina', 'squawky', 'squakawaka']:
-        #     db.create(name=n, species='penguin', location='aquarium', family='bird')
-        # for n in ['puffin', 'puffy', 'puffinini']:
-        #     db.create(name=n, species='puffin', location='zoo', family='bird')
-        # db.create(name='Fredrick', location='zoo', species='aardvark')
-        
+
     def test_create_and_find(self):
         db = self.db
         aarduid = str(uuid.uuid4())
@@ -80,3 +76,10 @@ class _baseSM:
     #     uid = db.add(name='linkt', location='VR')
     #     with pytest.raises(ValueError):
     #         db.update(uid, overwrite=False, location='R')
+
+    @classmethod
+    def teardown_class(cls):
+        print('Tearing it down')
+        conn = MongoClient('localhost:27017')
+        conn.amostra.drop_collection('sample')
+        print('done tearing it down')
