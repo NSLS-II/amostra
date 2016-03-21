@@ -117,10 +117,10 @@ class SampleReferenceHandler(DefaultHandler):
                 uids.append(d['uid'])
                 res = database.sample.insert(d)
                 database.sample.create_index([('uid', pymongo.DESCENDING)], unique=True, 
-                                             background=True)
+                                             background=False)
                 database.sample.create_index([('time', pymongo.DESCENDING),
                                               ('name', pymongo.DESCENDING)], unique=False,
-                                             background=True)
+                                             background=False)
                 database.sample.create_index([('container', pymongo.DESCENDING)],
                                                unique=False, sparse=True)
         elif isinstance(data, dict):
