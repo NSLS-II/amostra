@@ -1,0 +1,39 @@
+{
+    "properties": {
+        "project": {
+            "type": "string",
+            "description": "Name of project that this sample is part of"
+        },
+        "beamline_id": {
+            "type": "string",
+            "description": "The beamline ID"
+        },
+        "time": {
+            "type": "number",
+            "description": "Time the sample was created.  Unix epoch time"
+        },
+        "uid": {
+            "type": "string",
+            "description": "Globally unique ID for tihs run"
+        },
+        "owner": {
+            "type": "string",
+            "description": "String identifier that denotes the owner of this sample. Process/project/user"
+        },
+        "name": {
+            "type": "string",
+            "description": "Sample name!"
+        },
+        "container": {
+            "type": "string",
+            "description": "Name of the container/group sample is contained within.Can be virtual or real. Sparsely indexed, not required"
+        }
+    },
+    "required": [
+        "uid",
+        "time",
+        "name"
+     ],
+    "type": "object",
+    "description": "Document created for a single sample"
+}

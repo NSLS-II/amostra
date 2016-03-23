@@ -1,0 +1,37 @@
+{
+    "properties": {
+        "uid": {
+            "type": "string",
+            "description": "Globally unique ID for this container"
+        },        
+        "owner": {
+            "type": "string",
+            "description": "String descriptor to associate this request with. Can be user or process"
+        },
+        "time": {
+            "type": "number",
+            "description": "Time the container was created.  Unix epoch time"
+        },
+        "kind": {
+            "type": "string",
+            "description": "Type of the container"
+        },
+        "name": {
+            "type": "string",
+            "description": "Container name"
+        },
+        "content": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "The items of this container"
+        }
+    },
+    "required": [
+        "uid",
+        "time"
+     ],
+    "type": "object",
+    "description": "Document created for group of containers."
+}
