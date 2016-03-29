@@ -337,4 +337,3 @@ class ContainerReference(object):
         r.raise_for_status()
         return ujson.loads(r.text)
 
-
