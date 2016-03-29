@@ -150,7 +150,7 @@ class SampleReference(object):
     def get_schema(self):
         """Get information about schema from the server side"""
         r = requests.get(self._server_path +
-                        '/schema_ref', params=ujson.dumps('sample'))
+                        'schema', params=ujson.dumps('sample'))
         r.raise_for_status()
         return ujson.loads(r.text)
 
@@ -244,6 +244,13 @@ class RequestReference(object):
                          data=ujson.dumps(payload))
         r.raise_for_status()
 
+    def get_schema(self):
+        """Get information about schema from the server side"""
+        r = requests.get(self._server_path +
+                        'schema', params=ujson.dumps('request'))
+        r.raise_for_status()
+        return ujson.loads(r.text)
+
 
 class ContainerReference(object):
     """Reference implementation of generic container"""
@@ -322,3 +329,12 @@ class ContainerReference(object):
         r = requests.put(url=self._server_path + 'container',
                          data=ujson.dumps(payload))
         r.raise_for_status()
+
+    def get_schema(self):
+        """Get information about schema from the server side"""
+        r = requests.get(self._server_path +
+                        'schema', params=ujson.dumps('container'))
+        r.raise_for_status()
+        return ujson.loads(r.text)
+
+

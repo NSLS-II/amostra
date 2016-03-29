@@ -368,7 +368,8 @@ class SchemaHandler(DefaultHandler):
     @tornado.web.asynchronous
     def get(self):
         col = utils.unpack_params(self)
-        utils.return2client(self, utils.schemas[col])
+        self.write(utils.schemas[col])
+        self.finish()
 
     @tornado.web.asynchronous
     def put(self):
