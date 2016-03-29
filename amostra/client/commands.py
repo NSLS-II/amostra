@@ -147,13 +147,6 @@ class SampleReference(object):
         else:
             yaml.dump(self._sample_list, fpath)
 
-    def get_schema(self):
-        """Get information about schema from the server side"""
-        r = requests.get(self._server_path +
-                        '/schema_ref', params=ujson.dumps('sample'))
-        r.raise_for_status()
-        return ujson.loads(r.text)
-
 
 class RequestReference(object):
     """Reference implementation of generic request

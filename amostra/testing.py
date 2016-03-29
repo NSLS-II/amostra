@@ -42,9 +42,11 @@ class _baseSM:
         assert len(find_res) == 1
         assert find_res[0]['uid'] == aarduid
 
-    # def test_update(self):
-    #     db = self.db
-    #     uid = db.create(name='samantha', location='home', occupation='zoo goer')
+    def test_update(self):
+        db = self.db
+        sam_uid = str(uuid.uuid4())
+        uid = db.create(name='samantha', location='home', occupation='zoo goer',
+                        uid=sam_uid)
     #     original = list(db.find(uid=uid))[0]
     #     old, new = db.update(uid, location='zoo')
     #     assert old == original
@@ -79,7 +81,5 @@ class _baseSM:
 
     @classmethod
     def teardown_class(cls):
-        print('Tearing it down')
         conn = MongoClient('localhost:27017')
         conn.amostra.drop_collection('sample')
-        print('done tearing it down')
