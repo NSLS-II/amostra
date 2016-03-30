@@ -5,3 +5,4 @@ from __future__ import (absolute_import, division, print_function,
 
 
 conn_config = dict(host='localhost', port=7770)
+local_conn_config = dict(top='~/amostra_files')
