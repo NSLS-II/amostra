@@ -43,7 +43,7 @@ class SampleReference(object):
             r.raise_for_status()
 
     def create(self, name=None, time=None, uid=None, container=None,
-               **kwargs):
+               local=False, **kwargs):
         """Add a sample to the database
         All kwargs are collected and passed through to the documents
         In order to modify which tornao server this routine talks to,
@@ -80,7 +80,7 @@ class SampleReference(object):
         self._sample_list.append(doc)
         return doc
 
-    def update(self, query, update):
+    def update(self, query, update, local=False):
         """Update a request given a query and name value pair to be updated.
         No upsert(s). If doc does not exist, simply do not update
         In order to modify which tornao server this routine talks to,
@@ -101,7 +101,8 @@ class SampleReference(object):
         r.raise_for_status()
         return True
         
-    def find(self, as_document=False, as_json=False, **kwargs):
+    def find(self, as_document=False, as_json=False, local=False,
+             **kwargs):
         """
         Parameters
         ----------
@@ -130,7 +131,7 @@ class SampleReference(object):
             for c in content:
                 yield c
             
-    def dump_to_json(self, fpath):
+    def _dump_to_json(self, fpath):
         # Seems done
         if isinstance(fpath, str):
             with open(fpath, 'w') as fout:
@@ -138,7 +139,7 @@ class SampleReference(object):
         else:
             ujson.dump(self._sample_list, fpath)
 
-    def dump_to_yaml(self, fpath):
+    def _dump_to_yaml(self, fpath):
         """For those who don't want to write into the database or work offline."""
         import yaml
         if isinstance(fpath, str):
@@ -181,7 +182,7 @@ class RequestReference(object):
             self._request_list.append(payload)
 
     def create(self, sample=None, time=None,
-               uid=None, state='active', seq_num=0, **kwargs):
+               uid=None, state='active', seq_num=0, local=False, **kwargs):
         """ Create a sample entry in the dataase
         Parameters
         ----------
@@ -211,7 +212,7 @@ class RequestReference(object):
         r.raise_for_status()
         return payload
 
-    def find(self, as_document=False, **kwargs):
+    def find(self, as_document=False, local=False, **kwargs):
         """Given a set of mongo search parameters, return a requests iterator"""
         self._server_path = 'http://{}:{}/' .format(self.host, self.port) 
         r = requests.get(self._server_path + 'request',
@@ -227,7 +228,7 @@ class RequestReference(object):
             for c in content:
                 yield c
                 
-    def update(self, query, update):
+    def update(self, query, update, local=False):
         """Update a request given a query and name value pair to be updated.
         No upsert(s). If doc does not exist, simply do not update
         
@@ -272,7 +273,7 @@ class ContainerReference(object):
             r.raise_for_status()
             self._container_list.append(_cont_dict)
     
-    def create(self, uid=None, time=None, **kwargs):
+    def create(self, uid=None, time=None, local=False, **kwargs):
         """Insert a container document. Schema validation done
         on the server side. No native Python object (e.g. np.ndarray)
         due to performance constraints. 
@@ -298,7 +299,7 @@ class ContainerReference(object):
         self._container_list.append(payload)        
         return payload
     
-    def find(self, as_document=False, **kwargs):
+    def find(self, as_document=False, local=False, **kwargs):
         """Given a set of mongo search parameters, return a requests iterator"""
         self._server_path = 'http://{}:{}/' .format(self.host, self.port)        
         r = requests.get(self._server_path + 'container',
@@ -313,7 +314,6 @@ class ContainerReference(object):
             for c in content:
                 yield c
     
-    def update(self, query, update):
         """Update a request given a query and name value pair to be updated.
         No upsert(s). If doc does not exist, simply do not update
         
