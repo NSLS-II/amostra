@@ -380,7 +380,6 @@ class LocalSampleReference:
         
     def create(self,name=None, time=None, uid=None, container=None,
                **kwargs):
-        self._samp_fname = top_dir + '/samples.json'
         payload = dict(uid=uid if uid else str(uuid4()),
                    name=name, time=time if time else ttime.time(),
                    container=container if container else 'NULL',
@@ -394,16 +393,22 @@ class LocalSampleReference:
 
     def find(self):
         pass
-    
+
+    @property
+    def _samp_fname(self):
+        self._samp_fname = self.top_dir + '/samples.json'
     
 class LocalRequestReference:
     def __init__(self, top_dir=conf.local_conn_config['top']):
         self.top_dir = top_dir        
         
+    @property
+    def _req_fname(self):
+        self._req_fname = top_dir + '/requests.json'
+    
     
     def create(self, sample=None, time=None, uid=None, state='active', 
-               seq_num=0, **kwargs):
-        self._req_fname = top_dir + '/requests.json'        
+               seq_num=0, **kwargs):        
         payload = dict(uid=uid if uid else str(uuid4()), 
                        sample=sample['uid'] if sample else 'NULL',
                        time=time if time else ttime.time(),state=state,
@@ -421,9 +426,13 @@ class LocalRequestReference:
 class LocalContainerRequestReference:
     def __init__(self, top_dir=conf.local_conn_config['top']):
         self.top_dir = top_dir        
-        
-    def create(self, uid=None, time=None, **kwargs):
-        self._cont_fname = top_dir + '/containers.json'        
+    
+    @property
+    def _cont_fname(self):
+        self._cont_fname = top_dir + '/containers.json'
+
+    
+    def create(self, uid=None, time=None, **kwargs):        
         payload = dict(uid=uid if uid else str(uuid4()),
                        time=time if time else ttime.time(), **kwargs)
         with open(self._cont_fname, 'w') as fp:
