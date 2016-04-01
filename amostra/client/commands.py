@@ -6,7 +6,7 @@ from uuid import uuid4
 import requests
 import time as ttime
 from amostra.client import conf
-
+from os.path import expanduser 
 
 class SampleReference(object):
     """Reference implementation of generic sample manager"""
@@ -384,9 +384,9 @@ class LocalSampleReference:
                    name=name, time=time if time else ttime.time(),
                    container=container if container else 'NULL',
                    **kwargs)
-        with open(self._samp_fname, 'w') as fp:
+        with open(self._samp_fname, 'w+') as fp:
             ujson.dump(payload, fp)
-        return doc
+        return payload
     
     def update(self):
         pass
@@ -396,7 +396,7 @@ class LocalSampleReference:
 
     @property
     def _samp_fname(self):
-        return  self.top_dir + '/samples.json'
+        return  expanduser(self.top_dir + '/samples.json')
     
 class LocalRequestReference:
     def __init__(self, top_dir=conf.local_conn_config['top']):
@@ -404,7 +404,7 @@ class LocalRequestReference:
         
     @property
     def _req_fname(self):
-        return top_dir + '/requests.json'
+        return expanduser(self.top_dir + '/requests.json')
     
     
     def create(self, sample=None, time=None, uid=None, state='active', 
@@ -413,7 +413,7 @@ class LocalRequestReference:
                        sample=sample['uid'] if sample else 'NULL',
                        time=time if time else ttime.time(),state=state,
                        seq_num=seq_num, **kwargs)
-        with open(self._req_fname, 'w') as fp:
+        with open(self._req_fname, 'w+') as fp:
             ujson.dump(payload, fp)
     
     def update(self):
@@ -421,21 +421,21 @@ class LocalRequestReference:
 
     def find(self):
         pass
-    
-    
+  
+
 class LocalContainerRequestReference:
     def __init__(self, top_dir=conf.local_conn_config['top']):
         self.top_dir = top_dir        
     
     @property
     def _cont_fname(self):
-        return top_dir + '/containers.json'
+        return expanduser(self.top_dir + '/containers.json')
 
     
     def create(self, uid=None, time=None, **kwargs):        
         payload = dict(uid=uid if uid else str(uuid4()),
                        time=time if time else ttime.time(), **kwargs)
-        with open(self._cont_fname, 'w') as fp:
+        with open(self._cont_fname, 'w+') as fp:
             ujson.dump(payload, fp)
     
     def update(self):
