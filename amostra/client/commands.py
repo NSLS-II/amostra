@@ -396,7 +396,7 @@ class LocalSampleReference:
 
     @property
     def _samp_fname(self):
-        self._samp_fname = self.top_dir + '/samples.json'
+        return  self.top_dir + '/samples.json'
     
 class LocalRequestReference:
     def __init__(self, top_dir=conf.local_conn_config['top']):
@@ -404,7 +404,7 @@ class LocalRequestReference:
         
     @property
     def _req_fname(self):
-        self._req_fname = top_dir + '/requests.json'
+        return top_dir + '/requests.json'
     
     
     def create(self, sample=None, time=None, uid=None, state='active', 
@@ -429,7 +429,7 @@ class LocalContainerRequestReference:
     
     @property
     def _cont_fname(self):
-        self._cont_fname = top_dir + '/containers.json'
+        return top_dir + '/containers.json'
 
     
     def create(self, uid=None, time=None, **kwargs):        
