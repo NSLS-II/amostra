@@ -24,8 +24,7 @@ class SampleReference(object):
             Port tornado server runs on
         """
         self.host = host
-        self.port = port        
-        self._server_path = 'http://{}:{}/' .format(self.host, self.port)
+        self.port = port
         if not isinstance(sample_list, list):
             raise TypeError("sample_list must be a list")
         if not isinstance(sample_list, list):
@@ -42,6 +41,27 @@ class SampleReference(object):
                               data=domt)
             r.raise_for_status()
 
+    @property
+    def host(self):
+        return self.__host
+    
+    @host.setter
+    def host(self, new_host):
+        self.__host = new_host
+     
+    @property
+    def port(self):
+        return self.__port
+    
+    @port.setter
+    def port(self, new_port):
+        self.__port = new_port   
+        
+    @property
+    def _server_path(self):
+        return 'http://{}:{}/' .format(self.host, self.port)
+    
+            
     def create(self, name=None, time=None, uid=None, container=None,
                **kwargs):
         """Add a sample to the database
@@ -65,7 +85,6 @@ class SampleReference(object):
         uid : str
             uid of the inserted document.
         """
-        self._server_path = 'http://{}:{}/' .format(self.host, self.port)
         if any(d['name'] == name for d in self._sample_list):
             raise ValueError(
                 "document with name {} already exists".format(name))
@@ -94,7 +113,6 @@ class SampleReference(object):
         update: dict
             Name/value pair that is to be replaced within an existing Request doc
         """
-        self._server_path = 'http://{}:{}/' .format(self.host, self.port)
         payload = dict(query=query, update=update)
         r = requests.put(url=self._server_path + 'sample',
                          data=ujson.dumps(payload))
@@ -115,7 +133,6 @@ class SampleReference(object):
             Documents which have all keys with the given values
 
         """
-        self._server_path = 'http://{}:{}/' .format(self.host, self.port)
         r = requests.get(self._server_path + 'sample',
                          params=ujson.dumps(kwargs))
         r.raise_for_status()
@@ -152,7 +169,6 @@ class RequestReference(object):
         """
         self.host = host
         self.port = port
-        self._server_path = 'http://{}:{}/' .format(self.host, self.port)
         self._request_list = []
         if sample:
             payload = dict(uid=uid if uid else str(uuid4()),
@@ -162,7 +178,28 @@ class RequestReference(object):
             r = requests.post(self._server_path + 'request', data=ujson.dumps(payload))
             r.raise_for_status()
             self._request_list.append(payload)
-
+            
+    @property
+    def host(self):
+        return self.__host
+    
+    @host.setter
+    def host(self, new_host):
+        self.__host = new_host
+     
+    @property
+    def port(self):
+        return self.__port
+    
+    @port.setter
+    def port(self, new_port):
+        self.__port = new_port   
+        
+    @property
+    def _server_path(self):
+        return 'http://{}:{}/' .format(self.host, self.port)
+    
+    
     def create(self, sample=None, time=None,
                uid=None, state='active', seq_num=0, **kwargs):
         """ Create a sample entry in the dataase
@@ -184,7 +221,6 @@ class RequestReference(object):
         payload['uid']
             uid of the payload created
         """
-        self._server_path = 'http://{}:{}/' .format(self.host, self.port)
         payload = dict(uid=uid if uid else str(uuid4()), 
                        sample=sample['uid'] if sample else 'NULL',
                        time=time if time else ttime.time(),state=state,
@@ -195,8 +231,7 @@ class RequestReference(object):
         return payload
 
     def find(self, as_document=False, **kwargs):
-        """Given a set of mongo search parameters, return a requests iterator"""
-        self._server_path = 'http://{}:{}/' .format(self.host, self.port) 
+        """Given a set of mongo search parameters, return a requests iterator""" 
         r = requests.get(self._server_path + 'request',
                          params=ujson.dumps(kwargs))
         r.raise_for_status()
@@ -221,7 +256,6 @@ class RequestReference(object):
         update: dict
             Name/value pair that is to be replaced within an existing Request doc.
         """
-        self._server_path = 'http://{}:{}/' .format(self.host, self.port)
         payload = dict(query=query, update=update)
         r = requests.put(url=self._server_path + 'request',
                          data=ujson.dumps(payload))
@@ -245,7 +279,6 @@ class ContainerReference(object):
         self._container_list = []
         self.port = port
         self.host = host
-        self._server_path = 'http://{}:{}/' .format(host, port)
         if kwargs:        
             _cont_dict = dict(uid=uid if uid else str(uuid4()), 
                               time=time if time else ttime.time(),
@@ -254,6 +287,26 @@ class ContainerReference(object):
                             data=ujson.dumps(_cont_dict))
             r.raise_for_status()
             self._container_list.append(_cont_dict)
+    
+    @property
+    def host(self):
+        return self.__host
+    
+    @host.setter
+    def host(self, new_host):
+        self.__host = new_host
+     
+    @property
+    def port(self):
+        return self.__port
+    
+    @port.setter
+    def port(self, new_port):
+        self.__port = new_port   
+        
+    @property
+    def _server_path(self):
+        return 'http://{}:{}/' .format(self.host, self.port)
     
     def create(self, uid=None, time=None, **kwargs):
         """Insert a container document. Schema validation done
@@ -271,8 +324,7 @@ class ContainerReference(object):
         -------
         payload['uid']
             uid of the payload created
-        """
-        self._server_path = 'http://{}:{}/' .format(self.host, self.port)        
+        """        
         payload = dict(uid=uid if uid else str(uuid4()),
                        time=time if time else ttime.time(), **kwargs)
         r = requests.post(url=self._server_path + 'container',
@@ -282,8 +334,7 @@ class ContainerReference(object):
         return payload
     
     def find(self, as_document=False, **kwargs):
-        """Given a set of mongo search parameters, return a requests iterator"""
-        self._server_path = 'http://{}:{}/' .format(self.host, self.port)        
+        """Given a set of mongo search parameters, return a requests iterator"""        
         r = requests.get(self._server_path + 'container',
                          params=ujson.dumps(kwargs))
         r.raise_for_status()
@@ -307,7 +358,6 @@ class ContainerReference(object):
         update: dict
             Name/value pair that is to be replaced within an existing Request doc.
         """
-        self._server_path = 'http://{}:{}/' .format(self.host, self.port)
         payload = dict(query=dict(query), update=update)
         r = requests.put(url=self._server_path + 'container',
                          data=ujson.dumps(payload))
