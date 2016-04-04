@@ -384,16 +384,20 @@ class LocalSampleReference:
                    name=name, time=time if time else ttime.time(),
                    container=container if container else 'NULL',
                    **kwargs)
-        with open(self._samp_fname, 'w+') as fp:
+        with open(self._samp_fname, 'a+') as fp:
             ujson.dump(payload, fp)
         return payload
     
     def update(self):
-        pass
+        with open(self._samp_fname, 'a+') as fp:
+            local_payload = ujson.load(fp)
 
     def find(self):
-        pass
-
+        with open(self._samp_fname, 'r') as fp:
+            print(fp)
+            local_payload = ujson.load(fp)
+        print(local_payload, type(local_payload))
+        
     @property
     def _samp_fname(self):
         return  expanduser(self.top_dir + '/samples.json')
@@ -409,24 +413,26 @@ class LocalRequestReference:
     
     def create(self, sample=None, time=None, uid=None, state='active', 
                seq_num=0, **kwargs):        
-        payload = dict(uid=uid if uid else str(uuid4()), 
+        local_payload = dict(uid=uid if uid else str(uuid4()), 
                        sample=sample['uid'] if sample else 'NULL',
                        time=time if time else ttime.time(),state=state,
                        seq_num=seq_num, **kwargs)
         with open(self._req_fname, 'w+') as fp:
-            ujson.dump(payload, fp)
+            ujson.dump(local_payload, fp)
     
     def update(self):
-        pass
+        with open(self._req_fname,'a+') as fp:
+            local_payload = ujson.load(fp)
 
     def find(self):
-        pass
-  
+        with open(self._req_fname,'a+') as fp:
+            local_payload = ujson.load(fp)
+        
 
-class LocalContainerRequestReference:
+class LocalContainerReference:
     def __init__(self, top_dir=conf.local_conn_config['top']):
         self.top_dir = top_dir        
-    
+        
     @property
     def _cont_fname(self):
         return expanduser(self.top_dir + '/containers.json')
@@ -439,7 +445,9 @@ class LocalContainerRequestReference:
             ujson.dump(payload, fp)
     
     def update(self):
-        pass
+        with open(self._cont_fname,'a+') as fp:
+            local_payload = ujson.load(fp)
 
     def find(self):
-        pass
+        with open(self._cont_fname,'a+') as fp:
+            local_payload = ujson.load(fp)
