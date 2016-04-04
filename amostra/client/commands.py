@@ -375,7 +375,15 @@ class LocalSampleReference:
 
     def __init__(self, top_dir=conf.local_conn_config['top']):
         self.top_dir = top_dir
-        self.sample_list = []
+        try:        
+            with open(self._samp_fname, 'r') as fp:
+                tmp = ujson.load(fp)
+        except FileNotFoundError:
+            tmp = []
+        try:
+            self.sample_list = tmp if tmp else []
+        except FileNotFoundError:
+            self.sample_list = []
         # TODO: Replicate sample_list behavior in the constructor
         
     def create(self,name=None, time=None, uid=None, container=None,
@@ -384,8 +392,9 @@ class LocalSampleReference:
                    name=name, time=time if time else ttime.time(),
                    container=container if container else 'NULL',
                    **kwargs)
-        with open(self._samp_fname, 'a+') as fp:
-            ujson.dump(payload, fp)
+        self.sample_list.append(payload)
+        with open(self._samp_fname, 'w+') as fp:
+            ujson.dump(self.sample_list, fp)
         return payload
     
     def update(self):
@@ -405,11 +414,19 @@ class LocalSampleReference:
 class LocalRequestReference:
     def __init__(self, top_dir=conf.local_conn_config['top']):
         self.top_dir = top_dir        
-        
+        try:        
+            with open(self._req_fname, 'r') as fp:
+                tmp = ujson.load(fp)
+        except FileNotFoundError:
+            tmp = []
+        try:
+            self.request_list = tmp if tmp else []
+        except FileNotFoundError:
+            self.request_list = []
+    
     @property
     def _req_fname(self):
         return expanduser(self.top_dir + '/requests.json')
-    
     
     def create(self, sample=None, time=None, uid=None, state='active', 
                seq_num=0, **kwargs):        
@@ -417,21 +434,32 @@ class LocalRequestReference:
                        sample=sample['uid'] if sample else 'NULL',
                        time=time if time else ttime.time(),state=state,
                        seq_num=seq_num, **kwargs)
+        self.request_list.append(local_payload)
         with open(self._req_fname, 'w+') as fp:
-            ujson.dump(local_payload, fp)
+            ujson.dump(self.request_list, fp)
     
     def update(self):
-        with open(self._req_fname,'a+') as fp:
+        with open(self._req_fname,'r+') as fp:
             local_payload = ujson.load(fp)
 
     def find(self):
-        with open(self._req_fname,'a+') as fp:
+        with open(self._req_fname,'r') as fp:
             local_payload = ujson.load(fp)
+        print(local_payload)
         
 
 class LocalContainerReference:
     def __init__(self, top_dir=conf.local_conn_config['top']):
-        self.top_dir = top_dir        
+        self.top_dir = top_dir
+        try:        
+            with open(self._cont_fname, 'r') as fp:
+                tmp = ujson.load(fp)
+        except FileNotFoundError:
+            tmp = []
+        try:
+            self.container_list = tmp if tmp else []
+        except FileNotFoundError:
+            self.container_list = []        
         
     @property
     def _cont_fname(self):
@@ -441,13 +469,15 @@ class LocalContainerReference:
     def create(self, uid=None, time=None, **kwargs):        
         payload = dict(uid=uid if uid else str(uuid4()),
                        time=time if time else ttime.time(), **kwargs)
+        self.container_list.append(payload)
         with open(self._cont_fname, 'w+') as fp:
-            ujson.dump(payload, fp)
+            ujson.dump(self.container_list, fp)
     
     def update(self):
-        with open(self._cont_fname,'a+') as fp:
+        with open(self._cont_fname,'r+') as fp:
             local_payload = ujson.load(fp)
 
     def find(self):
-        with open(self._cont_fname,'a+') as fp:
+        with open(self._cont_fname,'r') as fp:
             local_payload = ujson.load(fp)
+        print(local_payload)
