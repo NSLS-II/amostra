@@ -10,7 +10,7 @@ from os.path import expanduser
 
 class SampleReference(object):
     """Reference implementation of generic sample manager"""
-    def __init__(self, sample_list=[], host=conf.conn_config['host'],
+    def __init__(self, host=conf.conn_config['host'],
                  port=conf.conn_config['port']):
         """Constructor. 
 
@@ -25,21 +25,21 @@ class SampleReference(object):
         """
         self.host = host
         self.port = port
-        if not isinstance(sample_list, list):
-            raise TypeError("sample_list must be a list")
-        if not isinstance(sample_list, list):
-            raise TypeError('Not a correct type for the constructor.Expects list')
-        self._sample_list = [dict(d) for d in sample_list]
-        ln = len(self._sample_list)
-        if ln != len(set(d['name'] for d in self._sample_list)):
-            raise ValueError("duplicate names")
-        if ln != len(set(d['uid'] for d in self._sample_list)):
-            raise ValueError("duplicate uids")
-        if sample_list:
-            domt = ujson.dumps(self._sample_list)
-            r = requests.post(self._server_path + 'sample',
-                              data=domt)
-            r.raise_for_status()
+#        if not isinstance(sample_list, list):
+#            raise TypeError("sample_list must be a list")
+#        if not isinstance(sample_list, list):
+#            raise TypeError('Not a correct type for the constructor.Expects list')
+#        self._sample_list = [dict(d) for d in sample_list]
+#        ln = len(self._sample_list)
+#        if ln != len(set(d['name'] for d in self._sample_list)):
+#            raise ValueError("duplicate names")
+#        if ln != len(set(d['uid'] for d in self._sample_list)):
+#            raise ValueError("duplicate uids")
+#        if sample_list:
+#            domt = ujson.dumps(self._sample_list)
+#            r = requests.post(self._server_path + 'sample',
+#                              data=domt)
+#            r.raise_for_status()
 
     @property
     def host(self):
@@ -61,6 +61,9 @@ class SampleReference(object):
     def _server_path(self):
         return 'http://{}:{}/' .format(self.host, self.port)
     
+    @property
+    def _samp_url(self):
+        return self._server_path + 'sample'
             
     def create(self, name=None, time=None, uid=None, container=None,
                **kwargs):
@@ -85,18 +88,14 @@ class SampleReference(object):
         uid : str
             uid of the inserted document.
         """
-        if any(d['name'] == name for d in self._sample_list):
-            raise ValueError(
-                "document with name {} already exists".format(name))
         doc = dict(uid=uid if uid else str(uuid4()),
                    name=name, time=time if time else ttime.time(),
                    container=container if container else 'NULL',
                    **kwargs)
         domt = ujson.dumps(doc)
-        r = requests.post(self._server_path + 'sample',
+        r = requests.post(self._samp_url,
                           data=domt)
         r.raise_for_status()
-        self._sample_list.append(doc)
         return doc
 
     def update(self, query, update):
@@ -114,7 +113,7 @@ class SampleReference(object):
             Name/value pair that is to be replaced within an existing Request doc
         """
         payload = dict(query=query, update=update)
-        r = requests.put(url=self._server_path + 'sample',
+        r = requests.put(url=self._samp_url,
                          data=ujson.dumps(payload))
         r.raise_for_status()
         return True
@@ -133,11 +132,10 @@ class SampleReference(object):
             Documents which have all keys with the given values
 
         """
-        r = requests.get(self._server_path + 'sample',
+        r = requests.get(self._samp_url,
                          params=ujson.dumps(kwargs))
         r.raise_for_status()
         content = ujson.loads(r.text)
-        self._sample_list.extend(content)
         if as_json:
             return r.text
         if as_document:        
@@ -169,13 +167,12 @@ class RequestReference(object):
         """
         self.host = host
         self.port = port
-        self._request_list = []
         if sample:
             payload = dict(uid=uid if uid else str(uuid4()),
                            sample=sample['uid'] if sample else 'NULL',
                            time=time if time else ttime.time(), state=state,
                            seq_num=seq_num, **kwargs)
-            r = requests.post(self._server_path + 'request', data=ujson.dumps(payload))
+            r = requests.post(self._req_url, data=ujson.dumps(payload))
             r.raise_for_status()
             self._request_list.append(payload)
             
@@ -199,6 +196,9 @@ class RequestReference(object):
     def _server_path(self):
         return 'http://{}:{}/' .format(self.host, self.port)
     
+    @property
+    def _req_url(self):
+        return self._server_path + 'request'
     
     def create(self, sample=None, time=None,
                uid=None, state='active', seq_num=0, **kwargs):
@@ -225,19 +225,19 @@ class RequestReference(object):
                        sample=sample['uid'] if sample else 'NULL',
                        time=time if time else ttime.time(),state=state,
                        seq_num=seq_num, **kwargs)
-        r = requests.post(url=self._server_path + 'request',
+        r = requests.post(url=self._req_url,
                           data=ujson.dumps(payload))
         r.raise_for_status()
         return payload
 
     def find(self, as_document=False, **kwargs):
+        # TODO: Add as_json option
         """Given a set of mongo search parameters, return a requests iterator""" 
-        r = requests.get(self._server_path + 'request',
+        r = requests.get(self._req_url,
                          params=ujson.dumps(kwargs))
         r.raise_for_status()
         content = ujson.loads(r.text)
         # add all content to local sample list
-        self._request_list.extend(content)
         if as_document:        
             for c in content:
                 yield Document('Request', c)
@@ -257,7 +257,7 @@ class RequestReference(object):
             Name/value pair that is to be replaced within an existing Request doc.
         """
         payload = dict(query=query, update=update)
-        r = requests.put(url=self._server_path + 'request',
+        r = requests.put(url=self._req_url,
                          data=ujson.dumps(payload))
         r.raise_for_status()
 
@@ -276,14 +276,13 @@ class ContainerReference(object):
         """Handles connection configuration to the service backend.
         Either initiate with a request or use purely as a client for requests.
         """
-        self._container_list = []
         self.port = port
         self.host = host
         if kwargs:        
             _cont_dict = dict(uid=uid if uid else str(uuid4()), 
                               time=time if time else ttime.time(),
                               **kwargs)        
-            r = requests.post(self._server_path + 'container',
+            r = requests.post(self._cont_url,
                             data=ujson.dumps(_cont_dict))
             r.raise_for_status()
             self._container_list.append(_cont_dict)
@@ -308,6 +307,10 @@ class ContainerReference(object):
     def _server_path(self):
         return 'http://{}:{}/' .format(self.host, self.port)
     
+    @property
+    def _cont_url(self):
+        return self._server_path + 'container'
+    
     def create(self, uid=None, time=None, **kwargs):
         """Insert a container document. Schema validation done
         on the server side. No native Python object (e.g. np.ndarray)
@@ -327,15 +330,15 @@ class ContainerReference(object):
         """        
         payload = dict(uid=uid if uid else str(uuid4()),
                        time=time if time else ttime.time(), **kwargs)
-        r = requests.post(url=self._server_path + 'container',
+        r = requests.post(url=self._cont_url,
                           data=ujson.dumps(payload))
         r.raise_for_status()
-        self._container_list.append(payload)        
         return payload
     
     def find(self, as_document=False, **kwargs):
+        # TODO: Add as_json option
         """Given a set of mongo search parameters, return a requests iterator"""        
-        r = requests.get(self._server_path + 'container',
+        r = requests.get(self._cont_url,
                          params=ujson.dumps(kwargs))
         r.raise_for_status()
         content = ujson.loads(r.text)
@@ -359,7 +362,7 @@ class ContainerReference(object):
             Name/value pair that is to be replaced within an existing Request doc.
         """
         payload = dict(query=dict(query), update=update)
-        r = requests.put(url=self._server_path + 'container',
+        r = requests.put(url=self._cont_url,
                          data=ujson.dumps(payload))
         r.raise_for_status()
 
@@ -372,7 +375,7 @@ class ContainerReference(object):
 
 
 class LocalSampleReference:
-
+    """Handle sample information locally via json files"""
     def __init__(self, top_dir=conf.local_conn_config['top']):
         self.top_dir = top_dir
         try:        
@@ -384,7 +387,6 @@ class LocalSampleReference:
             self.sample_list = tmp if tmp else []
         except FileNotFoundError:
             self.sample_list = []
-        # TODO: Replicate sample_list behavior in the constructor
         
     def create(self,name=None, time=None, uid=None, container=None,
                **kwargs):
@@ -396,6 +398,10 @@ class LocalSampleReference:
         with open(self._samp_fname, 'w+') as fp:
             ujson.dump(self.sample_list, fp)
         return payload
+        
+    @property
+    def _samp_fname(self):
+        return  expanduser(self.top_dir + '/samples.json')
     
     def update(self):
         with open(self._samp_fname, 'a+') as fp:
@@ -407,10 +413,7 @@ class LocalSampleReference:
             local_payload = ujson.load(fp)
         print(local_payload, type(local_payload))
         
-    @property
-    def _samp_fname(self):
-        return  expanduser(self.top_dir + '/samples.json')
-    
+        
 class LocalRequestReference:
     def __init__(self, top_dir=conf.local_conn_config['top']):
         self.top_dir = top_dir        
