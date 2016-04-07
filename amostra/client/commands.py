@@ -25,38 +25,7 @@ class SampleReference(object):
         """
         self.host = host
         self.port = port
-#        if not isinstance(sample_list, list):
-#            raise TypeError("sample_list must be a list")
-#        if not isinstance(sample_list, list):
-#            raise TypeError('Not a correct type for the constructor.Expects list')
-#        self._sample_list = [dict(d) for d in sample_list]
-#        ln = len(self._sample_list)
-#        if ln != len(set(d['name'] for d in self._sample_list)):
-#            raise ValueError("duplicate names")
-#        if ln != len(set(d['uid'] for d in self._sample_list)):
-#            raise ValueError("duplicate uids")
-#        if sample_list:
-#            domt = ujson.dumps(self._sample_list)
-#            r = requests.post(self._server_path + 'sample',
-#                              data=domt)
-#            r.raise_for_status()
 
-    @property
-    def host(self):
-        return self.__host
-    
-    @host.setter
-    def host(self, new_host):
-        self.__host = new_host
-     
-    @property
-    def port(self):
-        return self.__port
-    
-    @port.setter
-    def port(self, new_port):
-        self.__port = new_port   
-        
     @property
     def _server_path(self):
         return 'http://{}:{}/' .format(self.host, self.port)
@@ -175,23 +144,7 @@ class RequestReference(object):
             r = requests.post(self._req_url, data=ujson.dumps(payload))
             r.raise_for_status()
             self._request_list.append(payload)
-            
-    @property
-    def host(self):
-        return self.__host
-    
-    @host.setter
-    def host(self, new_host):
-        self.__host = new_host
-     
-    @property
-    def port(self):
-        return self.__port
-    
-    @port.setter
-    def port(self, new_port):
-        self.__port = new_port   
-        
+                    
     @property
     def _server_path(self):
         return 'http://{}:{}/' .format(self.host, self.port)
@@ -286,23 +239,7 @@ class ContainerReference(object):
                             data=ujson.dumps(_cont_dict))
             r.raise_for_status()
             self._container_list.append(_cont_dict)
-    
-    @property
-    def host(self):
-        return self.__host
-    
-    @host.setter
-    def host(self, new_host):
-        self.__host = new_host
-     
-    @property
-    def port(self):
-        return self.__port
-    
-    @port.setter
-    def port(self, new_port):
-        self.__port = new_port   
-        
+
     @property
     def _server_path(self):
         return 'http://{}:{}/' .format(self.host, self.port)
