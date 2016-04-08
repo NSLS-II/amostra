@@ -279,7 +279,6 @@ class ContainerReference(object):
                          params=ujson.dumps(kwargs))
         r.raise_for_status()
         content = ujson.loads(r.text)
-        self._container_list.extend(content)
         if as_document:
             for c in content:
                 yield Document('container', c)
