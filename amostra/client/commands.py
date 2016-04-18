@@ -311,6 +311,24 @@ class ContainerReference(object):
         return ujson.loads(r.text)
 
 
+def _find_local(fname, qparams):
+    res_list = []
+    try:
+        with open(fname, 'r') as fp:
+            local_payload = ujson.load(fp)
+        qobj = mongoquery.Query(qparams)
+        for _sample in local_payload:
+            try:
+                qobj.match(_sample)
+                res_list.append(_sample)
+            except mongoquery.QueryError:
+                pass
+        for c in res_list:
+            yield c
+    except FileNotFoundError:
+        return None
+
+
 class LocalSampleReference:
     """Handle sample information locally via json files"""
     def __init__(self, top_dir=conf.local_conn_config['top']):
@@ -325,7 +343,7 @@ class LocalSampleReference:
         except FileNotFoundError:
             self.sample_list = []
         
-    def create(self,name=None, time=None, uid=None, container=None,
+    def create(self, name=None, time=None, uid=None, container=None,
                **kwargs):
         payload = dict(uid=uid if uid else str(uuid4()),
                    name=name, time=time if time else ttime.time(),
@@ -347,21 +365,7 @@ class LocalSampleReference:
             pass
 
     def find(self, **kwargs):
-        res_list = []
-        try:
-            with open(self._samp_fname, 'r') as fp:
-                local_payload = ujson.load(fp)
-            qobj = mongoquery.Query(kwargs)
-            for _sample in local_payload:
-                try:
-                    qobj.match(_sample)
-                    res_list.append(_sample)
-                except mongoquery.QueryError:
-                    pass
-            for c in res_list:
-                yield c
-        except FileNotFoundError:
-            return None
+        return _find_local(self._samp_fname, kwargs)
 
 
 class LocalRequestReference:
@@ -383,10 +387,10 @@ class LocalRequestReference:
     
     def create(self, sample=None, time=None, uid=None, state='active', 
                seq_num=0, **kwargs):        
-        local_payload = dict(uid=uid if uid else str(uuid4()), 
-                       sample=sample['uid'] if sample else 'NULL',
-                       time=time if time else ttime.time(),state=state,
-                       seq_num=seq_num, **kwargs)
+        local_payload = dict(uid=uid if uid else str(uuid4()),
+                             sample=sample['uid'] if sample else 'NULL',
+                             time=time if time else ttime.time(), state=state,
+                             seq_num=seq_num, **kwargs)
         self.request_list.append(local_payload)
         with open(self._req_fname, 'w+') as fp:
             ujson.dump(self.request_list, fp)
@@ -395,11 +399,9 @@ class LocalRequestReference:
         with open(self._req_fname,'r+') as fp:
             local_payload = ujson.load(fp)
 
-    def find(self):
-        with open(self._req_fname,'r') as fp:
-            local_payload = ujson.load(fp)
-        print(local_payload)
-        
+    def find(self, **kwargs):
+        return _find_local(self._req_fname, kwargs)
+
 
 class LocalContainerReference:
     def __init__(self, top_dir=conf.local_conn_config['top']):
@@ -409,16 +411,13 @@ class LocalContainerReference:
                 tmp = ujson.load(fp)
         except FileNotFoundError:
             tmp = []
-        try:
-            self.container_list = tmp if tmp else []
-        except FileNotFoundError:
-            self.container_list = []        
+        self.container_list = tmp if tmp else []
+        self.container_list = []
         
     @property
     def _cont_fname(self):
         return expanduser(self.top_dir + '/containers.json')
 
-    
     def create(self, uid=None, time=None, **kwargs):        
         payload = dict(uid=uid if uid else str(uuid4()),
                        time=time if time else ttime.time(), **kwargs)
@@ -430,7 +429,5 @@ class LocalContainerReference:
         with open(self._cont_fname,'r+') as fp:
             local_payload = ujson.load(fp)
 
-    def find(self):
-        with open(self._cont_fname,'r') as fp:
-            local_payload = ujson.load(fp)
-        print(local_payload)
+    def find(self, **kwargs):
+        return _find_local(self._cont_fname, kwargs)
