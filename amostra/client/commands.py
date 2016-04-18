@@ -6,7 +6,8 @@ from uuid import uuid4
 import requests
 import time as ttime
 from amostra.client import conf
-from os.path import expanduser 
+from os.path import expanduser
+import mongoquery
 
 class SampleReference(object):
     """Reference implementation of generic sample manager"""
@@ -337,19 +338,32 @@ class LocalSampleReference:
         
     @property
     def _samp_fname(self):
-        return  expanduser(self.top_dir + '/samples.json')
-    
-    def update(self):
+        return expanduser(self.top_dir + '/samples.json')
+
+    def update(self, query, update):
         with open(self._samp_fname, 'a+') as fp:
             local_payload = ujson.load(fp)
+        for _sample in local_payload:
+            pass
 
-    def find(self):
-        with open(self._samp_fname, 'r') as fp:
-            print(fp)
-            local_payload = ujson.load(fp)
-        print(local_payload, type(local_payload))
-        
-        
+    def find(self, **kwargs):
+        res_list = []
+        try:
+            with open(self._samp_fname, 'r') as fp:
+                local_payload = ujson.load(fp)
+            qobj = mongoquery.Query(kwargs)
+            for _sample in local_payload:
+                try:
+                    qobj.match(_sample)
+                    res_list.append(_sample)
+                except mongoquery.QueryError:
+                    pass
+            for c in res_list:
+                yield c
+        except FileNotFoundError:
+            return None
+
+
 class LocalRequestReference:
     def __init__(self, top_dir=conf.local_conn_config['top']):
         self.top_dir = top_dir        
