@@ -17,12 +17,10 @@ class SampleReference(object):
 
         Parameters
         ----------
-        sample_list: list, optional
-            List of desired sample(s) to be created
         host: str, optional
-            Machine name/address for tornado instance
+            Machine name/address for amostra server
         port: int, optional
-            Port tornado server runs on
+            Port amostra server is initiated on
         """
         self.host = host
         self.port = port
@@ -37,27 +35,25 @@ class SampleReference(object):
             
     def create(self, name=None, time=None, uid=None, container=None,
                **kwargs):
-        """Add a sample to the database
-        All kwargs are collected and passed through to the documents
-        In order to modify which tornao server this routine talks to,
-        simply set self.host and self.port to the correct host and port.
-        Do not mess with _server_path variable alone.
-        
+        """Insert a sample to the database
+
         Parameters
         ----------
         name : str
             The name of the sample.  This must be unique in the database
-
-        schema : str, optional
-             The schema used to validate the kwargs prior to inserting
-             into the database.  The schema must allow for 'uid',
-             'schema', and 'name' string fields.
+        time: float
+            The time sample is created. Client provided timestamp
+        uid: str
+            Unique identifier for a sample document
+        container: str, list
+            A single or a list of container documents or uids
 
         Returns
         -------
-        uid : str
-            uid of the inserted document.
+        uid : str, list
+            uid of the inserted document
         """
+        # TODO: Make creation of list of samples possible!
         doc = dict(uid=uid if uid else str(uuid4()),
                    name=name, time=time if time else ttime.time(),
                    container=container if container else 'NULL',
@@ -66,14 +62,11 @@ class SampleReference(object):
         r = requests.post(self._samp_url,
                           data=domt)
         r.raise_for_status()
-        return doc
+        return doc[uid]
 
     def update(self, query, update):
-        """Update a request given a query and name value pair to be updated.
-        No upsert(s). If doc does not exist, simply do not update
-        In order to modify which tornao server this routine talks to,
-        simply set self.host and self.port to the correct host and port.
-        Do not mess with _server_path variable.
+        """Update a request given a query and name value pair to be updated. No upsert support.
+        For more info on upsert, check Mongo documentations
         
         Parameters
         -----------
@@ -94,20 +87,21 @@ class SampleReference(object):
         ----------
         
         as_document: bool
-            Return doct.Document if True else return a dict
+            Yields doct.Document if True
+        as_json: bool
+            Yields json instance if True
 
         Yields
         ------
-        c : dict
+        c : dict, doct.Document, json
             Documents which have all keys with the given values
-
         """
         r = requests.get(self._samp_url,
                          params=ujson.dumps(kwargs))
         r.raise_for_status()
         content = ujson.loads(r.text)
         if as_json:
-            return r.text
+            yield r.text
         if as_document:        
             for c in content:
                 yield Document('Sample', c)
@@ -117,8 +111,7 @@ class SampleReference(object):
             
     def get_schema(self):
         """Get information about schema from the server side"""
-        r = requests.get(self._server_path +
-                        'schema', params=ujson.dumps('sample'))
+        r = requests.get(self._server_path + 'schema', params=ujson.dumps('sample'))
         r.raise_for_status()
         return ujson.loads(r.text)
 
