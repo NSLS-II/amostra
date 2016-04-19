@@ -326,7 +326,25 @@ def _find_local(fname, qparams):
         for c in res_list:
             yield c
     except FileNotFoundError:
-        return None
+        yield None
+
+
+def _update_local(fname, qparams, replacement):
+    try:
+        with open(fname, 'r') as fp:
+            local_payload = ujson.load(fp)
+        qobj = mongoquery.Query(qparams)
+        for _sample in local_payload:
+            try:
+                qobj.match(_sample)
+                for k, v in replacement.iteritems():
+                    _sample[key] = v
+            except mongoquery.QueryError:
+                pass
+        with open(fname, 'w') as fp:
+            fp.write(ujson.dump(local_payload))
+    except FileNotFoundError:
+        pass # TODO: print a warning or exception here
 
 
 class LocalSampleReference:
@@ -346,9 +364,9 @@ class LocalSampleReference:
     def create(self, name=None, time=None, uid=None, container=None,
                **kwargs):
         payload = dict(uid=uid if uid else str(uuid4()),
-                   name=name, time=time if time else ttime.time(),
-                   container=container if container else 'NULL',
-                   **kwargs)
+                       name=name, time=time if time else ttime.time(),
+                       container=container if container else 'NULL',
+                       **kwargs)
         self.sample_list.append(payload)
         with open(self._samp_fname, 'w+') as fp:
             ujson.dump(self.sample_list, fp)
@@ -358,11 +376,8 @@ class LocalSampleReference:
     def _samp_fname(self):
         return expanduser(self.top_dir + '/samples.json')
 
-    def update(self, query, update):
-        with open(self._samp_fname, 'a+') as fp:
-            local_payload = ujson.load(fp)
-        for _sample in local_payload:
-            pass
+    def update(self, query, replacement):
+        _update_local(self._samp_fname, query, replacement)
 
     def find(self, **kwargs):
         return _find_local(self._samp_fname, kwargs)
@@ -395,9 +410,9 @@ class LocalRequestReference:
         with open(self._req_fname, 'w+') as fp:
             ujson.dump(self.request_list, fp)
     
-    def update(self):
-        with open(self._req_fname,'r+') as fp:
-            local_payload = ujson.load(fp)
+    def update(self, query, replacement):
+        _update_local(self._req_fname, query, replacement)
+
 
     def find(self, **kwargs):
         return _find_local(self._req_fname, kwargs)
@@ -424,10 +439,9 @@ class LocalContainerReference:
         self.container_list.append(payload)
         with open(self._cont_fname, 'w+') as fp:
             ujson.dump(self.container_list, fp)
-    
-    def update(self):
-        with open(self._cont_fname,'r+') as fp:
-            local_payload = ujson.load(fp)
+
+    def update(self, query, replacement):
+        _update_local(self._cont_fname, query, replacement)
 
     def find(self, **kwargs):
         return _find_local(self._cont_fname, kwargs)
