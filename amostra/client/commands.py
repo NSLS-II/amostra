@@ -9,6 +9,11 @@ from amostra.client import conf
 from os.path import expanduser
 import mongoquery
 
+
+class AmostraException(Exception):
+    pass
+
+
 class SampleReference(object):
     """Reference implementation of generic sample manager"""
     def __init__(self, host=conf.conn_config['host'],
@@ -64,6 +69,31 @@ class SampleReference(object):
         r.raise_for_status()
         return doc[uid]
 
+    def create_sample_list(self, sample_list):
+        """Insert a sample to the database
+
+        Parameters
+        ----------
+        sample_list : list
+            List of dictionaries
+
+
+        Returns
+        -------
+        uid : str, list
+            uid of the inserted document
+        """
+    uid_list = []
+    for doc in sample_list:
+        try:
+            uid_list.append(doc['uid'])
+        except KeyError:
+            raise AmostraException('All samples must have uids')
+        domt = ujson.dumps(doc)
+        r = requests.post(self._samp_url,
+                          data=domt)
+        r.raise_for_status()
+
     def update(self, query, update):
         """Update a request given a query and name value pair to be updated. No upsert support.
         For more info on upsert, check Mongo documentations
@@ -81,27 +111,23 @@ class SampleReference(object):
         r.raise_for_status()
         return True
         
-    def find(self, as_document=False, as_json=False, **kwargs):
+    def find(self, as_document=False, **kwargs):
         """
         Parameters
         ----------
         
         as_document: bool
             Yields doct.Document if True
-        as_json: bool
-            Yields json instance if True
 
         Yields
         ------
-        c : dict, doct.Document, json
+        c : dict, doct.Document
             Documents which have all keys with the given values
         """
         r = requests.get(self._samp_url,
                          params=ujson.dumps(kwargs))
         r.raise_for_status()
         content = ujson.loads(r.text)
-        if as_json:
-            yield r.text
         if as_document:        
             for c in content:
                 yield Document('Sample', c)
@@ -184,7 +210,6 @@ class RequestReference(object):
                          params=ujson.dumps(kwargs))
         r.raise_for_status()
         content = ujson.loads(r.text)
-        # add all content to local sample list
         if as_document:        
             for c in content:
                 yield Document('Request', c)
@@ -232,7 +257,6 @@ class ContainerReference(object):
             r = requests.post(self._cont_url,
                             data=ujson.dumps(_cont_dict))
             r.raise_for_status()
-            self._container_list.append(_cont_dict)
 
     @property
     def _server_path(self):
@@ -319,7 +343,7 @@ def _find_local(fname, qparams):
         for c in res_list:
             yield c
     except FileNotFoundError:
-        yield None
+        raise RuntimeWarning('Local file {} does not exist'.format(fname))
 
 
 def _update_local(fname, qparams, replacement):
@@ -337,7 +361,7 @@ def _update_local(fname, qparams, replacement):
         with open(fname, 'w') as fp:
             fp.write(ujson.dump(local_payload))
     except FileNotFoundError:
-        pass # TODO: print a warning or exception here
+        raise RuntimeWarning('Local file {} does not exist'.format(fname))
 
 
 class LocalSampleReference:
