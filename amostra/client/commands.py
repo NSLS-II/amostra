@@ -19,14 +19,23 @@ import mongoquery
 class AmostraException(Exception):
     pass
 
-class _get():
-    pass
 
-class _post():
-    pass
+def _get(url, params):
+    r = requests.get(url, ujson.dumps(params))
+    r.raise_for_status()
 
-class _put():
-    pass
+
+def _post(url, data):
+    r = requests.post(url,
+                      data=ujson.dumps(data))
+    r.raise_for_status()
+
+
+def _put(url, update_cont):
+    r = requests.put(url,
+                     data=ujson.dumps(update_cont))
+    r.raise_for_status()
+
 
 class SampleReference(object):
     """Reference implementation of generic sample manager"""
