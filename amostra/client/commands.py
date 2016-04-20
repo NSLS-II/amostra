@@ -9,10 +9,21 @@ from amostra.client import conf
 from os.path import expanduser
 import mongoquery
 
+# TODO: Separate local and online commands.py
+# TODO: Replace get, post, put and exception handling with _ from utils
+
 
 class AmostraException(Exception):
     pass
 
+class _get():
+    pass
+
+class _post():
+    pass
+
+class _put():
+    pass
 
 class SampleReference(object):
     """Reference implementation of generic sample manager"""
@@ -58,7 +69,6 @@ class SampleReference(object):
         uid : str, list
             uid of the inserted document
         """
-        # TODO: Make creation of list of samples possible!
         doc = dict(uid=uid if uid else str(uuid4()),
                    name=name, time=time if time else ttime.time(),
                    container=container if container else 'NULL',
@@ -88,7 +98,7 @@ class SampleReference(object):
             try:
                 uid_list.append(doc['uid'])
             except KeyError:
-                raise AmostraException('All samples must have uids')
+                raise AmostraException('Every sample must have a uid')
             domt = ujson.dumps(doc)
             r = requests.post(self._samp_url,
                               data=domt)
@@ -115,7 +125,6 @@ class SampleReference(object):
         """
         Parameters
         ----------
-        
         as_document: bool
             Yields doct.Document if True
 
@@ -143,32 +152,24 @@ class SampleReference(object):
 
 
 class RequestReference(object):
-    """Reference implementation of generic request
+    """Reference implementation of generic request"""
+    def __init__(self, host=conf.conn_config['host'], port=conf.conn_config['port']):
+        """Constructor
 
-    For simplicity, built on top of a list of dicts.
-
-    """
-    def __init__(self, host=conf.conn_config['host'], port=conf.conn_config['port'],
-                 sample=None, time=None, uid=None, state='active',
-                 seq_num=0, **kwargs):
-        """Handles connection configuration to the service backend.
-        Either initiate with a request or use purely as a client for requests.
+        Parameters
+        ----------
+        host: str, optional
+            Machine name/address for amostra server
+        port: int, optional
+            Port amostra server is initiated on
         """
         self.host = host
         self.port = port
-        if sample:
-            payload = dict(uid=uid if uid else str(uuid4()),
-                           sample=sample['uid'] if sample else 'NULL',
-                           time=time if time else ttime.time(), state=state,
-                           seq_num=seq_num, **kwargs)
-            r = requests.post(self._req_url, data=ujson.dumps(payload))
-            r.raise_for_status()
-            self._request_list.append(payload)
                     
     @property
     def _server_path(self):
         return 'http://{}:{}/' .format(self.host, self.port)
-    
+
     @property
     def _req_url(self):
         return self._server_path + 'request'
@@ -204,8 +205,7 @@ class RequestReference(object):
         return payload
 
     def find(self, as_document=False, **kwargs):
-        # TODO: Add as_json option
-        """Given a set of mongo search parameters, return a requests iterator""" 
+        """Given a set of mongo search parameters, return a requests iterator"""
         r = requests.get(self._req_url,
                          params=ujson.dumps(kwargs))
         r.raise_for_status()
@@ -219,7 +219,7 @@ class RequestReference(object):
                 
     def update(self, query, update):
         """Update a request given a query and name value pair to be updated.
-        No upsert(s). If doc does not exist, simply do not update
+        No upsert(s).
         
         Parameters
         -----------
@@ -243,29 +243,21 @@ class RequestReference(object):
 
 class ContainerReference(object):
     """Reference implementation of generic container"""
-    def __init__(self, uid=None, time=None, host=conf.conn_config['host'], port=conf.conn_config['port'],
-                 **kwargs):
+    def __init__(self, host=conf.conn_config['host'], port=conf.conn_config['port']):
         """Handles connection configuration to the service backend.
         Either initiate with a request or use purely as a client for requests.
         """
         self.port = port
         self.host = host
-        if kwargs:        
-            _cont_dict = dict(uid=uid if uid else str(uuid4()), 
-                              time=time if time else ttime.time(),
-                              **kwargs)        
-            r = requests.post(self._cont_url,
-                            data=ujson.dumps(_cont_dict))
-            r.raise_for_status()
 
     @property
     def _server_path(self):
         return 'http://{}:{}/' .format(self.host, self.port)
-    
+
     @property
     def _cont_url(self):
         return self._server_path + 'container'
-    
+
     def create(self, uid=None, time=None, **kwargs):
         """Insert a container document. Schema validation done
         on the server side. No native Python object (e.g. np.ndarray)
@@ -282,17 +274,16 @@ class ContainerReference(object):
         -------
         payload['uid']
             uid of the payload created
-        """        
+        """
         payload = dict(uid=uid if uid else str(uuid4()),
                        time=time if time else ttime.time(), **kwargs)
         r = requests.post(url=self._cont_url,
                           data=ujson.dumps(payload))
         r.raise_for_status()
         return payload
-    
+
     def find(self, as_document=False, **kwargs):
-        # TODO: Add as_json option
-        """Given a set of mongo search parameters, return a requests iterator"""        
+        """Given a set of mongo search parameters, return a requests iterator"""
         r = requests.get(self._cont_url,
                          params=ujson.dumps(kwargs))
         r.raise_for_status()
@@ -303,7 +294,7 @@ class ContainerReference(object):
         else:
             for c in content:
                 yield c
-    
+
     def update(self, query, update):
         """Update a request given a query and name value pair to be updated.
         No upsert(s). If doc does not exist, simply do not update
@@ -329,6 +320,20 @@ class ContainerReference(object):
 
 
 def _find_local(fname, qparams):
+    """Update a document created using the local framework
+    Parameters
+    -----------
+    fname: str
+        Name of the query should be run
+    qparams: dict
+        Query parameters. Similar to online query methods
+
+    Yields
+    ------------
+    c: doct.Document, StopIteration
+        Result of the query if found
+
+    """
     res_list = []
     try:
         with open(fname, 'r') as fp:
@@ -339,11 +344,12 @@ def _find_local(fname, qparams):
                 qobj.match(_sample)
                 res_list.append(_sample)
             except mongoquery.QueryError:
+                # this document is not it, skip it
                 pass
-        for c in res_list:
-            yield c
     except FileNotFoundError:
         raise RuntimeWarning('Local file {} does not exist'.format(fname))
+    for c in res_list:
+        yield c
 
 
 def _update_local(fname, qparams, replacement):
