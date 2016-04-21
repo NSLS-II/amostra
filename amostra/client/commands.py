@@ -103,14 +103,8 @@ class SampleReference(object):
         """
         uid_list = []
         for doc in sample_list:
-            try:
-                uid_list.append(doc['uid'])
-            except KeyError:
-                raise AmostraException('Every sample must have a uid')
-            domt = ujson.dumps(doc)
-            r = requests.post(self._samp_url,
-                              data=domt)
-            r.raise_for_status()
+            uid_list.append(_post(self._samp_url, doc)['uid'])
+        return uid_list
 
     def update(self, query, update):
         """Update a request given a query and name value pair to be updated. No upsert support.
