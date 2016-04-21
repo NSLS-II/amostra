@@ -8,7 +8,6 @@ import time as ttime
 from amostra.client import conf
 
 
-# TODO: Replace get, post, put and exception handling with _ from utils
 # TODO: Go over local lists prior to file lookups in local version
 # TODO: Make use of local lists for all collections
 # TODO: Add tests for both local and online commands/clients
@@ -21,6 +20,7 @@ class AmostraException(Exception):
 def _get(url, params):
     r = requests.get(url, ujson.dumps(params))
     r.raise_for_status()
+    return ujson.loads(r.text)
 
 
 def _post(url, data):
@@ -29,8 +29,8 @@ def _post(url, data):
     r.raise_for_status()
 
 
-def _put(url, update_cont):
-    update_cont = {''}
+def _put(url, query, update):
+    update_cont = {'query': query, 'update': update}
     r = requests.put(url,
                      data=ujson.dumps(update_cont))
     r.raise_for_status()
@@ -60,7 +60,7 @@ class SampleReference(object):
     def _samp_url(self):
         return self._server_path + 'sample'
             
-    def create(self, name=None, time=None, uid=None, container=None,
+    def create(self, name, time=None, uid=None, container=None,
                **kwargs):
         """Insert a sample to the database
 
@@ -84,8 +84,8 @@ class SampleReference(object):
                    name=name, time=time if time else ttime.time(),
                    container=container if container else 'NULL',
                    **kwargs)
-        _get(self._samp_url,)
-        return doc[uid]
+        _post(self._samp_url, doc)
+        return doc
 
     def create_sample_list(self, sample_list):
         """Insert a sample to the database
@@ -123,10 +123,7 @@ class SampleReference(object):
         update: dict
             Name/value pair that is to be replaced within an existing Request doc
         """
-        payload = dict(query=query, update=update)
-        r = requests.put(url=self._samp_url,
-                         data=ujson.dumps(payload))
-        r.raise_for_status()
+        _put(self._samp_url, query, update)
         return True
         
     def find(self, as_document=False, **kwargs):
@@ -141,11 +138,8 @@ class SampleReference(object):
         c : dict, doct.Document
             Documents which have all keys with the given values
         """
-        r = requests.get(self._samp_url,
-                         params=ujson.dumps(kwargs))
-        r.raise_for_status()
-        content = ujson.loads(r.text)
-        if as_document:        
+        content = _get(self._samp_url, params=kwargs)
+        if as_document:
             for c in content:
                 yield Document('Sample', c)
         else:
@@ -154,7 +148,8 @@ class SampleReference(object):
             
     def get_schema(self):
         """Get information about schema from the server side"""
-        r = requests.get(self._server_path + 'schema', params=ujson.dumps('sample'))
+        r = requests.get(self._server_path + 'schema',
+                         params=ujson.dumps('sample'))
         r.raise_for_status()
         return ujson.loads(r.text)
 
@@ -207,17 +202,12 @@ class RequestReference(object):
                        sample=sample['uid'] if sample else 'NULL',
                        time=time if time else ttime.time(),state=state,
                        seq_num=seq_num, **kwargs)
-        r = requests.post(url=self._req_url,
-                          data=ujson.dumps(payload))
-        r.raise_for_status()
+        _post(self._req_url, payload)
         return payload
 
     def find(self, as_document=False, **kwargs):
         """Given a set of mongo search parameters, return a requests iterator"""
-        r = requests.get(self._req_url,
-                         params=ujson.dumps(kwargs))
-        r.raise_for_status()
-        content = ujson.loads(r.text)
+        content = _get(self._req_url, kwargs)
         if as_document:        
             for c in content:
                 yield Document('Request', c)
@@ -236,10 +226,8 @@ class RequestReference(object):
         update: dict
             Name/value pair that is to be replaced within an existing Request doc.
         """
-        payload = dict(query=query, update=update)
-        r = requests.put(url=self._req_url,
-                         data=ujson.dumps(payload))
-        r.raise_for_status()
+        _put(self._req_url, query, update)
+        return True
 
     def get_schema(self):
         """Get information about schema from the server side"""
@@ -285,17 +273,12 @@ class ContainerReference(object):
         """
         payload = dict(uid=uid if uid else str(uuid4()),
                        time=time if time else ttime.time(), **kwargs)
-        r = requests.post(url=self._cont_url,
-                          data=ujson.dumps(payload))
-        r.raise_for_status()
+        _post(self._cont_url, payload)
         return payload
 
     def find(self, as_document=False, **kwargs):
         """Given a set of MongoDB search parameters, return a requests iterator"""
-        r = requests.get(self._cont_url,
-                         params=ujson.dumps(kwargs))
-        r.raise_for_status()
-        content = ujson.loads(r.text)
+        content = _get(self._cont_url, kwargs)
         if as_document:
             for c in content:
                 yield Document('container', c)
@@ -314,10 +297,8 @@ class ContainerReference(object):
         update: dict
             Name/value pair that is to be replaced within an existing Request doc.
         """
-        payload = dict(query=dict(query), update=update)
-        r = requests.put(url=self._cont_url,
-                         data=ujson.dumps(payload))
-        r.raise_for_status()
+        _put(self._cont_url, query, update)
+        return True
 
     def get_schema(self):
         """Get information about schema from the server side"""
