@@ -8,8 +8,6 @@ import time as ttime
 from amostra.client import conf
 
 
-# TODO: Go over local lists prior to file lookups in local version
-# TODO: Make use of local lists for all collections
 # TODO: Add tests for both local and online commands/clients
 # TODO: Add AmostraClient as a convenient way to interact with commands.py
 
