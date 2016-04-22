@@ -16,18 +16,64 @@ class AmostraException(Exception):
 
 
 def _get(url, params):
+    """RESTful API get (querying)
+
+    Parameters
+    ----------
+    url: str
+        Address for the amostra server
+    params: dict
+        Query parameters to be sent to mongo instance
+
+    Returns
+    -------
+    list
+        Results of the query
+
+    """
     r = requests.get(url, ujson.dumps(params))
     r.raise_for_status()
     return ujson.loads(r.text)
 
 
 def _post(url, data):
+    """RESTful API post (insert to database)
+
+    Parameters
+    ----------
+    url: str
+        Address for the amostra server
+    data: dict
+        Entries to be inserted to database
+
+    """
     r = requests.post(url,
                       data=ujson.dumps(data))
     r.raise_for_status()
 
 
 def _put(url, query, update):
+    """RESTful API put (update entries in database)
+
+    Parameters
+    ----------
+    url: str
+        Address for the amostra server
+    query: dict
+        Query string. Any pymongo supported mongo query
+    update: dict
+        Key/value pairs to be updated in the original document
+
+    Returns
+    -------
+    bool
+        True if update successful
+    Raises
+    --------
+    requests.exceptions.HTTPError
+        In case update fails, appropriate HTTPError and message string returned
+
+    """
     update_cont = {'query': query, 'update': update}
     r = requests.put(url,
                      data=ujson.dumps(update_cont))
@@ -46,18 +92,26 @@ class SampleReference(object):
             Machine name/address for Amostra server
         port: int, optional
             Port Amostra server is initiated on
+
         """
         self.host = host
         self.port = port
 
     @property
     def _server_path(self):
+        """URL to the Amostra server"""
         return 'http://{}:{}/' .format(self.host, self.port)
     
     @property
     def _samp_url(self):
+        """URL to the sample reference handler in the server side"""
         return self._server_path + 'sample'
-            
+
+    @property
+    def _schema_url(self):
+        """URL to the schema reference handler in the server side"""
+        return self._server_path + 'schema'
+
     def create(self, name, time=None, uid=None, container=None,
                **kwargs):
         """Insert a sample to the database
@@ -75,8 +129,9 @@ class SampleReference(object):
 
         Returns
         -------
-        uid : str, list
-            uid of the inserted document
+        doc : dict
+            The inserted document
+
         """
         doc = dict(uid=uid if uid else str(uuid4()),
                    name=name, time=time if time else ttime.time(),
@@ -93,11 +148,11 @@ class SampleReference(object):
         sample_list : list
             List of dictionaries
 
-
         Returns
         -------
-        uid : str, list
-            uid of the inserted document
+        uid_list : list
+            uid of the inserted documents
+
         """
         uid_list = []
         for s in sample_list:
@@ -119,21 +174,27 @@ class SampleReference(object):
             Allows finding Sample documents to be updated
         update: dict
             Name/value pair that is to be replaced within an existing Request doc
+        Returns
+        ----------
+        bool
+            Returns True if update successful
+
         """
         _put(self._samp_url, query, update)
         return True
-        
+
     def find(self, as_document=False, **kwargs):
         """
         Parameters
         ----------
         as_document: bool
-            Yields doct.Document if True
+            Formats output to doct.Document if True
 
         Yields
         ------
         c : dict, doct.Document
             Documents which have all keys with the given values
+
         """
         content = _get(self._samp_url, params=kwargs)
         if as_document:
@@ -144,8 +205,15 @@ class SampleReference(object):
                 yield c
             
     def get_schema(self):
-        """Get information about schema from the server side"""
-        r = requests.get(self._server_path + 'schema',
+        """Get information about schema from the server side
+
+        Returns
+        --------
+        dict
+            Returns the json schema dict used for validation
+
+        """
+        r = requests.get(self._schema_url,
                          params=ujson.dumps('sample'))
         r.raise_for_status()
         return ujson.loads(r.text)
@@ -162,18 +230,26 @@ class RequestReference(object):
             Machine name/address for amostra server
         port: int, optional
             Port amostra server is initiated on
+
         """
         self.host = host
         self.port = port
                     
     @property
     def _server_path(self):
+        """URL to the Amostra server"""
         return 'http://{}:{}/' .format(self.host, self.port)
 
     @property
     def _req_url(self):
+        """URL to the request reference handler in the server side"""
         return self._server_path + 'request'
-    
+
+    @property
+    def _schema_url(self):
+        """URL to the schema reference handler in the server side"""
+        return self._server_path + 'schema'
+
     def create(self, sample=None, time=None,
                uid=None, state='active', seq_num=0, **kwargs):
         """ Create a sample entry in the dataase
@@ -192,8 +268,9 @@ class RequestReference(object):
 
         Returns
         -------
-        payload['uid']
+        str
             uid of the payload created
+
         """
         payload = dict(uid=uid if uid else str(uuid4()), 
                        sample=sample['uid'] if sample else 'NULL',
@@ -203,7 +280,25 @@ class RequestReference(object):
         return payload
 
     def find(self, as_document=False, **kwargs):
-        """Given a set of mongo search parameters, return a requests iterator"""
+        """Given a set of mongo search parameters, return a requests iterator
+
+        Parameters
+        -----------
+        as_document: bool
+            Format return type to doct.Document if set
+
+        Yields
+        ----------
+        dict, doct.Document
+            Result of the query
+
+        Raises
+        ---------
+        StopIteration, requests.exceptions.HTTPError
+            When nothing found or something is wrong on the server side. If server error occurs,
+            a human friendly message is returned.
+
+        """
         content = _get(self._req_url, kwargs)
         if as_document:        
             for c in content:
@@ -222,14 +317,24 @@ class RequestReference(object):
             Allows finding Request documents to be updated.
         update: dict
             Name/value pair that is to be replaced within an existing Request doc.
+        Returns
+        ----------
+        bool
+            Returns True if update successful
         """
         _put(self._req_url, query, update)
         return True
 
     def get_schema(self):
-        """Get information about schema from the server side"""
-        r = requests.get(self._server_path +
-                        'schema', params=ujson.dumps('request'))
+        """Get information about schema from the server side
+
+        Returns
+        --------
+        dict
+            Returns the json schema dict used for validation
+        """
+        r = requests.get(self._schema_url,
+                         params=ujson.dumps('request'))
         r.raise_for_status()
         return ujson.loads(r.text)
 
@@ -245,11 +350,18 @@ class ContainerReference(object):
 
     @property
     def _server_path(self):
+        """URL to the Amostra server"""
         return 'http://{}:{}/' .format(self.host, self.port)
 
     @property
     def _cont_url(self):
+        """URL to the container reference handler in the server side"""
         return self._server_path + 'container'
+
+    @property
+    def _schema_url(self):
+        """URL to the schema reference handler in the server side"""
+        return self._server_path + 'schema'
 
     def create(self, uid=None, time=None, **kwargs):
         """Insert a container document. Schema validation done
@@ -293,13 +405,27 @@ class ContainerReference(object):
             Allows finding Container documents to be updated.
         update: dict
             Name/value pair that is to be replaced within an existing Request doc.
+        Returns
+        --------
+        bool
+            Returns True if update successful
+
+        Returns
+        ----------
+        bool
+            Returns True if update successful
         """
         _put(self._cont_url, query, update)
         return True
 
     def get_schema(self):
-        """Get information about schema from the server side"""
-        r = requests.get(self._server_path +
-                        'schema', params=ujson.dumps('container'))
+        """Get information about schema from the server side
+
+        Returns
+        --------
+        dict
+            Returns the json schema dict used for validation
+        """
+        r = requests.get(self._schema_url, params=ujson.dumps('container'))
         r.raise_for_status()
         return ujson.loads(r.text)
