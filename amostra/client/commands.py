@@ -5,7 +5,7 @@ import ujson
 from uuid import uuid4
 import requests
 import time as ttime
-from amostra.client import conf
+from ..client import conf
 
 
 # TODO: Add tests for both local and online commands/clients
