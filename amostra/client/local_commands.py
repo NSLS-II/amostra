@@ -53,6 +53,7 @@ def _update_local(fname, qparams, replacement):
         Fields/value pair to be updated. Beware of disallowed fields
         such as time and uid
     """
+    print(fname, qparams, replacement)
     try:
         with open(fname, 'r') as fp:
             local_payload = ujson.load(fp)
@@ -60,12 +61,12 @@ def _update_local(fname, qparams, replacement):
         for _sample in local_payload:
             try:
                 qobj.match(_sample)
-                for k, v in replacement.iteritems():
+                for k, v in replacement.items():
                     _sample[k] = v
             except mongoquery.QueryError:
                 pass
         with open(fname, 'w') as fp:
-            fp.write(ujson.dump(local_payload))
+            ujson.dump(local_payload, fp)
     except FileNotFoundError:
         raise RuntimeWarning('Local file {} does not exist'.format(fname))
 
@@ -77,7 +78,7 @@ class LocalSampleReference:
         try:
             with open(self._samp_fname, 'r') as fp:
                 tmp = ujson.load(fp)
-        except FileNotFoundError:
+        except (FileNotFoundError, ValueError):
             tmp = []
         try:
             self.sample_list = tmp if tmp else []
