@@ -100,8 +100,13 @@ class SampleReference(object):
             uid of the inserted document
         """
         uid_list = []
-        for doc in sample_list:
-            uid_list.append(_post(self._samp_url, doc)['uid'])
+        for s in sample_list:
+            if 'uid' not in s:
+                s['uid'] = str(uuid4())
+            if 'time' not in s:
+                s['time'] = ttime.time()
+            _post(self._samp_url, s)
+            uid_list.append(s['uid'])
         return uid_list
 
     def update(self, query, update):
