@@ -4,7 +4,8 @@ import tornado.web
 from pkg_resources import resource_filename as rs_fn
 import ujson
 import pymongo
-
+import uuid
+import time as ttime
 
 class AmostraException(Exception):
     pass
@@ -80,3 +81,24 @@ def return2client(handler, payload):
                 break
         handler.write(']')
     handler.finish()
+
+
+def default_timeuid(document):
+    """
+    Given a document, default time and uid fields if not provided
+
+    Parameters
+    ----------
+    document: dict
+        Document to be inserted
+
+    Returns
+    -------
+    dict
+        Document with defaults
+    """
+    if 'uid' not in document or document['uid'] is None:
+        document['uid'] = str(uuid.uuid4())
+    if 'time' not in document or document['time'] is None:
+        document['time'] = ttime.time()
+    return document

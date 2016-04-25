@@ -108,6 +108,7 @@ class SampleReferenceHandler(DefaultHandler):
         uids = []
         if isinstance(data, list):
             for d in data:
+                d = utils.default_timeuid(d)
                 try:
                     jsonschema.validate(d,
                                         utils.schemas['sample'])
@@ -124,6 +125,7 @@ class SampleReferenceHandler(DefaultHandler):
                 database.sample.create_index([('container', pymongo.DESCENDING)],
                                                unique=False, sparse=True)
         elif isinstance(data, dict):
+            data = utils.default_timeuid(data)
             try:
                 jsonschema.validate(data,
                                     utils.schemas['sample'])
@@ -197,6 +199,7 @@ class RequestReferenceHandler(DefaultHandler):
         uids = []
         if isinstance(data, list):
             for d in data:
+                d = utils.default_timeuid(d)
                 try:
                     jsonschema.validate(d,
                                         utils.schemas['request'])
@@ -217,6 +220,7 @@ class RequestReferenceHandler(DefaultHandler):
                 database.request.create_index([('sample', pymongo.DESCENDING)],
                                              unique=False, background=True, sparse=True)
         elif isinstance(data, dict):
+            data = utils.default_timeuid(data)
             try:
                 jsonschema.validate(data,
                                     utils.schemas['request'])
@@ -308,6 +312,7 @@ class ContainerReferenceHandler(DefaultHandler):
         uids = []
         if isinstance(data, list):
             for d in data:
+                d = utils.default_timeuid(d)
                 try:
                     jsonschema.validate(d,
                                         utils.schemas['container'])
@@ -323,6 +328,7 @@ class ContainerReferenceHandler(DefaultHandler):
                 database.container.create_index([('container', pymongo.DESCENDING)],
                                                 unique=False, background=True, sparse=True)
         elif isinstance(data, dict):
+            data = utils.default_timeuid(data)
             try:
                 jsonschema.validate(data,
                                     utils.schemas['container'])
