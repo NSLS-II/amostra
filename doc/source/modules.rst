@@ -7,4 +7,5 @@ amostra
    introduction
    setup
    tutorial
+   examples
    amostra  
