@@ -97,12 +97,11 @@ def test_update_sample_illegal():
     test_sample = dict(name='up_sam', uid=str(uuid.uuid4()),
                     time=ttime.time(), owner='arkilic', project='trial',
                     beamline_id='trial_b', updated=False)
-    samp = SampleReference([test_sample],
-                            host=TESTING_CONFIG['host'],
-                            port=TESTING_CONFIG['port'])
+    samp = SampleReference(host=TESTING_CONFIG['host'],
+                           port=TESTING_CONFIG['port'])
     pytest.raises(HTTPError,
                   samp.update, query={'name': test_sample['name']},
-                                      update={'time': 'illegal'})
+                  update={'time': 'illegal'})
     pytest.raises(HTTPError,
                   samp.update, query={'name': test_sample['name']},
                                       update={'uid': 'illegal'})
