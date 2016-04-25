@@ -5,7 +5,7 @@ import pytest
 import time
 from amostra.testing import amostra_setup, amostra_teardown
 from amostra.client.api import RequestReference
-from requests.exceptions import RequestException
+from requests.exceptions import HTTPError, ConnectionError
 from amostra.testing import TESTING_CONFIG
 from uuid import uuid4
 from requests.exceptions import ConnectionError
@@ -29,56 +29,56 @@ def test_req_connection_switch():
     list(r.find())
     
 
-# def test_request_create():
-#     req1= RequestReference(host=TESTING_CONFIG['host'],
-#                            port=TESTING_CONFIG['port'])
-#
-#     req2 = RequestReference(host=TESTING_CONFIG['host'],
-#                            port=TESTING_CONFIG['port'])
-#     req2.create(sample=None, time=time.time(),
-#                uid=None, state='active', seq_num=0, foo='bar',
-#                hero='asterix', antihero='romans')
-#     req2.host = 'hail_caesar'
-#     pytest.raises(RequestException, req2.create)
+def test_request_create():
+    req1= RequestReference(host=TESTING_CONFIG['host'],
+                           port=TESTING_CONFIG['port'])
+
+    req2 = RequestReference(host=TESTING_CONFIG['host'],
+                           port=TESTING_CONFIG['port'])
+    req2.create(sample='roman_sample', time=time.time(),
+               uid=None, state='active', seq_num=0, foo='bar',
+               hero='asterix', antihero='romans')
+    req2.host = 'hail_caesar'
+    pytest.raises(ConnectionError, req2.create, sample='roman_sample')
 
 
-# def test_duplicate_request():
-#     m_uid = str(uuid4())
-#     req1= RequestReference(host=TESTING_CONFIG['host'],
-#                            port=TESTING_CONFIG['port'])
-#     req1.create(sample=None, time=time.time(),
-#                uid=m_uid, state='active', seq_num=0, foo='bar',
-#                hero='asterix', antihero='romans')
-#     req2 = RequestReference(host=TESTING_CONFIG['host'],
-#                            port=TESTING_CONFIG['port'])
-#     pytest.raises(RequestException, req2.create, sample=None, time=time.time(),
-#                uid=m_uid, state='active', seq_num=0, foo='bar',
-#                hero='asterix', antihero='romans')
-#
-# def test_request_find():
-#     r = RequestReference(host=TESTING_CONFIG['host'],
-#                         port=TESTING_CONFIG['port'])
-#     req_dict = dict(sample=None, time=time.time(),
-#                     uid=None, state='active', seq_num=0, foo='bar',
-#                     hero='obelix', antihero='romans')
-#     inserted = r.create(**req_dict)
-#     retrieved = next(r.find(foo='bar'))
-#     assert retrieved == inserted
-#
-#
-# def test_update_request():
-#     r = RequestReference(host=TESTING_CONFIG['host'],
-#                         port=TESTING_CONFIG['port'])
-#     m_uid = str(uuid4())
-#     req_dict = dict(sample=None, time=time.time(),
-#                     uid=m_uid, state='active', seq_num=0, foo='bar',
-#                     hero='obelix', antihero='romans')
-#     r.create(**req_dict)
-#     r.update(query={'uid': m_uid},
-#                        update={'state': 'inactive'})
-#     updated_req = next(r.find(uid=m_uid))
-#     assert updated_req['state'] == 'inactive'
-#
+def test_duplicate_request():
+    m_uid = str(uuid4())
+    req1= RequestReference(host=TESTING_CONFIG['host'],
+                           port=TESTING_CONFIG['port'])
+    req1.create(sample='hidefix', time=time.time(),
+               uid=m_uid, state='active', seq_num=0, foo='bar',
+               hero='asterix', antihero='romans')
+    req2 = RequestReference(host=TESTING_CONFIG['host'],
+                           port=TESTING_CONFIG['port'])
+    pytest.raises(HTTPError, req2.create, sample='hidefix', time=time.time(),
+               uid=m_uid, state='active', seq_num=0, foo='bar',
+               hero='asterix', antihero='romans')
+
+def test_request_find():
+    r = RequestReference(host=TESTING_CONFIG['host'],
+                        port=TESTING_CONFIG['port'])
+    req_dict = dict(sample='hidefix', time=time.time(),
+                    uid=None, state='active', seq_num=0, foo='bar',
+                    hero='obelix', antihero='romans')
+    inserted = r.create(**req_dict)
+    retrieved = next(r.find(foo='bar'))
+    assert retrieved == inserted
+
+
+def test_update_request():
+    r = RequestReference(host=TESTING_CONFIG['host'],
+                        port=TESTING_CONFIG['port'])
+    m_uid = str(uuid4())
+    req_dict = dict(sample='hidefix', time=time.time(),
+                    uid=m_uid, state='active', seq_num=0, foo='bar',
+                    hero='obelix', antihero='romans')
+    r.create(**req_dict)
+    r.update(query={'uid': m_uid},
+                       update={'state': 'inactive'})
+    updated_req = next(r.find(uid=m_uid))
+    assert updated_req['state'] == 'inactive'
+
 
 def setup():
     amostra_setup()
