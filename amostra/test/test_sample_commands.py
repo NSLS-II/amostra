@@ -65,32 +65,32 @@ def test_find_sample():
                          port=TESTING_CONFIG['port'])
     s1.create(**m_sample)
 
+    s_ret = next(s1.find(uid=m_sample['uid']))
+    assert s_ret == m_sample
+
+
+def test_find_sample_as_doc():
+    m_sample = dict(name='comp_sam', uid=str(uuid.uuid4()),
+                    time=ttime.time(), owner='arkilic', project='trial',
+                    beamline_id='trial_b', container='legion1')
+    s1 = SampleReference(host=TESTING_CONFIG['host'],
+                         port=TESTING_CONFIG['port'])
+    s1.create(**m_sample)
     s_ret = next(s1.find(uid=m_sample['uid'], as_document=True))
     assert s_ret == Document('Sample', m_sample)
 
 
-# def test_find_sample_as_doc():
-#     m_sample = dict(name='comp_sam', uid=str(uuid.uuid4()),
-#                     time=ttime.time(), owner='arkilic', project='trial',
-#                     beamline_id='trial_b')
-#     s1 = SampleReference([m_sample],
-#                         host=TESTING_CONFIG['host'],
-#                         port=TESTING_CONFIG['port'])
-#     s_ret = next(s1.find(uid=m_sample['uid'], as_document=True))
-#     assert s_ret == Document('Sample', m_sample)
-
-
-# def test_update_sample():
-#     test_sample = dict(name='up_sam', uid=str(uuid.uuid4()),
-#                     time=ttime.time(), owner='arkilic', project='trial',
-#                     beamline_id='trial_b', state='active')
-#     samp = SampleReference([test_sample],
-#                         host=TESTING_CONFIG['host'],
-#                         port=TESTING_CONFIG['port'])
-#     samp.update(query={'name': test_sample['name']},
-#                        update={'state': 'inactive'})
-#     updated_samp = next(samp.find(name='up_sam'))
-#     assert updated_samp['state'] == 'inactive'
+def test_update_sample():
+    test_sample = dict(name='up_sam', uid=str(uuid.uuid4()),
+                       time=ttime.time(), owner='arkilic', project='trial',
+                       beamline_id='trial_b', state='active', container='legion2')
+    samp = SampleReference(host=TESTING_CONFIG['host'],
+                           port=TESTING_CONFIG['port'])
+    samp.create(**test_sample)
+    samp.update(query={'uid': test_sample['uid']},
+                       update={'state': 'inactive'})
+    updated_samp = next(samp.find(name='up_sam'))
+    assert updated_samp['state'] == 'inactive'
     
 
 # def test_update_sample_illegal():
