@@ -9,7 +9,7 @@ from  amostra.server.engine import (SampleReferenceHandler,
                                     SchemaHandler,
                                     ContainerReferenceHandler,
                                     db_connect)
-from amostra.server.conf import load_configuration
+from .server.conf import load_configuration
 
 
 def start_server(config=None):

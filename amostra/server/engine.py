@@ -146,7 +146,6 @@ class SampleReferenceHandler(DefaultHandler):
 
     @tornado.web.asynchronous
     def put(self):
-        # TODO: Make sure no unique field gets updated!
         database = self.settings['db']
         incoming = ujson.loads(self.request.body)
         try:
@@ -244,7 +243,6 @@ class RequestReferenceHandler(DefaultHandler):
     
     @tornado.web.asynchronous
     def put(self):
-        # TODO: Make sure no unique field gets updated!
         database = self.settings['db']
         incoming = ujson.loads(self.request.body)
         try:
@@ -345,7 +343,6 @@ class ContainerReferenceHandler(DefaultHandler):
 
     @tornado.web.asynchronous
     def put(self):
-        # TODO: Make sure no unique field gets updated!
         database = self.settings['db']
         incoming = ujson.loads(self.request.body)
         try:

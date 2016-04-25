@@ -5,87 +5,168 @@ import ujson
 from uuid import uuid4
 import requests
 import time as ttime
-from amostra.client import conf
+from ..client import conf
+
+
+# TODO: Add tests for both local and online commands/clients
+# TODO: Add AmostraClient as a convenient way to interact with commands.py
+
+class AmostraException(Exception):
+    pass
+
+
+def _get(url, params):
+    """RESTful API get (querying)
+
+    Parameters
+    ----------
+    url: str
+        Address for the amostra server
+    params: dict
+        Query parameters to be sent to mongo instance
+
+    Returns
+    -------
+    list
+        Results of the query
+
+    """
+    r = requests.get(url, ujson.dumps(params))
+    r.raise_for_status()
+    return ujson.loads(r.text)
+
+
+def _post(url, data):
+    """RESTful API post (insert to database)
+
+    Parameters
+    ----------
+    url: str
+        Address for the amostra server
+    data: dict
+        Entries to be inserted to database
+
+    """
+    r = requests.post(url,
+                      data=ujson.dumps(data))
+    r.raise_for_status()
+
+
+def _put(url, query, update):
+    """RESTful API put (update entries in database)
+
+    Parameters
+    ----------
+    url: str
+        Address for the amostra server
+    query: dict
+        Query string. Any pymongo supported mongo query
+    update: dict
+        Key/value pairs to be updated in the original document
+
+    Returns
+    -------
+    bool
+        True if update successful
+    Raises
+    --------
+    requests.exceptions.HTTPError
+        In case update fails, appropriate HTTPError and message string returned
+
+    """
+    update_cont = {'query': query, 'update': update}
+    r = requests.put(url,
+                     data=ujson.dumps(update_cont))
+    r.raise_for_status()
 
 
 class SampleReference(object):
     """Reference implementation of generic sample manager"""
-    def __init__(self, sample_list=[], host=conf.conn_config['host'],
+    def __init__(self, host=conf.conn_config['host'],
                  port=conf.conn_config['port']):
         """Constructor. 
 
         Parameters
         ----------
-        sample_list: list, optional
-            List of desired sample(s) to be created
         host: str, optional
-            Machine name/address for tornado instance
+            Machine name/address for Amostra server
         port: int, optional
-            Port tornado server runs on
+            Port Amostra server is initiated on
+
         """
         self.host = host
-        self.port = port        
-        self._server_path = 'http://{}:{}/' .format(self.host, self.port)
-        if not isinstance(sample_list, list):
-            raise TypeError("sample_list must be a list")
-        if not isinstance(sample_list, list):
-            raise TypeError('Not a correct type for the constructor.Expects list')
-        self._sample_list = [dict(d) for d in sample_list]
-        ln = len(self._sample_list)
-        if ln != len(set(d['name'] for d in self._sample_list)):
-            raise ValueError("duplicate names")
-        if ln != len(set(d['uid'] for d in self._sample_list)):
-            raise ValueError("duplicate uids")
-        if sample_list:
-            domt = ujson.dumps(self._sample_list)
-            r = requests.post(self._server_path + 'sample',
-                              data=domt)
-            r.raise_for_status()
+        self.port = port
 
-    def create(self, name=None, time=None, uid=None, container=None,
+    @property
+    def _server_path(self):
+        """URL to the Amostra server"""
+        return 'http://{}:{}/' .format(self.host, self.port)
+    
+    @property
+    def _samp_url(self):
+        """URL to the sample reference handler in the server side"""
+        return self._server_path + 'sample'
+
+    @property
+    def _schema_url(self):
+        """URL to the schema reference handler in the server side"""
+        return self._server_path + 'schema'
+
+    def create(self, name, time=None, uid=None, container=None,
                **kwargs):
-        """Add a sample to the database
-        All kwargs are collected and passed through to the documents
-        In order to modify which tornao server this routine talks to,
-        simply set self.host and self.port to the correct host and port.
-        Do not mess with _server_path variable alone.
-        
+        """Insert a sample to the database
+
         Parameters
         ----------
         name : str
             The name of the sample.  This must be unique in the database
-
-        schema : str, optional
-             The schema used to validate the kwargs prior to inserting
-             into the database.  The schema must allow for 'uid',
-             'schema', and 'name' string fields.
+        time: float
+            The time sample is created. Client provided timestamp
+        uid: str
+            Unique identifier for a sample document
+        container: str, list
+            A single or a list of container documents or uids
 
         Returns
         -------
-        uid : str
-            uid of the inserted document.
+        doc : dict
+            The inserted document
+
         """
-        self._server_path = 'http://{}:{}/' .format(self.host, self.port)
-        if any(d['name'] == name for d in self._sample_list):
-            raise ValueError(
-                "document with name {} already exists".format(name))
         doc = dict(uid=uid if uid else str(uuid4()),
                    name=name, time=time if time else ttime.time(),
                    container=container if container else 'NULL',
                    **kwargs)
-        domt = ujson.dumps(doc)
-        r = requests.post(self._server_path + 'sample',
-                          data=domt)
-        r.raise_for_status()
-        self._sample_list.append(doc)
+        _post(self._samp_url, doc)
         return doc
 
+    def create_sample_list(self, sample_list):
+        """Insert a sample to the database
+
+        Parameters
+        ----------
+        sample_list : list
+            List of dictionaries
+
+        Returns
+        -------
+        uid_list : list
+            uid of the inserted documents
+
+        """
+        uid_list = []
+        for s in sample_list:
+            if 'uid' not in s:
+                s['uid'] = str(uuid4())
+            if 'time' not in s:
+                s['time'] = ttime.time()
+            _post(self._samp_url, s)
+            uid_list.append(s['uid'])
+        return uid_list
+
     def update(self, query, update):
-        """Update a request given a query and name value pair to be updated.
-        No upsert(s). If doc does not exist, simply do not update
-        In order to modify which tornao server this routine talks to,
-        simply set self.host and self.port to the correct host and port.
-        Do not mess with _server_path variable.
+        """Update a request given a query and name value pair to be updated. No upsert support.
+        For more info on upsert, check Mongo documentations
         
         Parameters
         -----------
@@ -93,92 +174,81 @@ class SampleReference(object):
             Allows finding Sample documents to be updated
         update: dict
             Name/value pair that is to be replaced within an existing Request doc
+        Returns
+        ----------
+        bool
+            Returns True if update successful
+
         """
-        self._server_path = 'http://{}:{}/' .format(self.host, self.port)
-        payload = dict(query=query, update=update)
-        r = requests.put(url=self._server_path + 'sample',
-                         data=ujson.dumps(payload))
-        r.raise_for_status()
+        _put(self._samp_url, query, update)
         return True
-        
-    def find(self, as_document=False, as_json=False, **kwargs):
+
+    def find(self, as_document=False, **kwargs):
         """
         Parameters
         ----------
-        
         as_document: bool
-            Return doct.Document if True else return a dict
+            Formats output to doct.Document if True
 
         Yields
         ------
-        c : dict
+        c : dict, doct.Document
             Documents which have all keys with the given values
 
         """
-        self._server_path = 'http://{}:{}/' .format(self.host, self.port)
-        r = requests.get(self._server_path + 'sample',
-                         params=ujson.dumps(kwargs))
-        r.raise_for_status()
-        content = ujson.loads(r.text)
-        self._sample_list.extend(content)
-        if as_json:
-            return r.text
-        if as_document:        
+        content = _get(self._samp_url, params=kwargs)
+        if as_document:
             for c in content:
                 yield Document('Sample', c)
         else:
             for c in content:
                 yield c
             
-    def dump_to_json(self, fpath):
-        # Seems done
-        if isinstance(fpath, str):
-            with open(fpath, 'w') as fout:
-                ujson.dump(self._sample_list, fout)
-        else:
-            ujson.dump(self._sample_list, fpath)
-
-    def dump_to_yaml(self, fpath):
-        """For those who don't want to write into the database or work offline."""
-        import yaml
-        if isinstance(fpath, str):
-            with open(fpath, 'w') as fout:
-                yaml.dump(self._sample_list, fout)
-        else:
-            yaml.dump(self._sample_list, fpath)
-
     def get_schema(self):
-        """Get information about schema from the server side"""
-        r = requests.get(self._server_path +
-                        'schema', params=ujson.dumps('sample'))
+        """Get information about schema from the server side
+
+        Returns
+        --------
+        dict
+            Returns the json schema dict used for validation
+
+        """
+        r = requests.get(self._schema_url,
+                         params=ujson.dumps('sample'))
         r.raise_for_status()
         return ujson.loads(r.text)
 
 
 class RequestReference(object):
-    """Reference implementation of generic request
+    """Reference implementation of generic request"""
+    def __init__(self, host=conf.conn_config['host'], port=conf.conn_config['port']):
+        """Constructor
 
-    For simplicity, built on top of a list of dicts.
+        Parameters
+        ----------
+        host: str, optional
+            Machine name/address for amostra server
+        port: int, optional
+            Port amostra server is initiated on
 
-    """
-    def __init__(self, host=conf.conn_config['host'], port=conf.conn_config['port'],
-                 sample=None, time=None, uid=None, state='active',
-                 seq_num=0, **kwargs):
-        """Handles connection configuration to the service backend.
-        Either initiate with a request or use purely as a client for requests.
         """
         self.host = host
         self.port = port
-        self._server_path = 'http://{}:{}/' .format(self.host, self.port)
-        self._request_list = []
-        if sample:
-            payload = dict(uid=uid if uid else str(uuid4()),
-                           sample=sample['uid'] if sample else 'NULL',
-                           time=time if time else ttime.time(), state=state,
-                           seq_num=seq_num, **kwargs)
-            r = requests.post(self._server_path + 'request', data=ujson.dumps(payload))
-            r.raise_for_status()
-            self._request_list.append(payload)
+                    
+    @property
+    def _server_path(self):
+        """URL to the Amostra server"""
+        return 'http://{}:{}/' .format(self.host, self.port)
+
+    @property
+    def _req_url(self):
+        """URL to the request reference handler in the server side"""
+        return self._server_path + 'request'
+
+    @property
+    def _schema_url(self):
+        """URL to the schema reference handler in the server side"""
+        return self._server_path + 'schema'
 
     def create(self, sample=None, time=None,
                uid=None, state='active', seq_num=0, **kwargs):
@@ -198,28 +268,38 @@ class RequestReference(object):
 
         Returns
         -------
-        payload['uid']
+        str
             uid of the payload created
+
         """
-        self._server_path = 'http://{}:{}/' .format(self.host, self.port)
         payload = dict(uid=uid if uid else str(uuid4()), 
                        sample=sample['uid'] if sample else 'NULL',
                        time=time if time else ttime.time(),state=state,
                        seq_num=seq_num, **kwargs)
-        r = requests.post(url=self._server_path + 'request',
-                          data=ujson.dumps(payload))
-        r.raise_for_status()
+        _post(self._req_url, payload)
         return payload
 
     def find(self, as_document=False, **kwargs):
-        """Given a set of mongo search parameters, return a requests iterator"""
-        self._server_path = 'http://{}:{}/' .format(self.host, self.port) 
-        r = requests.get(self._server_path + 'request',
-                         params=ujson.dumps(kwargs))
-        r.raise_for_status()
-        content = ujson.loads(r.text)
-        # add all content to local sample list
-        self._request_list.extend(content)
+        """Given a set of mongo search parameters, return a requests iterator
+
+        Parameters
+        -----------
+        as_document: bool
+            Format return type to doct.Document if set
+
+        Yields
+        ----------
+        dict, doct.Document
+            Result of the query
+
+        Raises
+        ---------
+        StopIteration, requests.exceptions.HTTPError
+            When nothing found or something is wrong on the server side. If server error occurs,
+            a human friendly message is returned.
+
+        """
+        content = _get(self._req_url, kwargs)
         if as_document:        
             for c in content:
                 yield Document('Request', c)
@@ -229,7 +309,7 @@ class RequestReference(object):
                 
     def update(self, query, update):
         """Update a request given a query and name value pair to be updated.
-        No upsert(s). If doc does not exist, simply do not update
+        No upsert(s).
         
         Parameters
         -----------
@@ -237,41 +317,52 @@ class RequestReference(object):
             Allows finding Request documents to be updated.
         update: dict
             Name/value pair that is to be replaced within an existing Request doc.
+        Returns
+        ----------
+        bool
+            Returns True if update successful
         """
-        self._server_path = 'http://{}:{}/' .format(self.host, self.port)
-        payload = dict(query=query, update=update)
-        r = requests.put(url=self._server_path + 'request',
-                         data=ujson.dumps(payload))
-        r.raise_for_status()
+        _put(self._req_url, query, update)
+        return True
 
     def get_schema(self):
-        """Get information about schema from the server side"""
-        r = requests.get(self._server_path +
-                        'schema', params=ujson.dumps('request'))
+        """Get information about schema from the server side
+
+        Returns
+        --------
+        dict
+            Returns the json schema dict used for validation
+        """
+        r = requests.get(self._schema_url,
+                         params=ujson.dumps('request'))
         r.raise_for_status()
         return ujson.loads(r.text)
 
 
 class ContainerReference(object):
     """Reference implementation of generic container"""
-    def __init__(self, uid=None, time=None, host=conf.conn_config['host'], port=conf.conn_config['port'],
-                 **kwargs):
+    def __init__(self, host=conf.conn_config['host'], port=conf.conn_config['port']):
         """Handles connection configuration to the service backend.
         Either initiate with a request or use purely as a client for requests.
         """
-        self._container_list = []
         self.port = port
         self.host = host
-        self._server_path = 'http://{}:{}/' .format(host, port)
-        if kwargs:        
-            _cont_dict = dict(uid=uid if uid else str(uuid4()), 
-                              time=time if time else ttime.time(),
-                              **kwargs)        
-            r = requests.post(self._server_path + 'container',
-                            data=ujson.dumps(_cont_dict))
-            r.raise_for_status()
-            self._container_list.append(_cont_dict)
-    
+
+    @property
+    def _server_path(self):
+        """URL to the Amostra server"""
+        return 'http://{}:{}/' .format(self.host, self.port)
+
+    @property
+    def _cont_url(self):
+        """URL to the container reference handler in the server side"""
+        return self._server_path + 'container'
+
+    @property
+    def _schema_url(self):
+        """URL to the schema reference handler in the server side"""
+        return self._server_path + 'schema'
+
     def create(self, uid=None, time=None, **kwargs):
         """Insert a container document. Schema validation done
         on the server side. No native Python object (e.g. np.ndarray)
@@ -289,30 +380,21 @@ class ContainerReference(object):
         payload['uid']
             uid of the payload created
         """
-        self._server_path = 'http://{}:{}/' .format(self.host, self.port)        
         payload = dict(uid=uid if uid else str(uuid4()),
                        time=time if time else ttime.time(), **kwargs)
-        r = requests.post(url=self._server_path + 'container',
-                          data=ujson.dumps(payload))
-        r.raise_for_status()
-        self._container_list.append(payload)        
+        _post(self._cont_url, payload)
         return payload
-    
+
     def find(self, as_document=False, **kwargs):
-        """Given a set of mongo search parameters, return a requests iterator"""
-        self._server_path = 'http://{}:{}/' .format(self.host, self.port)        
-        r = requests.get(self._server_path + 'container',
-                         params=ujson.dumps(kwargs))
-        r.raise_for_status()
-        content = ujson.loads(r.text)
-        self._container_list.extend(content)
+        """Given a set of MongoDB search parameters, return a requests iterator"""
+        content = _get(self._cont_url, kwargs)
         if as_document:
             for c in content:
                 yield Document('container', c)
         else:
             for c in content:
                 yield c
-    
+
     def update(self, query, update):
         """Update a request given a query and name value pair to be updated.
         No upsert(s). If doc does not exist, simply do not update
@@ -323,17 +405,27 @@ class ContainerReference(object):
             Allows finding Container documents to be updated.
         update: dict
             Name/value pair that is to be replaced within an existing Request doc.
+        Returns
+        --------
+        bool
+            Returns True if update successful
+
+        Returns
+        ----------
+        bool
+            Returns True if update successful
         """
-        self._server_path = 'http://{}:{}/' .format(self.host, self.port)
-        payload = dict(query=dict(query), update=update)
-        r = requests.put(url=self._server_path + 'container',
-                         data=ujson.dumps(payload))
-        r.raise_for_status()
+        _put(self._cont_url, query, update)
+        return True
 
     def get_schema(self):
-        """Get information about schema from the server side"""
-        r = requests.get(self._server_path +
-                        'schema', params=ujson.dumps('container'))
+        """Get information about schema from the server side
+
+        Returns
+        --------
+        dict
+            Returns the json schema dict used for validation
+        """
+        r = requests.get(self._schema_url, params=ujson.dumps('container'))
         r.raise_for_status()
         return ujson.loads(r.text)
-

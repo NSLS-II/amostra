@@ -49,7 +49,8 @@ def test_request_create():
                hero='asterix', antihero='romans')
     req2.host = 'hail_caesar'
     pytest.raises(RequestException, req2.create)               
-             
+
+
 def test_duplicate_request():
     m_uid = str(uuid4())
     req1= RequestReference(host=TESTING_CONFIG['host'],
