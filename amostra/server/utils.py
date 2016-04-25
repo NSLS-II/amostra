@@ -97,8 +97,8 @@ def default_timeuid(document):
     dict
         Document with defaults
     """
-    if 'uid' not in document:
+    if 'uid' not in document or document['uid'] is None:
         document['uid'] = str(uuid.uuid4())
-    if 'time' not in document:
+    if 'time' not in document or document['time'] is None:
         document['time'] = ttime.time()
     return document

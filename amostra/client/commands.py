@@ -6,7 +6,7 @@ from uuid import uuid4
 import requests
 import time as ttime
 from ..client import conf
-
+from .amutils import doc_or_uid_to_uid
 
 # TODO: Add tests for both local and online commands/clients
 # TODO: Add AmostraClient as a convenient way to interact with commands.py
@@ -50,6 +50,7 @@ def _post(url, data):
     r = requests.post(url,
                       data=ujson.dumps(data))
     r.raise_for_status()
+    return r.json()
 
 
 def _put(url, query, update):
@@ -129,16 +130,16 @@ class SampleReference(object):
 
         Returns
         -------
-        doc : dict
+        ins_doc : str
             The inserted document
 
         """
-        doc = dict(uid=uid if uid else str(uuid4()),
-                   name=name, time=time if time else ttime.time(),
-                   container=container if container else 'NULL',
+        doc = dict(uid=uid,
+                   name=name, time=time,
+                   container=doc_or_uid_to_uid(container) if container else 'NULL',
                    **kwargs)
-        _post(self._samp_url, doc)
-        return doc
+        ins_doc = _post(self._samp_url, doc)
+        return ins_doc[0]
 
     def create_sample_list(self, sample_list):
         """Insert a sample to the database
@@ -156,12 +157,8 @@ class SampleReference(object):
         """
         uid_list = []
         for s in sample_list:
-            if 'uid' not in s:
-                s['uid'] = str(uuid4())
-            if 'time' not in s:
-                s['time'] = ttime.time()
-            _post(self._samp_url, s)
-            uid_list.append(s['uid'])
+            uid = _post(self._samp_url, s)
+            uid_list.extend(uid)
         return uid_list
 
     def update(self, query, update):
@@ -268,16 +265,17 @@ class RequestReference(object):
 
         Returns
         -------
-        str
-            uid of the payload created
+        ins_doc: str
+            The inserted Request document uid
 
         """
-        payload = dict(uid=uid if uid else str(uuid4()), 
-                       sample=sample['uid'] if sample else 'NULL',
-                       time=time if time else ttime.time(),state=state,
+
+        payload = dict(uid=uid,
+                       sample=doc_or_uid_to_uid(sample),
+                       time=time, state=state,
                        seq_num=seq_num, **kwargs)
-        _post(self._req_url, payload)
-        return payload
+        ins_doc = _post(self._req_url, payload)
+        return ins_doc[0]
 
     def find(self, as_document=False, **kwargs):
         """Given a set of mongo search parameters, return a requests iterator
@@ -377,13 +375,13 @@ class ContainerReference(object):
       
         Returns
         -------
-        payload['uid']
-            uid of the payload created
+        ins_doc: str
+            Inserted Container document uid
         """
-        payload = dict(uid=uid if uid else str(uuid4()),
-                       time=time if time else ttime.time(), **kwargs)
-        _post(self._cont_url, payload)
-        return payload
+        payload = dict(uid=uid,
+                       time=time, **kwargs)
+        ins_doc = _post(self._cont_url, payload)
+        return ins_doc[0]
 
     def find(self, as_document=False, **kwargs):
         """Given a set of MongoDB search parameters, return a requests iterator"""
