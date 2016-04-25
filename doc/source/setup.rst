@@ -42,7 +42,25 @@ Once successful, the service will prompt:
 4. Client Installation
 ***********************
 
+In order to install and run the client, there are a series of packages needs to be installed: requests, pytz, ujson, pyyaml
+
+Once the packages above are installed, one can install the client simply:
+
+.. code-block:: python
+   
+   python setup.py install
+
+
 5. Simple Test
 ********************
+
+Once everthing is good and setup is complete, you can try to create a sample document of your choice by:
+
+.. code-block:: python
+
+   s_ref = SampleReference()
+   m_uid = s_ref.create(name='test')
+   print(s_ref.find(uid=m_uid))
+
 
 
