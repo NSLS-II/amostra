@@ -20,6 +20,17 @@ Schema
 Sample
 ******
 
+The sample collection provides users with tools to save/restore/query attributes of their samples. Given the flexible nature of the service, users can add their own metadata in any hierarchical order. Amostra provides means to insert both a single sample and a list of samples. Validation is done on the server side for the online api, protecting users from issues that might arise due to schema changes.
+
+Below is the jsonschema model for the sample documents. In case you are not familiar with jsonschema, please see http://json-schema.org/
+
+Sample documents is intended to be the primary location to hold any sort of metadata for samples, prior to an experiment. It is not intended as a service to store experimental results as amostra belongs to the data acquisition stack. One can link amostra and its document to metadataservice and filestore. For storing experimental results on samples, please check https://github.com/nsls-ii/analysisstore.git
+
+Sample documents only require time, uid, and name fields. The client apis can fill in all this information except for the name. project, beamline_id, owner, and any additional kwargs can be used to keep track of samples. container is intended as an optional foreign key and it is the uid of the container document that contains the sample. In other words, container field highlights whether this sample document belongs to any container(physical or virtual group) using a container’s uid field. One sample can belong to a single group as of release one, however this might change based on user requirements.
+
+kwargs can be any name value pair including lists and nested dicts. The only limit enforced for a document is the 16 MB limit per document.
+
+
 .. code-block:: javascript
 
     {
@@ -63,7 +74,12 @@ Sample
     }
 
 Container
-******
+*********
+
+Container documents are intended for grouping samples either physically or virtually. A physical container can be a puck, doer, etc. while a virtual group can be anything defined by the user. Similar to samples, a container has time and uid as its required fields. Unlike a sample, name of the container is optional. This is due to the fact that most beamlines do not necessarily have more that a single container and it would be unnecessary to deal with this field every time an entry is created. Please note that name field is still part of the container documents but as an optional field, alongside owner, content, and kind. Similar to samples or most of metadataservice header documents, kwargs can be used to add any additional metadata or external relationship.
+
+One can also define container of containers, where a container can encapsulate another container within itself. This can be done simply by setting the container field of any container document to the uid of the container field.
+
 
 .. code-block:: javascript
 
@@ -107,7 +123,12 @@ Container
 
 
 Request
-******
+*********
+
+Request documents are intended as means to keep track of a set of operations to be performed on a sample. This means, samples and requests have a one-to-many relationship. Requests have three required fields: uid, time, and sample. The operations that user desires to perform. Users can use the state field in order to activate/de-activate requests on samples. The requests can be thought of human-friendly/readable plans.
+
+
+
 .. code-block:: javascript
 
     {
