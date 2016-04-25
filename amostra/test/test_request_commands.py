@@ -59,11 +59,11 @@ def test_request_find():
     r = RequestReference(host=TESTING_CONFIG['host'],
                         port=TESTING_CONFIG['port'])
     req_dict = dict(sample='hidefix', time=time.time(),
-                    uid=None, state='active', seq_num=0, foo='bar',
+                    uid=str(uuid4()), state='active', seq_num=0, foo='bar',
                     hero='obelix', antihero='romans')
     inserted = r.create(**req_dict)
     retrieved = next(r.find(foo='bar'))
-    assert retrieved == inserted
+    assert retrieved['uid'] == inserted
 
 
 def test_update_request():

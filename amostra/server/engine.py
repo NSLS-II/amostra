@@ -338,13 +338,13 @@ class ContainerReferenceHandler(DefaultHandler):
             uids.append(data['uid'])
             res = database.container.insert(data)
             if res:
-                database.request.create_index([('uid', pymongo.DESCENDING)],
-                                                 unique=True, background=True)
-                database.request.create_index([('time', pymongo.DESCENDING)],
-                                            unique=False, background=True)
+                database.container.create_index([('uid', pymongo.DESCENDING)],
+                                                unique=True, background=True)
+                database.container.create_index([('time', pymongo.DESCENDING)],
+                                                unique=False, background=True)
         else:
             raise utils._compose_err_msg(500,
-                                         status='SampleHandler expects list or dict')        
+                                         status='SampleHandler expects list or dict')
         self.finish(ujson.dumps(uids))
 
     @tornado.web.asynchronous
