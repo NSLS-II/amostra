@@ -44,6 +44,8 @@ Once successful, the service will prompt:
 
 In order to install and run the client, there are a series of packages needs to be installed: requests, pytz, ujson, pyyaml
 
+In addition to the packages above, the client requires doct.Document: https://github.com/NSLS-II/doct
+
 Once the packages above are installed, one can install the client simply:
 
 .. code-block:: python
