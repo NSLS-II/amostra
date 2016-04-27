@@ -100,7 +100,6 @@ def test_update_container():
     assert updated_cont['state'] == 'inactive'
 
 
-
 def test_update_container_illegal():
     orig_cont = dict(name='obelix', uid=str(uuid.uuid4()),
                        time=ttime.time(), owner='chief', project='egypt',
