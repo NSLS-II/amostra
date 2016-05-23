@@ -31,7 +31,7 @@ def amostra_teardown():
 
 
 class _baseSM:    
-    @classmethod
+    #    @classmethod
     #def setup_class(cls):
     #    db = cls.db = cls.db_class(*cls.args, **cls.kwargs)
 
