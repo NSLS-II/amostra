@@ -57,11 +57,6 @@ def test_invalid_container():
                     container=None,
                     beamline_id='trial_b')
     pytest.raises(HTTPError, c.create, **inv_cont)
-    inv_cont2 = dict(name='romans', uid='unique_id',
-                    time=ttime.time(), owner='obelix', project='invadegauls',
-                    container=None,
-                    beamline_id='trial_b')
-    pytest.raises(HTTPError, c.create, **inv_cont2)
 
 
 def test_find_container():
