@@ -5,6 +5,8 @@ import uuid
 import pytest
 import subprocess
 
+# TODO: Add a test data factory module here
+
 
 TESTING_CONFIG = {
     'database': "mds_testing_disposable_{}".format(str(uuid.uuid4())),
@@ -29,19 +31,20 @@ def amostra_teardown():
 
 
 class _baseSM:    
+    #    @classmethod
+    #def setup_class(cls):
+    #    db = cls.db = cls.db_class(*cls.args, **cls.kwargs)
+
+    #def test_create_and_find(self):
+    #    db = self.db
+    #    aarduid = str(uuid.uuid4())
+    #    doc = db.create(name='Lionel', location='zoo', species='aardvark',
+    #                    uid=aarduid)
+    #    find_res = list(db.find({'uid': aarduid}))
+    #    assert len(find_res) == 1
+    #    assert find_res[0]['uid'] == aarduid
+
     @classmethod
-    def setup_class(cls):
-        db = cls.db = cls.db_class(*cls.args, **cls.kwargs)
-
-    def test_create_and_find(self):
-        db = self.db
-        aarduid = str(uuid.uuid4())
-        doc = db.create(name='Lionel', location='zoo', species='aardvark',
-                        uid=aarduid)
-        find_res = list(db.find({'uid': aarduid}))
-        assert len(find_res) == 1
-        assert find_res[0]['uid'] == aarduid
-
     def test_update(self):
         db = self.db
         sam_uid = str(uuid.uuid4())
