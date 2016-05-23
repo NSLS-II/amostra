@@ -44,6 +44,7 @@ class _baseSM:
     #    assert len(find_res) == 1
     #    assert find_res[0]['uid'] == aarduid
 
+    @classmethod
     def test_update(self):
         db = self.db
         sam_uid = str(uuid.uuid4())
