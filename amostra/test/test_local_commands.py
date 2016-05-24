@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import time as ttime
 import pytest
+import uuid
 # from amostra.testing import amostra_setup, amostra_teardown
 from amostra.client.local_commands import (LocalSampleReference,
                                            LocalContainerReference,
@@ -14,9 +15,10 @@ def test_constructors():
     c_ref = LocalContainerReference()
     r_ref = LocalRequestReference()
 
-
 def test_create_sample():
-    pass
+    s = LocalSampleReference()
+    s.create(uid=str(uuid.uuid4()), name='local roman', 
+             time=ttime.time(), compound='Fe', material='sword')
 
 
 def test_create_request():
