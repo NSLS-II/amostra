@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function,
 import time as ttime
 import pytest
 import uuid
-# from amostra.testing import amostra_setup, amostra_teardown
+# from amostra.testing import amostra_local_setup, amostra_local_teardown
 from amostra.client.local_commands import (LocalSampleReference,
                                            LocalContainerReference,
                                            LocalRequestReference)
@@ -17,16 +17,19 @@ def test_constructors():
 
 def test_create_sample():
     s = LocalSampleReference()
-    s.create(uid=str(uuid.uuid4()), name='local roman', 
+    s.create(uid=str(uuid.uuid4()), name='local roman',
              time=ttime.time(), compound='Fe', material='sword')
 
 
 def test_create_request():
-    pass
+    r = LocalRequestReference()
+    r.create(sample=None, time=ttime.time(), uid=str(uuid.uuid4()))
 
 
 def test_create_container():
-    pass
+    c = LocalContainerReference()
+    c.create(time=ttime.time(), uid=str(uuid.uuid4()), name='village',
+             type='ancient gaul')
 
 
 def test_find_sample():
