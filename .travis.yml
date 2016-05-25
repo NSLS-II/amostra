@@ -13,6 +13,7 @@ before_install:
   - ./miniconda.sh -b -p /home/travis/mc
   - export PATH=/home/travis/mc/bin:$PATH
   - export PATH=/home/travis/mc/bin:$PATH
+  - mkdir ~/amostra_files
 
 install:
   - export GIT_FULL_HASH=`git rev-parse HEAD`
