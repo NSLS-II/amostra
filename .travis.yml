@@ -30,4 +30,4 @@ script:
 after_success:
   - coveralls
   - codecov
-
+  - rm -r ~/amostra_files

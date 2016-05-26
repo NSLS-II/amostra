@@ -3,11 +3,14 @@ from __future__ import (absolute_import, division, print_function,
 import time as ttime
 import pytest
 import uuid
-# from amostra.testing import amostra_local_setup, amostra_local_teardown
+from amostra.testing import amostra_local_setup, amostra_local_teardown
 from amostra.client.local_commands import (LocalSampleReference,
                                            LocalContainerReference,
                                            LocalRequestReference)
-# TODO: Add local setup and teardown into testing
+
+
+def setup():
+    amostra_local_setup()
 
 def test_constructors():
     # attempt empty reference create
@@ -33,14 +36,30 @@ def test_create_container():
 
 
 def test_find_sample():
-    pass
+    s = LocalSampleReference()
+    samp_dict = dict(uid=str(uuid.uuid4()), time=ttime.time(), name='hidefix',
+                     kind='dog', breed='multigree')
+    s.create(**samp_dict)
+    assert next(s.find(uid=samp_dict['uid']))['uid'] == samp_dict['uid']
 
 
 def test_find_container():
-    pass
+    c = LocalContainerReference()
+    cont_dict = dict(uid=str(uuid.uuid4()), time=ttime.time(), name='village',
+                     kind='gaul', population='50')
+    c.create(**cont_dict)
+    assert next(c.find(uid=cont_dict['uid']))['uid'] == cont_dict['uid']
 
 
 def test_find_request():
-    pass
+    r = LocalRequestReference()
+    req_dict = dict(uid=str(uuid.uuid4()), time=ttime.time(), name='war',
+                     kind='street fight', state='inactive', winner='gauls')
+    r.create(**req_dict)
+    assert next(r.find(uid=req_dict['uid']))['uid'] == req_dict['uid']
 
 
+
+
+def teardown():
+    amostra_local_teardown()
