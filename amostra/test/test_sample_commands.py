@@ -18,7 +18,6 @@ def teardown():
 
 
 def test_sample_constructor():
-    # attempt empty reference create
     s2 = SampleReference()
 
 

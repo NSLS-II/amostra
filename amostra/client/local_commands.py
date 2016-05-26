@@ -53,16 +53,15 @@ def _update_local(fname, qparams, replacement):
         Fields/value pair to be updated. Beware of disallowed fields
         such as time and uid
     """
-    print(fname, qparams, replacement)
     try:
         with open(fname, 'r') as fp:
             local_payload = ujson.load(fp)
         qobj = mongoquery.Query(qparams)
         for _sample in local_payload:
             try:
-                qobj.match(_sample)
-                for k, v in replacement.items():
-                    _sample[k] = v
+                if qobj.match(_sample):
+                    for k, v in replacement.items():
+                        _sample[k] = v
             except mongoquery.QueryError:
                 pass
         with open(fname, 'w') as fp:
@@ -179,7 +178,7 @@ class LocalRequestReference:
         if sample:
             sample = doc_or_uid_to_uid(sample)
         payload = dict(uid=uid if uid else str(uuid4()),
-                       sample=sample['uid'] if sample else 'NULL',
+                       sample=sample if sample else 'NULL',
                        time=time if time else ttime.time(), state=state,
                        seq_num=seq_num, **kwargs)
         self.request_list.append(payload)

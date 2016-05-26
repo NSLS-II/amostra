@@ -6,9 +6,6 @@ import requests
 from ..client import conf
 from .amutils import doc_or_uid_to_uid, _get, _post, _put
 
-# TODO: Add tests for both local and online commands/clients
-# TODO: Add AmostraClient as a convenient way to interact with commands.py
-
 
 class AmostraException(Exception):
     pass
@@ -35,7 +32,7 @@ class SampleReference(object):
     def _server_path(self):
         """URL to the Amostra server"""
         return 'http://{}:{}/' .format(self.host, self.port)
-    
+
     @property
     def _samp_url(self):
         """URL to the sample reference handler in the server side"""
@@ -97,7 +94,7 @@ class SampleReference(object):
     def update(self, query, update):
         """Update a request given a query and name value pair to be updated. No upsert support.
         For more info on upsert, check Mongo documentations
-        
+
         Parameters
         -----------
         query: dict
@@ -133,7 +130,7 @@ class SampleReference(object):
         else:
             for c in content:
                 yield c
-            
+
     def get_schema(self):
         """Get information about schema from the server side
 
@@ -164,7 +161,7 @@ class RequestReference(object):
         """
         self.host = host
         self.port = port
-                    
+
     @property
     def _server_path(self):
         """URL to the Amostra server"""
@@ -192,7 +189,7 @@ class RequestReference(object):
         uid: str
             Unique identifier for
         state: str
-            Enum 'active' or 'inactive' that displays the state of a request    
+            Enum 'active' or 'inactive' that displays the state of a request
         seq_num: int
             Sequence number for creation of the request. Not indexed but can be updated
 
@@ -231,17 +228,17 @@ class RequestReference(object):
 
         """
         content = _get(self._req_url, kwargs)
-        if as_document:        
+        if as_document:
             for c in content:
                 yield Document('Request', c)
         else:
             for c in content:
                 yield c
-                
+
     def update(self, query, update):
         """Update a request given a query and name value pair to be updated.
         No upsert(s).
-        
+
         Parameters
         -----------
         query: dict
@@ -297,15 +294,15 @@ class ContainerReference(object):
     def create(self, uid=None, time=None, **kwargs):
         """Insert a container document. Schema validation done
         on the server side. No native Python object (e.g. np.ndarray)
-        due to performance constraints. 
-        
+        due to performance constraints.
+
         Parameters
         ----------
         uid: str
             Unique identifier for a Container document
         time: float
             Time document created. Client side timestamp
-      
+
         Returns
         -------
         ins_doc: str
@@ -329,7 +326,7 @@ class ContainerReference(object):
     def update(self, query, update):
         """Update a request given a query and name value pair to be updated.
         No upsert(s). If doc does not exist, simply do not update
-        
+
         Parameters
         -----------
         query: dict
