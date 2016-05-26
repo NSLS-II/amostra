@@ -1,8 +1,8 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import time as ttime
-import pytest
 import uuid
+import pytest
 from amostra.testing import amostra_local_setup, amostra_local_teardown
 from amostra.client.local_commands import (LocalSampleReference,
                                            LocalContainerReference,
@@ -12,11 +12,13 @@ from amostra.client.local_commands import (LocalSampleReference,
 def setup():
     amostra_local_setup()
 
+
 def test_constructors():
     # attempt empty reference create
     s_ref = LocalSampleReference()
     c_ref = LocalContainerReference()
     r_ref = LocalRequestReference()
+
 
 def test_create_sample():
     s = LocalSampleReference()
@@ -54,11 +56,22 @@ def test_find_container():
 def test_find_request():
     r = LocalRequestReference()
     req_dict = dict(uid=str(uuid.uuid4()), time=ttime.time(), name='war',
-                     kind='street fight', state='inactive', winner='gauls')
+                    kind='street fight', state='inactive', winner='gauls')
     r.create(**req_dict)
     assert next(r.find(uid=req_dict['uid']))['uid'] == req_dict['uid']
 
 
+def test_update_sample():
+    s = LocalSampleReference()
+    samp = dict(uid=str(uuid.uuid4()), name='julius',
+                time=ttime.time(), position='emperor', material='wisdom',
+                state='in office')
+    s.create(**samp)
+    pytest.raises(NotImplementedError, s.update, {'uid': samp['uid']},
+                  {'state': 'murdered by brutus'})
+#   print(next(s.find(state='murdered by brutus'))['uid'], samp['uid'])
+
+#    assert next(s.find(state='murdered by brutus'))['uid'] == samp['uid']
 
 
 def teardown():

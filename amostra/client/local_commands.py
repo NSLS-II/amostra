@@ -53,7 +53,7 @@ def _update_local(fname, qparams, replacement):
         Fields/value pair to be updated. Beware of disallowed fields
         such as time and uid
     """
-    print(fname, qparams, replacement)
+    raise NotImplementedError()
     try:
         with open(fname, 'r') as fp:
             local_payload = ujson.load(fp)
