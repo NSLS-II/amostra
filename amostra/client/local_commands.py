@@ -53,16 +53,15 @@ def _update_local(fname, qparams, replacement):
         Fields/value pair to be updated. Beware of disallowed fields
         such as time and uid
     """
-    raise NotImplementedError()
     try:
         with open(fname, 'r') as fp:
             local_payload = ujson.load(fp)
         qobj = mongoquery.Query(qparams)
         for _sample in local_payload:
             try:
-                qobj.match(_sample)
-                for k, v in replacement.items():
-                    _sample[k] = v
+                if qobj.match(_sample):
+                    for k, v in replacement.items():
+                        _sample[k] = v
             except mongoquery.QueryError:
                 pass
         with open(fname, 'w') as fp:

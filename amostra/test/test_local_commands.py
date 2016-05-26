@@ -67,11 +67,9 @@ def test_update_sample():
                 time=ttime.time(), position='emperor', material='wisdom',
                 state='in office')
     s.create(**samp)
-    pytest.raises(NotImplementedError, s.update, {'uid': samp['uid']},
-                  {'state': 'murdered by brutus'})
-#   print(next(s.find(state='murdered by brutus'))['uid'], samp['uid'])
-
-#    assert next(s.find(state='murdered by brutus'))['uid'] == samp['uid']
+    s.update({'uid': samp['uid']},
+             {'state': 'murdered by brutus'})
+    assert next(s.find(state='murdered by brutus'))['uid'] == samp['uid']
 
 
 def teardown():
