@@ -178,7 +178,7 @@ class LocalRequestReference:
         if sample:
             sample = doc_or_uid_to_uid(sample)
         payload = dict(uid=uid if uid else str(uuid4()),
-                       sample=sample['uid'] if sample else 'NULL',
+                       sample=sample if sample else 'NULL',
                        time=time if time else ttime.time(), state=state,
                        seq_num=seq_num, **kwargs)
         self.request_list.append(payload)

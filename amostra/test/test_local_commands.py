@@ -72,5 +72,27 @@ def test_update_sample():
     assert next(s.find(state='murdered by brutus'))['uid'] == samp['uid']
 
 
+def test_update_container():
+    c = LocalContainerReference()
+    cont = dict(uid=str(uuid.uuid4()), container=str(uuid.uuid4()),
+                time=ttime.time(),state='empty')
+
+    c.create(**cont)
+    c.update({'uid': cont['uid']},
+             {'state': 'full'})
+    assert next(c.find(uid=cont['uid']))['state'] == 'full'
+
+
+def test_update_request():
+    r = LocalRequestReference()
+    req = dict(uid=str(uuid.uuid4()), sample=str(uuid.uuid4()),
+                time=ttime.time(), scan='mesh')
+
+    r.create(**req)
+    r.update({'uid': req['uid']},
+             {'scan': 'energy'})
+    assert next(r.find(uid=req['uid']))['scan'] == 'energy'
+
+
 def teardown():
     amostra_local_teardown()
