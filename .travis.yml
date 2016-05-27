@@ -18,7 +18,7 @@ before_install:
 install:
   - export GIT_FULL_HASH=`git rev-parse HEAD`
   - conda update conda --yes
-  - conda create -n testenv --yes nose python=$TRAVIS_PYTHON_VERSION pymongo ujson tornado jsonschema requests pyyaml pytz six pytest
+  - conda create -n testenv --yes nose python=$TRAVIS_PYTHON_VERSION pymongo ujson tornado jsonschema requests pyyaml pytz pytest
   - source activate testenv
   - pip install coveralls codecov
   - 'pip install https://github.com/NSLS-II/doct/zipball/master#egg=doct'

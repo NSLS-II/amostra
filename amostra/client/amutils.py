@@ -1,4 +1,3 @@
-import six
 import requests
 import ujson
 
@@ -17,9 +16,10 @@ def doc_or_uid_to_uid(doc_or_uid):
     uid : str
         A string version of the uid of the given document
     """
-    if not isinstance(doc_or_uid, six.string_types):
-        doc_or_uid = doc_or_uid['uid']
-    return str(doc_or_uid)
+    try:
+        return str(doc_or_uid['uid'])
+    except KeyError:
+        return doc_or_uid
 
 
 def _get(url, params):
