@@ -18,7 +18,7 @@ def doc_or_uid_to_uid(doc_or_uid):
     """
     try:
         return str(doc_or_uid['uid'])
-    except KeyError:
+    except TypeError:
         return doc_or_uid
 
 
