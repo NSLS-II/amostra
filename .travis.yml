@@ -5,24 +5,19 @@ services:
   - mongodb
 
 python:
+  - 3.4
   - 3.5
 
 before_install:
-  - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then wget http://repo.continuum.io/miniconda/Miniconda-3.5.5-Linux-x86_64.sh -O miniconda.sh; else wget http://repo.continuum.io/miniconda/Miniconda3-3.5.5-Linux-x86_64.sh -O miniconda.sh; fi
-  - chmod +x miniconda.sh
-  - ./miniconda.sh -b -p /home/travis/mc
-  - export PATH=/home/travis/mc/bin:$PATH
-  - export PATH=/home/travis/mc/bin:$PATH
+  - git clone https://github.com/nsls-ii/nsls2-ci ~/scripts
+  - . ~/scripts/install-miniconda.sh
   - mkdir ~/amostra_files
 
 install:
-  - export GIT_FULL_HASH=`git rev-parse HEAD`
-  - conda update conda --yes
-  - conda create -n testenv --yes nose python=$TRAVIS_PYTHON_VERSION pymongo ujson tornado jsonschema requests pyyaml pytz six pytest
+  - conda create -n testenv --yes nose python=$TRAVIS_PYTHON_VERSION pymongo ujson tornado jsonschema requests pyyaml pytz pytest doct -c lightsource2
   - source activate testenv
-  - pip install coveralls codecov
-  - 'pip install https://github.com/NSLS-II/doct/zipball/master#egg=doct'
-  - pip install mongoquery
+  - pip install coveralls codecov mongoquery
+
 script:
   - nohup python startup.py --mongo_host localhost --mongo_port 27017 --timezone US/Easternm --database amostra_test --service-port 7770  &
   - py.test -sv
