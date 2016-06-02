@@ -25,8 +25,8 @@ for name, filename in SCHEMA_NAMES.items():
 
 
 def _compose_err_msg(code, status, m_str=''):
-    fmsg = status + str(m_str)
-    return tornado.web.HTTPError(code, fmsg)
+    fmsg = str(status) + str(m_str)
+    return tornado.web.HTTPError(status_code=code, reason=fmsg)
 
 
 def unpack_params(handler):
