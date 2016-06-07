@@ -14,6 +14,7 @@ setuptools.setup(
     license="BSD 3-Clause",
     url="https://github.com/NSLS-II/amostra.git",
     packages=setuptools.find_packages(),
+    install_package_data = True,
     classifiers=[
         "License :: OSI Approved :: BSD License",
         "Development Status :: 3 - Alpha",
