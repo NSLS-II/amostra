@@ -42,7 +42,7 @@ def unpack_params(handler):
     if isinstance(handler, tornado.web.RequestHandler):
         return ujson.loads(list(handler.request.arguments.keys())[0])
     else:
-        raise TypeError("Wrong type", handler)
+        raise TypeError("Wrong type")
 
 
 def return2client(handler, payload):
