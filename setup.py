@@ -13,7 +13,8 @@ setuptools.setup(
     cmdclass=versioneer.get_cmdclass(),
     license="BSD 3-Clause",
     url="https://github.com/NSLS-II/amostra.git",
-    packages=setuptools.find_packages(),
+    packages=['amostra', 'amostra.client', 'amostra.schemas',
+              'amostra.server']
     classifiers=[
         "License :: OSI Approved :: BSD License",
         "Development Status :: 3 - Alpha",
