@@ -89,7 +89,6 @@ def test_update_sample():
                        update={'state': 'inactive'})
     updated_samp = next(samp.find(name='up_sam'))
     assert updated_samp['state'] == 'inactive'
-    
 
 def test_update_sample_illegal():
     test_sample = dict(name='up_sam', uid=str(uuid.uuid4()),

@@ -1,5 +1,4 @@
 import tornado.web
-from tornado import gen
 import pymongo
 import jsonschema
 import ujson
@@ -33,6 +32,29 @@ def db_connect(database, mongo_host, mongo_port):
     except pymongo.errors.ConnectionFailure:
         raise utils.AmostraException("Unable to connect to MongoDB server...")
     database = client[database]
+    database.sample.create_index([('uid', pymongo.DESCENDING)],
+                                 unique=True, background=False)
+    database.sample.create_index([('time', pymongo.DESCENDING),
+                                 ('name', pymongo.DESCENDING)],
+                                unique=False, background=True)
+    database.sample.create_index([('container', pymongo.DESCENDING)],
+                                 unique=False, sparse=True)
+    database.sample.create_index([('uid', pymongo.DESCENDING)],
+                                unique=True, background=True)
+    database.sample.create_index([('time', pymongo.DESCENDING)],
+                                unique=False, background=True)
+    database.request.create_index([('uid', pymongo.DESCENDING)],
+                                             unique=True, background=True)
+    database.request.create_index([('time', pymongo.DESCENDING)],
+                                            unique=False, background=True)
+    database.request.create_index([('sample', pymongo.DESCENDING)],
+                                  unique=False, background=True, sparse=True)
+    database.container.create_index([('uid', pymongo.DESCENDING)],
+                                   unique=True, background=True)
+    database.container.create_index([('time', pymongo.DESCENDING)],
+                                   unique=False, background=True)
+    database.container.create_index([('container', pymongo.DESCENDING)],
+                                    unique=False, background=True, sparse=True)
     return database
 
 
@@ -85,9 +107,10 @@ class SampleReferenceHandler(DefaultHandler):
         if num:
             try:
                 docs = database.sample.find().sort('time',
-                                        direction=pymongo.DESCENDING).limit(num)
+                                                   direction=pymongo.DESCENDING).limit(num)
             except pymongo.errors.PyMongoError:
-                raise utils._compose_err_msg(500, 'Query on sample has failed', query)
+                raise utils._compose_err_msg(500, 'Query on sample has failed',
+                                             query)
         else:
             try:
                 docs = database.sample.find(query).sort('time',
@@ -112,16 +135,10 @@ class SampleReferenceHandler(DefaultHandler):
                                         utils.schemas['sample'])
                 except (ValidationError, SchemaError):
                     raise utils._compose_err_msg(400,
-                                                 "Invalid schema on document(s)", d)
+                                                 "Invalid schema on document(s)",
+                                                 d)
                 uids.append(d['uid'])
                 res = database.sample.insert(d)
-                database.sample.create_index([('uid', pymongo.DESCENDING)], unique=True, 
-                                             background=False)
-                database.sample.create_index([('time', pymongo.DESCENDING),
-                                              ('name', pymongo.DESCENDING)], unique=False,
-                                             background=False)
-                database.sample.create_index([('container', pymongo.DESCENDING)],
-                                               unique=False, sparse=True)
         elif isinstance(data, dict):
             data = utils.default_timeuid(data)
             try:
@@ -129,19 +146,14 @@ class SampleReferenceHandler(DefaultHandler):
                                     utils.schemas['sample'])
             except (ValidationError, SchemaError):
                 raise utils._compose_err_msg(400,
-                                             "Invalid schema on document(s)", data)
+                                             "Invalid schema on document(s)",
+                                             data)
             uids.append(data['uid'])
-            
             res = database.sample.insert(data)
-            # if inserted, create indices that are certainly being indexed            
-            if res:
-                database.sample.create_index([('uid', pymongo.DESCENDING)],
-                                             unique=True, background=True)
-                database.sample.create_index([('time', pymongo.DESCENDING)],
-                                             unique=False, background=True)
-        else:
-            raise utils._compose_err_msg(500,
-                                         status='SampleHandler expects list or dict')        
+            # if inserted, create indices that are certainly being indexed
+            if not res:
+                raise utils._compose_err_msg(500,
+                                    status='SampleHandler expects list or dict')
         self.finish(ujson.dumps(uids))
 
     @tornado.web.asynchronous
@@ -152,16 +164,16 @@ class SampleReferenceHandler(DefaultHandler):
             query = incoming.pop('query')
             update = incoming.pop('update')
         except KeyError:
-            raise utils._compose_err_msg(500, 
+            raise utils._compose_err_msg(500,
                                          status='filter and update are both required fields')
         if any(x in update.keys() for x in ['uid', 'time']):
             raise utils._compose_err_msg(500,
-                                   status='Time and uid cannot be updated')
+                                         status='Time and uid cannot be updated')
         print('update query', query)
         print('update field', update)
         res = database.sample.update_many(filter=query,
-                                           update={'$set': update},
-                                           upsert=False)
+                                          update={'$set': update},
+                                          upsert=False)
         self.finish(ujson.dumps(res.raw_result))
 
 
@@ -182,7 +194,7 @@ class RequestReferenceHandler(DefaultHandler):
         else:
             try:
                 docs = database.request.find(query).sort('time',
-                                                           direction=pymongo.DESCENDING)
+                                                         direction=pymongo.DESCENDING)
             except pymongo.errors.PyMongoError:
                 raise utils._compose_err_msg(500, 'Query Failed: ', query)
         if docs:
@@ -203,7 +215,8 @@ class RequestReferenceHandler(DefaultHandler):
                                         utils.schemas['request'])
                 except (ValidationError, SchemaError):
                     raise utils._compose_err_msg(400,
-                                                 "Invalid schema on document(s)", d)
+                                                 "Invalid schema on document(s)",
+                                                 d)
                 try:
                     res = database.request.insert(d)
                     uids.append(d['uid'])
@@ -211,12 +224,6 @@ class RequestReferenceHandler(DefaultHandler):
                     raise utils._compose_err_msg(500,
                                                  'Validated data can not be inserted',
                                                  data)
-                database.request.create_index([('uid', pymongo.DESCENDING)],
-                                             unique=True, background=True)
-                database.request.create_index([('time', pymongo.DESCENDING)],
-                                             unique=False, background=True)
-                database.request.create_index([('sample', pymongo.DESCENDING)],
-                                             unique=False, background=True, sparse=True)
         elif isinstance(data, dict):
             data = utils.default_timeuid(data)
             try:
@@ -224,25 +231,20 @@ class RequestReferenceHandler(DefaultHandler):
                                     utils.schemas['request'])
             except (ValidationError, SchemaError):
                 raise utils._compose_err_msg(400,
-                                             "Invalid schema on document(s)", data)
+                                             "Invalid schema on document(s)",
+                                             data)
             try:
-                res = database.request.insert(data)
+                database.request.insert(data)
                 uids.append(data['uid'])
             except pymongo.errors.PyMongoError:
                 raise utils._compose_err_msg(500,
                                              'Validated data can not be inserted',
                                              data)
-            database.request.create_index([('uid', pymongo.DESCENDING)],
-                                             unique=True, background=True)
-            database.request.create_index([('time', pymongo.DESCENDING)],
-                                             unique=False, background=True)
-            database.request.create_index([('sample', pymongo.DESCENDING)],
-                                             unique=False, background=True, sparse=True)
         else:
             raise utils._compose_err_msg(500,
-                                         status='SampleHandler expects list or dict')
+                                        status='SampleHandler expects list or dict')
         self.finish(ujson.dumps(uids))
-    
+
     @tornado.web.asynchronous
     def put(self):
         database = self.settings['db']
@@ -251,7 +253,7 @@ class RequestReferenceHandler(DefaultHandler):
             query = incoming.pop('query')
             update = incoming.pop('update')
         except KeyError:
-            raise utils._compose_err_msg(500, 
+            raise utils._compose_err_msg(500,
                                          status='filter and update are both required fields')
         if any(x in update.keys() for x in ['uid', 'time', 'name']):
             raise utils._compose_err_msg(500,
@@ -260,7 +262,7 @@ class RequestReferenceHandler(DefaultHandler):
                                            update={'$set': update},
                                            upsert=False)
         self.finish(ujson.dumps(res.raw_result))
-        
+
 
 class ContainerReferenceHandler(DefaultHandler):
     """Handler for SampleReference insert, update, and querying.
@@ -289,13 +291,14 @@ class ContainerReferenceHandler(DefaultHandler):
         num = query.pop("num", None)
         if num:
             try:
-                docs = database.sample.find().sort('time', direction=pymongo.DESCENDING).limit(num)
+                docs = database.sample.find().sort('time',
+                                                   direction=pymongo.DESCENDING).limit(num)
             except pymongo.errors.PyMongoError:
                 raise utils._compose_err_msg(500, '', query)
         else:
             try:
                 docs = database.container.find(query).sort('time',
-                                                        direction=pymongo.DESCENDING)
+                                                      direction=pymongo.DESCENDING)
             except pymongo.errors.PyMongoError:
                 raise utils._compose_err_msg(500, 'Query Failed: ', query)
         if docs:
@@ -319,12 +322,6 @@ class ContainerReferenceHandler(DefaultHandler):
                                                  "Invalid schema on document(s)", d)
                 uids.append(d['uid'])
                 res = database.container.insert(d)
-                database.container.create_index([('uid', pymongo.DESCENDING)],
-                                                unique=True, background=True)
-                database.container.create_index([('time', pymongo.DESCENDING)],
-                                                unique=False, background=True)
-                database.container.create_index([('container', pymongo.DESCENDING)],
-                                                unique=False, background=True, sparse=True)
         elif isinstance(data, dict):
             data = utils.default_timeuid(data)
             try:
@@ -335,13 +332,8 @@ class ContainerReferenceHandler(DefaultHandler):
                                              "Invalid schema on document(s)", data)
             uids.append(data['uid'])
             res = database.container.insert(data)
-            if res:
-                database.container.create_index([('uid', pymongo.DESCENDING)],
-                                                unique=True, background=True)
-                database.container.create_index([('time', pymongo.DESCENDING)],
-                                                unique=False, background=True)
-        else:
-            raise utils._compose_err_msg(500,
+            if not res:
+                raise utils._compose_err_msg(500,
                                          status='SampleHandler expects list or dict')
         self.finish(ujson.dumps(uids))
 
@@ -353,7 +345,7 @@ class ContainerReferenceHandler(DefaultHandler):
             query = incoming.pop('query')
             update = incoming.pop('update')
         except KeyError:
-            raise utils._compose_err_msg(500, 
+            raise utils._compose_err_msg(500,
                                          status='filter and update are both required fields')
         if any(x in update.keys() for x in ['uid', 'time', 'name']):
             raise utils._compose_err_msg(500,
@@ -374,10 +366,10 @@ class SchemaHandler(DefaultHandler):
 
     @tornado.web.asynchronous
     def put(self):
-        raise utils._compose_err_msg(405, 
+        raise utils._compose_err_msg(405,
                                      status='Not allowed on server')
 
     @tornado.web.asynchronous
     def post(self):
-        raise utils._compose_err_msg(405, 
+        raise utils._compose_err_msg(405,
                                      status='Not allowed on server')
