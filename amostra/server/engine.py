@@ -60,7 +60,7 @@ def db_connect(database, mongo_host, mongo_port):
                                         unique=False, background=True,
                                         sparse=True)
     except PyMongoError:
-        raise compose_err_msg('Not connected to Mongo daemon')
+        raise compose_err_msg(500, 'Not connected to Mongo daemon')
     return database
 
 
