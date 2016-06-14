@@ -24,7 +24,7 @@ for name, filename in SCHEMA_NAMES.items():
         raise AmostraException('Schema file not found or does not exist')
 
 
-def _compose_err_msg(code, status, m_str=''):
+def compose_err_msg(code, status, m_str=''):
     fmsg = str(status) + str(m_str)
     return tornado.web.HTTPError(status_code=code, reason=fmsg)
 
@@ -46,8 +46,8 @@ def unpack_params(handler):
 
 
 def return2client(handler, payload):
-    """Home brew solution to dump the result back to client's open socket. 
-    No need to worry about package size or socket behavior as 
+    """Home brew solution to dump the result back to client's open socket.
+    No need to worry about package size or socket behavior as
     tornado handles this for us
     Parameters
     -----------
