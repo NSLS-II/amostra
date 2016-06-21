@@ -66,6 +66,7 @@ def _update_local(fname, qparams, replacement):
                 pass
         with open(fname, 'w') as fp:
             ujson.dump(local_payload, fp)
+            print("Update complete!")
     except FileNotFoundError:
         raise RuntimeWarning('Local file {} does not exist'.format(fname))
 
@@ -74,15 +75,19 @@ class LocalSampleReference:
     """Handle sample information locally via json files"""
     def __init__(self, top_dir=conf.local_conn_config['top']):
         self.top_dir = top_dir
+
+    @property
+    def sample_list(self):
         try:
             with open(self._samp_fname, 'r') as fp:
                 tmp = ujson.load(fp)
         except (FileNotFoundError, ValueError):
             tmp = []
         try:
-            self.sample_list = tmp if tmp else []
+            _sample_list = tmp if tmp else []
         except FileNotFoundError:
-            self.sample_list = []
+            _sample_list = []
+        return _sample_list
 
     def create(self, name=None, time=None, uid=None, container=None,
                **kwargs):
@@ -138,15 +143,19 @@ class LocalRequestReference:
             Directory where local files are stored
         """
         self.top_dir = top_dir
+
+    @property
+    def request_list(self):
         try:
             with open(self._req_fname, 'r') as fp:
                 tmp = ujson.load(fp)
         except FileNotFoundError:
             tmp = []
         try:
-            self.request_list = tmp if tmp else []
+            _request_list = tmp if tmp else []
         except FileNotFoundError:
-            self.request_list = []
+            _request_list = []
+        return _request_list
 
     @property
     def _req_fname(self):
@@ -197,12 +206,16 @@ class LocalContainerReference:
     """Handle container information locally via json files"""
     def __init__(self, top_dir=conf.local_conn_config['top']):
         self.top_dir = top_dir
+
+    @property
+    def container_list(self):
         try:
             with open(self._cont_fname, 'r') as fp:
                 tmp = ujson.load(fp)
         except FileNotFoundError:
             tmp = []
-        self.container_list = tmp if tmp else []
+        _container_list = tmp if tmp else []
+        return _container_list
 
     @property
     def _cont_fname(self):
