@@ -74,15 +74,15 @@ class LocalSampleReference:
     """Handle sample information locally via json files"""
     def __init__(self, top_dir=conf.local_conn_config['top']):
         self.top_dir = top_dir
+
+    @property
+    def sample_list(self):
         try:
             with open(self._samp_fname, 'r') as fp:
-                tmp = ujson.load(fp)
+                _sample_list = ujson.load(fp)
+            return _sample_list
         except (FileNotFoundError, ValueError):
-            tmp = []
-        try:
-            self.sample_list = tmp if tmp else []
-        except FileNotFoundError:
-            self.sample_list = []
+            return []
 
     def create(self, name=None, time=None, uid=None, container=None,
                **kwargs):
@@ -105,15 +105,17 @@ class LocalSampleReference:
             Document dict that was inserted
         """
         # TODO: Allow container to be an object
+        tmp =  self.sample_list
         if container:
             container = doc_or_uid_to_uid(container)
         payload = dict(uid=uid if uid else str(uuid4()),
                        name=name, time=time if time else ttime.time(),
                        container=container if container else 'NULL',
                        **kwargs)
-        self.sample_list.append(payload)
+
+        tmp.append(payload)
         with open(self._samp_fname, 'w+') as fp:
-            ujson.dump(self.sample_list, fp)
+            ujson.dump(tmp, fp)
         return payload
 
     @property
@@ -138,15 +140,15 @@ class LocalRequestReference:
             Directory where local files are stored
         """
         self.top_dir = top_dir
+
+    @property
+    def request_list(self):
         try:
             with open(self._req_fname, 'r') as fp:
-                tmp = ujson.load(fp)
-        except FileNotFoundError:
-            tmp = []
-        try:
-            self.request_list = tmp if tmp else []
-        except FileNotFoundError:
-            self.request_list = []
+                _req_list = ujson.load(fp)
+            return _req_list
+        except (FileNotFoundError, ValueError):
+            return []
 
     @property
     def _req_fname(self):
@@ -175,15 +177,16 @@ class LocalRequestReference:
             Request dict that was inserted locally
 
         """
+        tmp = self.request_list
         if sample:
             sample = doc_or_uid_to_uid(sample)
         payload = dict(uid=uid if uid else str(uuid4()),
                        sample=sample if sample else 'NULL',
                        time=time if time else ttime.time(), state=state,
                        seq_num=seq_num, **kwargs)
-        self.request_list.append(payload)
+        tmp.append(payload)
         with open(self._req_fname, 'w+') as fp:
-            ujson.dump(self.request_list, fp)
+            ujson.dump(tmp, fp)
         return payload
 
     def update(self, query, replacement):
@@ -197,12 +200,14 @@ class LocalContainerReference:
     """Handle container information locally via json files"""
     def __init__(self, top_dir=conf.local_conn_config['top']):
         self.top_dir = top_dir
+    @property
+    def container_list(self):
         try:
             with open(self._cont_fname, 'r') as fp:
-                tmp = ujson.load(fp)
-        except FileNotFoundError:
-            tmp = []
-        self.container_list = tmp if tmp else []
+                _cont_list = ujson.load(fp)
+            return _cont_list
+        except (FileNotFoundError, ValueError):
+            return []
 
     @property
     def _cont_fname(self):
@@ -225,14 +230,15 @@ class LocalContainerReference:
         payload: dict
             Document dict that was inserted
         """
+        tmp = self.container_list
         if container:
             container = doc_or_uid_to_uid(container)
         payload = dict(uid=uid if uid else str(uuid4()),
                        container=container if container else 'NULL',
                        time=time if time else ttime.time(), **kwargs)
-        self.container_list.append(payload)
+        tmp.append(payload)
         with open(self._cont_fname, 'w+') as fp:
-            ujson.dump(self.container_list, fp)
+            ujson.dump(tmp, fp)
         return payload
 
     def update(self, query, replacement):
