@@ -14,13 +14,13 @@ before_install:
   - mkdir ~/amostra_files
 
 install:
-  - conda create -n testenv --yes nose python=$TRAVIS_PYTHON_VERSION pymongo ujson tornado jsonschema requests pyyaml pytz pytest doct -c lightsource2
+  - conda create -n testenv --yes nose python=$TRAVIS_PYTHON_VERSION pymongo ujson tornado jsonschema pyyaml pytz doct -c lightsource2
   - source activate testenv
-  - pip install coveralls codecov mongoquery
+  - pip install coveralls codecov mongoquery requests pytest pytest-cov
 
 script:
   - nohup python startup.py --mongo-host localhost --mongo-port 27017 --timezone US/Easternm --database amostra_test --service-port 7770  &
-  - py.test -sv
+  - py.test -sv --cov=amostra --cov-report term-missing
 
 after_success:
   - coveralls
