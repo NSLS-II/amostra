@@ -7,3 +7,8 @@
 [![codecov](https://codecov.io/gh/NSLS-II/amostra/branch/master/graph/badge.svg)](https://codecov.io/gh/NSLS-II/amostra)
 [![Code Health](https://landscape.io/github/NSLS-II/amostra/master/landscape.svg?style=flat)](https://landscape.io/github/NSLS-II/amostra/master)
 
+## Conda Recipes
+
+[tag](https://github.com/NSLS-II/lightsource2-recipes/tree/master/recipes-tag/amostra)
+
+[dev](https://github.com/NSLS-II/lightsource2-recipes/tree/master/recipes-dev/amostra)
