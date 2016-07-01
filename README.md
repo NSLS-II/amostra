@@ -9,6 +9,8 @@
 
 ## Conda Recipes
 
-[tag](https://github.com/NSLS-II/lightsource2-recipes/tree/master/recipes-tag/amostra)
+Install the most recent tagged build: `conda install amostra -c lightsource2-tag`
 
-[dev](https://github.com/NSLS-II/lightsource2-recipes/tree/master/recipes-dev/amostra)
+Install the most recent tagged build: `conda install amostra -c lightsource2-dev`
+
+Find the tagged recipe [here](https://github.com/NSLS-II/lightsource2-recipes/tree/master/recipes-tag/amostra) and the dev recipe [here](https://github.com/NSLS-II/lightsource2-recipes/tree/master/recipes-dev/amostra)
