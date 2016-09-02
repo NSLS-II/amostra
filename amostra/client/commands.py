@@ -13,7 +13,7 @@ class SampleReference(object):
     """Reference implementation of generic sample manager"""
     def __init__(self, host=conf.conn_config['host'],
                  port=conf.conn_config['port']):
-        """Constructor. 
+        """Constructor.
 
         Parameters
         ----------

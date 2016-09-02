@@ -9,7 +9,8 @@ from pymongo import DESCENDING
 from .utils import compose_err_msg
 
 
-def db_connect(database, mongo_host, mongo_port):
+def db_connect(database, mongo_host, mongo_port, mongo_user=None,
+               mongo_pwd=None, auth=False):
     """Helper function to deal with stateful connections to MongoDB
     Connection established lazily. Connects to the database on request.
     Same connection pool is used for all clients per recommended by
@@ -29,10 +30,17 @@ def db_connect(database, mongo_host, mongo_port):
     multiple clients and makes no difference for a single client compared
     to pymongo
     """
-    try:
-        client = pymongo.MongoClient(host=mongo_host, port=mongo_port)
-    except pymongo.errors.ConnectionFailure:
-        raise utils.AmostraException("Unable to connect to MongoDB server...")
+    if auth:
+        uri = 'mongodb://{0}:{1}@{2}:{3}/'.format(mongo_user,
+                                                  mongo_pwd,
+                                                  mongo_host,
+                                                  mongo_port)
+        client = pymongo.MongoClient(uri)
+    else:
+        try:
+            client = pymongo.MongoClient(host=mongo_host, port=mongo_port)
+        except pymongo.errors.ConnectionFailure:
+            raise utils.AmostraException("Unable to connect to MongoDB server...")
     database = client[database]
     try:
         database.sample.create_index([('uid', DESCENDING)],
