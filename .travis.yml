@@ -4,6 +4,13 @@ sudo: false
 services:
   - mongodb
 
+addons:
+  apt:
+    sources:
+    - mongodb-3.2-precise
+    packages:
+    - mongodb-org
+
 python:
   - 3.4
   - 3.5
@@ -14,6 +21,7 @@ before_install:
   - mkdir ~/amostra_files
 
 install:
+  - mongo localhost:27017/admin ~/scripts/admin.js
   - conda create -n testenv --yes nose python=$TRAVIS_PYTHON_VERSION pymongo ujson tornado jsonschema pyyaml pytz doct -c lightsource2
   - source activate testenv
   - pip install coveralls codecov mongoquery requests pytest pytest-cov
