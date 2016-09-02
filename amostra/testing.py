@@ -12,6 +12,8 @@ TESTING_CONFIG = {
     'host': 'localhost',
     'port': 7770,
     'timezone': 'US/Eastern',
+    'mongo_user': 'tom',
+    'mongo_pwd': 'jerry',
     'local_files': '~/amostra_files'}
 
 
@@ -22,9 +24,14 @@ def amostra_setup():
 
 
 def amostra_teardown():
-    conn = MongoClient('{}:{}'.format(TESTING_CONFIG['mongo_server'],
-                                      TESTING_CONFIG['mongo_port']))
+    uri = 'mongodb://{0}:{1}@{2}:{3}/'.format(TESTING_CONFIG['mongo_user'],
+                                              TESTING_CONFIG['mongo_pwd'],
+                                              TESTING_CONFIG['mongo_server'],
+                                              TESTING_CONFIG['mongo_port'])
+    conn = MongoClient(uri)
     conn.amostra.drop_collection('sample')
+    conn.amostra.drop_collection('request')
+    conn.amostra.drop_collection('container')
 
 
 def amostra_local_setup():
