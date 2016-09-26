@@ -15,6 +15,13 @@ setuptools.setup(
     url="https://github.com/NSLS-II/amostra.git",
     packages=setuptools.find_packages(),
     install_package_data = True,
+    install_requires=["ujson",
+                      "pymongo",
+                      "tornado",
+                      "jsonschema",
+                      "mongoquery",
+                      "requests",
+                      "pyyaml"],
     classifiers=[
         "License :: OSI Approved :: BSD License",
         "Development Status :: 3 - Alpha",
