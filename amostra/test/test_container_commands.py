@@ -88,7 +88,7 @@ def test_update_container():
                               port=TESTING_CONFIG['port'])
     m_uid = c.create(**orig_cont)
     c.update(query={'uid': orig_cont['uid']},
-             update={'state': 'inactive'})
+             update={'state': 'inactive','time': time.time()})
     updated_cont = next(c.find(uid=m_uid))
     assert updated_cont['state'] == 'inactive'
 
@@ -101,8 +101,6 @@ def test_update_container_illegal():
                               port=TESTING_CONFIG['port'])
     m_uid = c.create(**orig_cont)
     test_time = time.time()
-    pytest.raises(HTTPError, c.update, query={'uid': orig_cont['uid']},
-                  update={'time': test_time})
     pytest.raises(HTTPError, c.update, query={'uid': orig_cont['uid']},
                   update={'uid': str(uuid.uuid4())})
 
