@@ -86,7 +86,7 @@ def test_update_sample():
                            port=TESTING_CONFIG['port'])
     samp.create(**test_sample)
     samp.update(query={'uid': test_sample['uid']},
-                update={'state': 'inactive', 'time': time.time()})
+                update={'state': 'inactive', 'time': ttime.time()})
     updated_samp = next(samp.find(name='up_sam'))
     assert updated_samp['state'] == 'inactive'
 
