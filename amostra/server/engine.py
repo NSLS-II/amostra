@@ -180,11 +180,9 @@ class SampleReferenceHandler(DefaultHandler):
         except KeyError:
             raise compose_err_msg(500,
                                   'filter and update are both required fields')
-        if any(x in update.keys() for x in ['uid', 'time']):
+        if any(x in update.keys() for x in ['uid']):
             raise compose_err_msg(500,
-                                  'Time and uid cannot be updated')
-        print('update query', query)
-        print('update field', update)
+                                  'Uid cannot be updated')
         res = database.sample.update_many(filter=query,
                                           update={'$set': update},
                                           upsert=False)
@@ -269,9 +267,9 @@ class RequestReferenceHandler(DefaultHandler):
         except KeyError:
             raise compose_err_msg(500,
                                   'filter and update are both required fields')
-        if any(x in update.keys() for x in ['uid', 'time', 'name']):
+        if any(x in update.keys() for x in ['uid']):
             raise compose_err_msg(500,
-                                  status='Time and uid cannot be updated')
+                                  status='Uid cannot be updated')
         res = database.request.update_many(filter=query,
                                            update={'$set': update},
                                            upsert=False)
@@ -362,9 +360,9 @@ class ContainerReferenceHandler(DefaultHandler):
         except KeyError:
             raise compose_err_msg(500,
                                   'filter and update are both required fields')
-        if any(x in update.keys() for x in ['uid', 'time', 'name']):
+        if any(x in update.keys() for x in ['uid']):
             raise compose_err_msg(500,
-                                  'Time and uid cannot be updated')
+                                  'Uid cannot be updated')
         res = database.container.update_many(filter=query,
                                              update={'$set': update},
                                              upsert=False)

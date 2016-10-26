@@ -86,7 +86,7 @@ def test_update_sample():
                            port=TESTING_CONFIG['port'])
     samp.create(**test_sample)
     samp.update(query={'uid': test_sample['uid']},
-                       update={'state': 'inactive'})
+                update={'state': 'inactive', 'time': ttime.time()})
     updated_samp = next(samp.find(name='up_sam'))
     assert updated_samp['state'] == 'inactive'
 
@@ -96,9 +96,6 @@ def test_update_sample_illegal():
                     beamline_id='trial_b', updated=False)
     samp = SampleReference(host=TESTING_CONFIG['host'],
                            port=TESTING_CONFIG['port'])
-    pytest.raises(HTTPError,
-                  samp.update, query={'name': test_sample['name']},
-                  update={'time': 'illegal'})
     pytest.raises(HTTPError,
                   samp.update, query={'name': test_sample['name']},
                                       update={'uid': 'illegal'})
