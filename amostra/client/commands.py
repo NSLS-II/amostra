@@ -107,23 +107,139 @@ class AmostraClient:
         """
         return self._container_client.create(uid=uid, time=time, **kwargs)
 
-    def update_sample(self):
-        pass
+    def update_sample(self, update, query):
+        """Update a sample given a query and name value pair to be updated.
+        No upsert(s).
 
-    def update_request(self):
-        pass
+        Parameters
+        -----------
+        query: dict
+            Allows finding Request documents to be updated.
+        update: dict
+            Name/value pair that is to be replaced within an existing Request doc.
+        Returns
+        ----------
+        bool
+            Returns True if update successful
+        """
+        if self._sample_client.update(update=update, query=query):
+            return True
+        return False
+    
+    def update_request(self, update, query):
+        """Update a request given a query and name value pair to be updated.
+        No upsert(s).
+        
+        Parameters
+        -----------
+        query: dict
+        Allows finding Request documents to be updated.
+        update: dict
+        Name/value pair that is to be replaced within an existing Request doc.
+        Returns
+        ----------
+        bool
+        Returns True if update successful
+        
+        """
+        if self._request_client.update(update=update, query=query):
+            return True
+        return False
 
-    def update_container(self):
-        pass
+    def update_container(self, update, query):
+        """Update a container given a query and name value pair to be updated.
+        No upsert(s).
+  
+        Parameters
+        -----------
+        query: dict
+            Allows finding Request documents to be updated.
+        update: dict
+            Name/value pair that is to be replaced within an existing Request doc.
+        Returns
+        ----------
+        bool
+            Returns True if update successful
 
-    def find_sample(self):
-        pass
+        """
+        if self._container_client.update(update=update, query=query):
+            return True
+        return False
 
-    def find_request(self):
-        pass
+    def find_sample(self, as_document=True, **kwargs):
+        """Given a set of mongo search parameters, return a requests iterator
+        
+        Parameters
+        -----------
+        as_document: bool
+            Format return type to doct.Document if set
+        
+        Yields
+        ----------
+        dict, doct.Document
+            Result of the query
+        
+        Raises
+        ---------
+        StopIteration, requests.exceptions.HTTPError
+            When nothing found or something is wrong on the server side. 
+            If server error occurs, a human friendly message is returned.
+            
+        """
+        try:
+            return list(self._sample_client.find(as_document=True, **kwargs))
+        except StopIteration:
+            return None
+
+    def find_request(self, as_document=True, **kwargs):
+        """Given a set of mongo search parameters, return a requests iterator
+            
+        Parameters
+        -----------
+        as_document: bool
+            Format return type to doct.Document if set
+            
+        Yields
+        ----------
+        dict, doct.Document
+            Result of the query
+            
+        Raises
+        ---------
+        StopIteration, requests.exceptions.HTTPError
+            When nothing found or something is wrong on the server side. 
+            If server error occurs, a human friendly message is returned.
+            
+        """
+        try:
+            return list(self._request_client.find(**kwargs))
+        except StopIteration:
+            return None
 
     def find_container(self):
-        pass
+        """Given a set of mongo search parameters, return a requests iterator
+            
+        Parameters
+        -----------
+        as_document: bool
+            Format return type to doct.Document if set
+            
+        Yields
+        ----------
+        dict, doct.Document
+            Result of the query
+            
+        Raises
+        ---------
+        StopIteration, requests.exceptions.HTTPError
+            When nothing found or something is wrong on the server side.
+            If server error occurs, a human friendly message is returned.
+
+        """
+        try:
+            return list(self._container_client.find(**kwargs))
+        except StopIteration:
+            return None
 
 
 class SampleReference(object):
