@@ -9,6 +9,123 @@ class AmostraException(Exception):
     pass
 
 
+class AmostraClient:
+    def __init__(self, host, port):
+        """ Simplified client for Sample, Request, and Container
+
+        Parameters
+        ----------
+        host: str, optional
+            Machine name/address for Amostra server
+        port: int, optional
+            Port Amostra server is initiated on
+        """
+        self.host = host
+        self.port = port
+
+    @property
+    def _sample_client(self):
+        """ Connection pool for Sample related tasks."""
+        return SampleReference(host=self.host,
+                               port=self.port)
+
+    @property
+    def _container_client(self):
+        """Connection pool for Container related tasks."""
+        return ContainerReference(host=self.host,
+                                  port=self.port)
+
+    @property
+    def _request_client(self):
+        """Connection pool for Request related tasks."""
+        return RequestReference(host=self.host,
+                                port=self.port)
+
+    def create_sample(self, name, time=None, uid=None, container=None,
+                       **kwargs):
+        """ Insert a sample to the database
+
+        Parameters
+        ----------
+        name : str
+           The name of the sample  This must be unique in the database
+        time: float
+           The time sample is created. Client provided timestamp
+        uid: str
+            Unique identifier for a sample document
+        container: str, list
+            A single or a list of container documents or uids
+
+        Returns
+        -------
+        str: The inserted document.
+         
+        """
+        return self._sample_client.create(name=name, time=time, uid=uid,
+                                          container=container, **kwargs)
+
+    def create_request(self, sample=None, time=None,
+                       uid=None, state='active', seq_num=0, **kwargs):
+        """ Create a request entry in the dataase
+        
+        Parameters
+        ----------
+        sample: dict, doct.Document, optional
+            The sample this reference refers to
+        time: float
+            Time request got created
+        uid: str
+            Unique identifier for
+        state: str
+            Enum 'active' or 'inactive' that displays the state of a request
+        seq_num: int
+            Sequence number for creation of the request. Not indexed but can be updated
+        
+        Returns
+        -------
+        str: The inserted Request document uid
+        
+        """
+        return self._request_client.create(sample=sample, time=time, uid=uid,
+                                            state=state, seq_num=seq_num,
+                                            **kwargs)
+
+    def create_container(self, uid=None, time=None, **kwargs):
+        """ Insert a container document.
+        
+        Parameters
+        ----------
+        uid: str
+        Unique identifier for a Container document
+        time: float
+        Time document created. Client side timestamp
+        
+        Returns
+        -------
+        str: Inserted Container document uid
+        
+        """
+        return self._container_client.create(uid=uid, time=time, **kwargs)
+
+    def update_sample(self):
+        pass
+
+    def update_request(self):
+        pass
+
+    def update_container(self):
+        pass
+
+    def find_sample(self):
+        pass
+
+    def find_request(self):
+        pass
+
+    def find_container(self):
+        pass
+
+
 class SampleReference(object):
     """Reference implementation of generic sample manager"""
     def __init__(self, host=conf.conn_config['host'],
@@ -177,7 +294,7 @@ class RequestReference(object):
 
     def create(self, sample=None, time=None,
                uid=None, state='active', seq_num=0, **kwargs):
-        """ Create a sample entry in the dataase
+        """ Create a request entry in the dataase
         Parameters
         ----------
         sample: dict, doct.Document, optional
