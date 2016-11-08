@@ -25,7 +25,7 @@ def test_sample_constructor():
 def test_connection_switch():
     s = SampleReference()
     conn = AmostraClient(host=TESTING_CONFIG['host'],
-                         port=TESTING_CONFIG['port']))
+                         port=TESTING_CONFIG['port'])
     s.host = 'caesar'
     pytest.raises(RequestException, s.create, 'asterix')
     s.host = TESTING_CONFIG['host']
