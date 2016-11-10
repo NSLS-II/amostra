@@ -5,7 +5,7 @@ import pytest
 from ..testing import amostra_setup, amostra_teardown
 from ..client.api import SampleReference, AmostraClient
 from requests.exceptions import HTTPError, RequestException
-from amostra.testing import TESTING_CONFIG
+from ..testing import TESTING_CONFIG
 
 import uuid
 
@@ -18,14 +18,10 @@ def teardown():
 
 def test_sample_constructor():
     s2 = SampleReference()
-    conn = AmostraClient(host=TESTING_CONFIG['host'],
-                         port=TESTING_CONFIG['port'])
 
 
 def test_connection_switch():
     s = SampleReference()
-    conn = AmostraClient(host=TESTING_CONFIG['host'],
-                         port=TESTING_CONFIG['port'])
     s.host = 'caesar'
     pytest.raises(RequestException, s.create, 'asterix')
     s.host = TESTING_CONFIG['host']
