@@ -51,7 +51,7 @@ def test_find_sample(conn=conn):
                     beamline_id='test-ci')
     s = conn.create_sample(**m_sample)
     s_ret = conn.find_sample(uid=m_sample['uid'])
-    assert s_ret == m_sample
+    assert s_ret[0]['uid'] == m_sample['uid']
 
 
 def test_find_sample_as_doc(conn=conn):
@@ -60,14 +60,23 @@ def test_find_sample_as_doc(conn=conn):
                     beamline_id='trial_b', container='legion1')
     conn.create_sample(**m_sample)
     s_ret = conn.find_sample(uid=m_sample['uid'], as_document=True)
-    assert s_ret == Document('Sample', m_sample)
+    assert s_ret[0] == Document('Sample', m_sample)
 
-def test_update_sample():
+def test_update_sample(conn=conn):
     test_sample = dict(name='up_sam', uid=str(uuid.uuid4()),
                        time=ttime.time(), owner='arkilic', project='trial',
                        beamline_id='trial_b', state='active', container='legion2')
     conn.create_sample(**test_sample)
     conn.update_sample(query={'uid': test_sample['uid']},
                        update={'state': 'inactive', 'time': ttime.time()})
-    updated_samp = conn.find_sample(name='up_sam'))
+    updated_samp = conn.find_sample(name='up_sam')[0]
     assert updated_samp['state'] == 'inactive'
+
+
+def test_update_sample_illegal(conn=conn):
+    test_sample = dict(name='up_sam', uid=str(uuid.uuid4()),
+                    time=ttime.time(), owner='arkilic', project='trial',
+                    beamline_id='trial_b', updated=False)
+    pytest.raises(HTTPError,
+                  conn.update_sample, query={'name': test_sample['name']},
+                                      update={'uid': 'illegal'})
