@@ -59,5 +59,16 @@ def test_find_sample_as_doc(conn=conn):
                     time=ttime.time(), owner='arkilic', project='trial',
                     beamline_id='trial_b', container='legion1')
     conn.create_sample(**m_sample)
-    s_ret = conn.find_sample(uid=m_sample['uid'], as_document=True))
+    s_ret = conn.find_sample(uid=m_sample['uid'], as_document=True)
     assert s_ret == Document('Sample', m_sample)
+
+def test_update_sample():
+    test_sample = dict(name='up_sam', uid=str(uuid.uuid4()),
+                       time=ttime.time(), owner='arkilic', project='trial',
+                       beamline_id='trial_b', state='active', container='legion2')
+                           port=TESTING_CONFIG['port'])
+    conn.create_sample(**test_sample)
+    conn.update_sample(query={'uid': test_sample['uid']},
+                       update={'state': 'inactive', 'time': ttime.time()})
+    updated_samp = conn.find_sample(name='up_sam'))
+    assert updated_samp['state'] == 'inactive'
