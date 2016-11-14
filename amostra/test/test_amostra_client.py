@@ -66,7 +66,6 @@ def test_update_sample():
     test_sample = dict(name='up_sam', uid=str(uuid.uuid4()),
                        time=ttime.time(), owner='arkilic', project='trial',
                        beamline_id='trial_b', state='active', container='legion2')
-                           port=TESTING_CONFIG['port'])
     conn.create_sample(**test_sample)
     conn.update_sample(query={'uid': test_sample['uid']},
                        update={'state': 'inactive', 'time': ttime.time()})
