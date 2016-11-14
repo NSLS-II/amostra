@@ -59,7 +59,7 @@ class AmostraClient:
         Returns
         -------
         str: The inserted document.
-         
+
         """
         return self._sample_client.create(name=name, time=time, uid=uid,
                                           container=container, **kwargs)
@@ -67,7 +67,7 @@ class AmostraClient:
     def create_request(self, sample=None, time=None,
                        uid=None, state='active', seq_num=0, **kwargs):
         """ Create a request entry in the dataase
-        
+
         Parameters
         ----------
         sample: dict, doct.Document, optional
@@ -80,30 +80,30 @@ class AmostraClient:
             Enum 'active' or 'inactive' that displays the state of a request
         seq_num: int
             Sequence number for creation of the request. Not indexed but can be updated
-        
+
         Returns
         -------
         str: The inserted Request document uid
-        
+
         """
         return self._request_client.create(sample=sample, time=time, uid=uid,
-                                            state=state, seq_num=seq_num,
-                                            **kwargs)
+                                           state=state, seq_num=seq_num,
+                                           **kwargs)
 
     def create_container(self, uid=None, time=None, **kwargs):
         """ Insert a container document.
-        
+
         Parameters
         ----------
         uid: str
         Unique identifier for a Container document
         time: float
         Time document created. Client side timestamp
-        
+
         Returns
         -------
         str: Inserted Container document uid
-        
+
         """
         return self._container_client.create(uid=uid, time=time, **kwargs)
 
@@ -125,11 +125,11 @@ class AmostraClient:
         if self._sample_client.update(update=update, query=query):
             return True
         return False
-    
+
     def update_request(self, update, query):
         """Update a request given a query and name value pair to be updated.
         No upsert(s).
-        
+
         Parameters
         -----------
         query: dict
@@ -140,7 +140,7 @@ class AmostraClient:
         ----------
         bool
         Returns True if update successful
-        
+
         """
         if self._request_client.update(update=update, query=query):
             return True
@@ -149,7 +149,7 @@ class AmostraClient:
     def update_container(self, update, query):
         """Update a container given a query and name value pair to be updated.
         No upsert(s).
-  
+
         Parameters
         -----------
         query: dict
@@ -168,67 +168,17 @@ class AmostraClient:
 
     def find_sample(self, as_document=True, **kwargs):
         """Given a set of mongo search parameters, return a requests iterator
-        
-        Parameters
-        -----------
-        as_document: bool
-            Format return type to doct.Document if set
-        
-        Yields
-        ----------
-        dict, doct.Document
-            Result of the query
-        
-        Raises
-        ---------
-        StopIteration, requests.exceptions.HTTPError
-            When nothing found or something is wrong on the server side. 
-            If server error occurs, a human friendly message is returned.
-            
-        """
-        try:
-            return list(self._sample_client.find(as_document=True, **kwargs))
-        except StopIteration:
-            return None
 
-    def find_request(self, as_document=True, **kwargs):
-        """Given a set of mongo search parameters, return a requests iterator
-            
         Parameters
         -----------
         as_document: bool
             Format return type to doct.Document if set
-            
-        Yields
-        ----------
-        dict, doct.Document
-            Result of the query
-            
-        Raises
-        ---------
-        StopIteration, requests.exceptions.HTTPError
-            When nothing found or something is wrong on the server side. 
-            If server error occurs, a human friendly message is returned.
-            
-        """
-        try:
-            return list(self._request_client.find(**kwargs))
-        except StopIteration:
-            return None
 
-    def find_container(self):
-        """Given a set of mongo search parameters, return a requests iterator
-            
-        Parameters
-        -----------
-        as_document: bool
-            Format return type to doct.Document if set
-            
         Yields
         ----------
         dict, doct.Document
             Result of the query
-            
+
         Raises
         ---------
         StopIteration, requests.exceptions.HTTPError
@@ -237,7 +187,60 @@ class AmostraClient:
 
         """
         try:
-            return list(self._container_client.find(**kwargs))
+            return list(self._sample_client.find(as_document=as_document,
+                                                 **kwargs))
+        except StopIteration:
+            return None
+
+    def find_request(self, as_document=True, **kwargs):
+        """Given a set of mongo search parameters, return a requests iterator
+
+        Parameters
+        -----------
+        as_document: bool
+            Format return type to doct.Document if set
+
+        Yields
+        ----------
+        dict, doct.Document
+            Result of the query
+
+        Raises
+        ---------
+        StopIteration, requests.exceptions.HTTPError
+            When nothing found or something is wrong on the server side.
+            If server error occurs, a human friendly message is returned.
+
+        """
+        try:
+            return list(self._request_client.find(as_document=as_document,
+                                                  **kwargs))
+        except StopIteration:
+            return None
+
+    def find_container(self, as_document=True, **kwargs):
+        """Given a set of mongo search parameters, return a requests iterator
+
+        Parameters
+        -----------
+        as_document: bool
+            Format return type to doct.Document if set
+
+        Yields
+        ----------
+        dict, doct.Document
+            Result of the query
+
+        Raises
+        ---------
+        StopIteration, requests.exceptions.HTTPError
+            When nothing found or something is wrong on the server side.
+            If server error occurs, a human friendly message is returned.
+
+        """
+        try:
+            return list(self._container_client.find(as_document=as_document,
+                                                    **kwargs))
         except StopIteration:
             return None
 

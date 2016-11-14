@@ -40,3 +40,24 @@ def test_duplicate_sample(conn=conn):
     pytest.raises(HTTPError, conn.create_sample, name='test_duplicate',
                   uid=_com_uid)
 
+
+def test_invalid_sample(conn=conn):
+    pytest.raises(TypeError, conn.create_sample)
+
+
+def test_find_sample(conn=conn):
+    m_sample = dict(name='comp_samp', uid=str(uuid.uuid4()),
+                    time=ttime.time(), owner='test', project='ci-tests',
+                    beamline_id='test-ci')
+    s = conn.create_sample(**m_sample)
+    s_ret = conn.find_sample(uid=m_sample['uid'])
+    assert s_ret == m_sample
+
+
+def test_find_sample_as_doc(conn=conn):
+    m_sample = dict(name='comp_sam', uid=str(uuid.uuid4()),
+                    time=ttime.time(), owner='arkilic', project='trial',
+                    beamline_id='trial_b', container='legion1')
+    conn.create_sample(**m_sample)
+    s_ret = conn.find_sample(uid=m_sample['uid'], as_document=True))
+    assert s_ret == Document('Sample', m_sample)
