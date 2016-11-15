@@ -80,3 +80,20 @@ def test_update_sample_illegal(conn=conn):
     pytest.raises(HTTPError,
                   conn.update_sample, query={'name': test_sample['name']},
                                       update={'uid': 'illegal'})
+
+def test_container_create(conn=conn):
+    ast_cont = {'name': 'obelix', "dog": 'hidefix', 'time': ttime.time(),
+                'container': 'gauls', 'uid': str(uuid.uuid4())}
+    cont1 = conn.create_container(**ast_cont)
+    assert cont1 == ast_cont['uid']
+
+
+def test_find_container(conn=conn):
+    f_cont = dict(name='comp_sam', uid=str(uuid.uuid4()),
+                    time=ttime.time(), owner='hidefix', project='ceasar',
+                    container='gauls',
+                    beamline_id='fiction')
+    c_uid = conn.create_container(**f_cont)
+    c_ret_doc = conn.find_container(uid=c_uid, as_document=True)[0]
+    assert Document == type(c_ret_doc)
+    assert c_ret_doc['uid'] == c_uid
