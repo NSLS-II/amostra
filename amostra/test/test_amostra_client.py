@@ -97,3 +97,35 @@ def test_find_container(conn=conn):
     c_ret_doc = conn.find_container(uid=c_uid, as_document=True)[0]
     assert Document == type(c_ret_doc)
     assert c_ret_doc['uid'] == c_uid
+
+
+def test_find_container_as_doc(conn=conn):
+    f_cont = dict(name='comp_sam', uid=str(uuid.uuid4()),
+                    time=ttime.time(), owner='hidefix', project='ceasar',
+                    container='gauls',
+                    beamline_id='fiction')
+    c_uid = conn.create_container(**f_cont)
+    c_ret_doc = conn.find_container(uid=c_uid, as_document=True)[0]
+    assert Document == type(c_ret_doc)
+    assert c_ret_doc['uid'] == c_uid
+
+def test_update_container(conn=conn):
+    orig_cont = dict(name='obelix', uid=str(uuid.uuid4()),
+                       time=ttime.time(), owner='chief', project='egypt',
+                       beamline_id='fiction', state='active', container='SPQR')
+    m_uid = conn.create_container(**orig_cont)
+    conn.update_container(query={'uid': orig_cont['uid']},
+                          update={'state': 'inactive','time': ttime.time()})
+    updated_cont = conn.find_container(uid=m_uid)[0]
+    assert updated_cont['state'] == 'inactive'
+
+
+def test_update_container_illegal(conn=conn):
+    orig_cont = dict(name='obelix', uid=str(uuid.uuid4()),
+                       time=ttime.time(), owner='chief', project='egypt',
+                       beamline_id='fiction', state='active', container='SPQR')
+    m_uid = conn.create_container(**orig_cont)
+    test_time = ttime.time()
+    pytest.raises(HTTPError, conn.update_container, query={'uid': orig_cont['uid']},
+                  update={'uid': str(uuid.uuid4())})
+
