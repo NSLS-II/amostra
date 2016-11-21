@@ -134,3 +134,33 @@ def test_request_create(conn=conn):
     conn.create_request(sample='roman_sample', time=ttime.time(),
                uid=None, state='active', seq_num=0, foo='bar',
                hero='asterix', antihero='romans')
+
+
+def test_duplicate_request(conn=conn):
+    m_uid = str(uuid.uuid4())
+    conn.create_request(sample='hidefix', time=ttime.time(),
+               uid=m_uid, state='active', seq_num=0, foo='bar',
+               hero='asterix', antihero='romans')
+    pytest.raises(HTTPError, conn.create_request, sample='hidefix', time=ttime.time(),
+               uid=m_uid, state='active', seq_num=0, foo='bar',
+               hero='asterix', antihero='romans')
+
+def test_request_find(conn=conn):
+    req_dict = dict(sample='hidefix', time=ttime.time(),
+                    uid=str(uuid.uuid4()), state='active', seq_num=0, foo='bar',
+                    hero='obelix', antihero='romans')
+    inserted = conn.create_request(**req_dict)
+    retrieved = conn.find_request(uid=inserted)[0]
+    assert retrieved['uid'] == inserted
+
+
+def test_update_request(conn=conn):
+    m_uid = str(uuid.uuid4())
+    req_dict = dict(uid=m_uid, sample='hidefix', time=ttime.time(),
+                    seq_num=0, foo='bar',
+                    hero='obelix', antihero='romans')
+    conn.create_request(**req_dict)
+    conn.update_request(query={'uid': m_uid},
+                        update={'state': 'inactive'})
+    updated_req = conn.find_request(uid=m_uid)[0]
+    assert updated_req['state'] == 'inactive'
