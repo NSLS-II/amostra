@@ -129,3 +129,8 @@ def test_update_container_illegal(conn=conn):
     pytest.raises(HTTPError, conn.update_container, query={'uid': orig_cont['uid']},
                   update={'uid': str(uuid.uuid4())})
 
+
+def test_request_create(conn=conn):
+    conn.create_request(sample='roman_sample', time=ttime.time(),
+               uid=None, state='active', seq_num=0, foo='bar',
+               hero='asterix', antihero='romans')

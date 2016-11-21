@@ -17,15 +17,15 @@ def test_request_constructor_config():
                           port=TESTING_CONFIG['port'])
     assert r1.host == TESTING_CONFIG['host']
     assert r1.port == TESTING_CONFIG['port']
-    
+
 
 def test_req_connection_switch():
     r = RequestReference()
     r.host = 'bogus_paigh'
     pytest.raises(ConnectionError, r.create, 'test')
-    r.host = 'localhost'
+    r.host =  TESTING_CONFIG['host']
     list(r.find())
-    
+
 
 def test_request_create():
     req1= RequestReference(host=TESTING_CONFIG['host'],
