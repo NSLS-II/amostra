@@ -28,8 +28,6 @@ def test_request_create():
     req2.create(sample='roman_sample', time=time.time(),
                uid=None, state='active', seq_num=0, foo='bar',
                hero='asterix', antihero='romans')
-    req2.host = 'hail_caesar'
-    pytest.raises(ConnectionError, req2.create, sample='roman_sample')
 
 
 def test_duplicate_request():
