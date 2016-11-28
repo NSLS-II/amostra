@@ -17,15 +17,7 @@ def test_request_constructor_config():
                           port=TESTING_CONFIG['port'])
     assert r1.host == TESTING_CONFIG['host']
     assert r1.port == TESTING_CONFIG['port']
-    
 
-def test_req_connection_switch():
-    r = RequestReference()
-    r.host = 'bogus_paigh'
-    pytest.raises(ConnectionError, r.create, 'test')
-    r.host = 'localhost'
-    list(r.find())
-    
 
 def test_request_create():
     req1= RequestReference(host=TESTING_CONFIG['host'],
@@ -36,8 +28,6 @@ def test_request_create():
     req2.create(sample='roman_sample', time=time.time(),
                uid=None, state='active', seq_num=0, foo='bar',
                hero='asterix', antihero='romans')
-    req2.host = 'hail_caesar'
-    pytest.raises(ConnectionError, req2.create, sample='roman_sample')
 
 
 def test_duplicate_request():

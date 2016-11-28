@@ -9,6 +9,213 @@ class AmostraException(Exception):
     pass
 
 
+class AmostraClient:
+    def __init__(self, host, port):
+        """ Simplified client for Sample, Request, and Container
+
+        Parameters
+        ----------
+        host: str, optional
+            Machine name/address for Amostra server
+        port: int, optional
+            Port Amostra server is initiated on
+        """
+        self.host = host
+        self.port = port
+
+    @property
+    def _sample_client(self):
+        """ Connection pool for Sample related tasks."""
+        return SampleReference(host=self.host,
+                               port=self.port)
+
+    @property
+    def _container_client(self):
+        """Connection pool for Container related tasks."""
+        return ContainerReference(host=self.host,
+                                  port=self.port)
+
+    @property
+    def _request_client(self):
+        """Connection pool for Request related tasks."""
+        return RequestReference(host=self.host,
+                                port=self.port)
+
+    def create_sample(self, name, time=None, uid=None, container=None,
+                       **kwargs):
+        """ Insert a sample to the database
+
+        Parameters
+        ----------
+        name : str
+           The name of the sample  This must be unique in the database
+        time: float
+           The time sample is created. Client provided timestamp
+        uid: str
+            Unique identifier for a sample document
+        container: str, list
+            A single or a list of container documents or uids
+
+        Returns
+        -------
+        str: The inserted document.
+
+        """
+        return self._sample_client.create(name=name, time=time, uid=uid,
+                                          container=container, **kwargs)
+
+    def create_request(self, sample=None, time=None,
+                       uid=None, state='active', seq_num=0, **kwargs):
+        """ Create a request entry in the dataase
+
+        Parameters
+        ----------
+        sample: dict, doct.Document, optional
+            The sample this reference refers to
+        time: float
+            Time request got created
+        uid: str
+            Unique identifier for
+        state: str
+            Enum 'active' or 'inactive' that displays the state of a request
+        seq_num: int
+            Sequence number for creation of the request. Not indexed but can be updated
+
+        Returns
+        -------
+        str: The inserted Request document uid
+
+        """
+        return self._request_client.create(sample=sample, time=time, uid=uid,
+                                           state=state, seq_num=seq_num,
+                                           **kwargs)
+
+    def create_container(self, uid=None, time=None, **kwargs):
+        """ Insert a container document.
+
+        Parameters
+        ----------
+        uid: str
+        Unique identifier for a Container document
+        time: float
+        Time document created. Client side timestamp
+
+        Returns
+        -------
+        str: Inserted Container document uid
+
+        """
+        return self._container_client.create(uid=uid, time=time, **kwargs)
+
+    def update_sample(self, update, query):
+        """Update a sample given a query and name value pair to be updated.
+        No upsert(s).
+
+        Parameters
+        -----------
+        query: dict
+            Allows finding Request documents to be updated.
+        update: dict
+            Name/value pair that is to be replaced within an existing Request doc.
+        Returns
+        ----------
+        bool
+            Returns True if update successful
+        """
+        return self._sample_client.update(update=update, query=query)
+
+    def update_request(self, update, query):
+        """Update a request given a query and name value pair to be updated.
+        No upsert(s).
+
+        Parameters
+        -----------
+        query: dict
+        Allows finding Request documents to be updated.
+        update: dict
+        Name/value pair that is to be replaced within an existing Request doc.
+        Returns
+        ----------
+        bool
+        Returns True if update successful
+
+        """
+        if self._request_client.update(update=update, query=query):
+            return True
+        return False
+
+    def update_container(self, update, query):
+        """Update a container given a query and name value pair to be updated.
+        No upsert(s).
+
+        Parameters
+        -----------
+        query: dict
+            Allows finding Request documents to be updated.
+        update: dict
+            Name/value pair that is to be replaced within an existing Request doc.
+        Returns
+        ----------
+        bool
+            Returns True if update successful
+
+        """
+        if self._container_client.update(update=update, query=query):
+            return True
+        return False
+
+    def find_sample(self, as_document=True, **kwargs):
+        """Given a set of mongo search parameters, return a requests iterator
+
+        Parameters
+        -----------
+        as_document: bool
+            Format return type to doct.Document if set
+
+        Yields
+        ----------
+       list
+            Result of the query, list of samples doct.Document
+
+
+        """
+        return list(self._sample_client.find(as_document=as_document,
+                                                 **kwargs))
+
+    def find_request(self, as_document=True, **kwargs):
+        """Given a set of mongo search parameters, return a list of requests
+
+        Parameters
+        -----------
+        as_document: bool
+            Format return type to doct.Document if set
+
+        Returns
+        ----------
+        list
+            Result of the query, list of doct.Document
+
+        """
+        return list(self._request_client.find(as_document=as_document,
+                                              **kwargs))
+
+    def find_container(self, as_document=True, **kwargs):
+        """Given a set of mongo search parameters, return a requests iterator
+
+        Parameters
+        -----------
+        as_document: bool
+            Format return type to doct.Document if set
+
+        Yields
+        ----------
+       list
+            Result of the query, list of containers doct.Document
+
+        """
+        return list(self._container_client.find(as_document=as_document,
+                                                **kwargs))
+
 class SampleReference(object):
     """Reference implementation of generic sample manager"""
     def __init__(self, host=conf.conn_config['host'],
@@ -59,7 +266,7 @@ class SampleReference(object):
         Returns
         -------
         ins_doc : str
-            The inserted document
+            The inserted document uid
 
         """
         doc = dict(uid=uid,
@@ -177,7 +384,7 @@ class RequestReference(object):
 
     def create(self, sample=None, time=None,
                uid=None, state='active', seq_num=0, **kwargs):
-        """ Create a sample entry in the dataase
+        """ Create a request entry in the dataase
         Parameters
         ----------
         sample: dict, doct.Document, optional

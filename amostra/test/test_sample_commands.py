@@ -3,9 +3,9 @@ import time as ttime
 import pytest
 
 from ..testing import amostra_setup, amostra_teardown
-from ..client.api import SampleReference
+from ..client.api import SampleReference, AmostraClient
 from requests.exceptions import HTTPError, RequestException
-from amostra.testing import TESTING_CONFIG
+from ..testing import TESTING_CONFIG
 
 import uuid
 
