@@ -2,19 +2,61 @@
 Usage
 =====
 
-Connect to a MongoDB database.
+Setup
+=====
 
-.. ipython:: python
+Users can connect directly to a MongoDB (suitable for personal use or testing)
+or connect to an HTTP server with a RESTful API. Amostra provides a Python
+client for each of these modes that present identical interfaces to the user.
+
+Direct Connection to MongoDB
+----------------------------
+
+For direct connection to MongoDB without an HTTP server in the middle, use
+:class:`amostra.mongo_client.Client`.
+
+.. code:: python
 
    import amostra.mongo_client
    URI = 'mongodb://localhost:27017/amostra_demo'
    client = amostra.mongo_client.Client(URI)
 
+HTTP Server and Client
+----------------------
+
+On a machine with access to the MongoDB server, start amostra's HTTP server.
+There is only one required option: the URI for a MongoDB database. Note that a
+database name must be included in the URI, as in ``test_amostra`` below. Any
+database name may be used, and it will be created if it does not yet exist.
+
+.. code:: bash
+
+   $ python -m amostra.server --mongo_uri='mongodb://localhost:27017/test_amostra'
+   [I 190802 15:24:41 server:62] Listening on 0.0.0.0:5000, path None
+
+See ``python -m amostra.server --help`` for more options, including SSL support
+and a custom base URL.
+
+On any machine that can see that server, use
+:class:`amostra.http_client.Client`.
+
+.. code:: python
+
+   import amostra.mongo_client
+   URI = 'http://localhost:5000'
+   client = amostra.http_client.Client(URI)
+
 .. ipython:: python
    :suppress:
 
+   import amostra.mongo_client
+   URI = 'mongodb://localhost:27017/amostra_demo'
+   client = amostra.mongo_client.Client(URI)
    # Drop the demo database to clean data from any previous builds.
    client._db.client.drop_database('amostra_demo')
+
+Using the Client
+================
 
 Create a new Sample.
 
@@ -93,4 +135,3 @@ To pull them all we can use ``list``.
    list(results)
 
 Note that the ``revisions`` result above worked in the same way.
-
