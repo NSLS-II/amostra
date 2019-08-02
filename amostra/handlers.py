@@ -1,36 +1,54 @@
 from tornado import web
 from tornado.escape import json_decode
+from jsonschema.exceptions import ValidationError
 
 
 class CreateHandler(web.RequestHandler):
-    def post(self, obj_type):
-        content = json_decode(self.request.body)
-        client = self.settings['mongo_client']
-        obj = client.new_sample(**content)
+    def post(self, collection_name):
+        parameters = json_decode(self.request.body)['parameters']
+        accessor = getattr(self.settings['mongo_client'], collection_name)
+        parameters.pop('uuid')
+        parameters.pop('revision')
+        try:
+            obj = accessor.new(**parameters)
+        except ValidationError:
+            self.write_error(403)
         self.write({'uuid': obj.uuid})
 
 
 class SearchHandler(web.RequestHandler):
-    def post(self, obj_type):
+    def post(self, collection_name):
         filter = json_decode(self.request.body)['filter']
-        client = self.settings['mongo_client']
+        accessor = getattr(self.settings['mongo_client'], collection_name)
         # TODO Add pagination.
-        results = list(client.find_samples(filter))
+        results = list(accessor.find(filter))
         self.write({"results": [result.to_dict() for result in results]})
 
 
 class ObjectHandler(web.RequestHandler):
-    def get(self, obj_type):
-        filter = json_decode(self.request.body)['filter']
+    def get(self, collection_name, uuid):
+        accessor = getattr(self.settings['mongo_client'], collection_name)
+        result = accessor.find_one({'uuid': uuid})
+        self.write(result.to_dict())
+
+    def put(self, collection_name, uuid):
+        change = json_decode(self.request.body)['change']
+        accessor = getattr(self.settings['mongo_client'], collection_name)
+        change['owner'] = accessor.find_one({'uuid': uuid})
         client = self.settings['mongo_client']
-        # TODO Add pagination.
-        results = list(client.find_samples(filter))
-        self.write(results)
+        try:
+            client._update(change)
+        except ValidationError:
+            self.write_error(403)
         self.finish()
 
 
 def init_handlers():
+    # POST /samples/new
+    # POST /samples
+    # GET /samples/<uuid>
+    # PUT /samples/<uuid>
     return [(r'/([A-Za-z0-9_\.\-]+)/new/?', CreateHandler),
-            (r'/([A-Za-z0-9_\.\-]+)//?', SearchHandler),
-            (r'/([A-Za-z0-9_\.\-]+)/(.+)/?', ObjectHandler),
+            (r'/([A-Za-z0-9_\.\-]+)/([A-Za-z0-9_\.\-]+)/?', ObjectHandler),
+            (r'/([A-Za-z0-9_\.\-]+)/?', SearchHandler),
             ]

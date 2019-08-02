@@ -122,3 +122,6 @@ class Request(AmostraDocument):
 
     def __init__(self, *, _amostra_client, name, **kwargs):
         super().__init__(name=name, **kwargs)
+
+
+TYPES_TO_COLLECTION_NAMES = {Sample: 'samples'}

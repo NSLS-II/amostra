@@ -1,8 +1,6 @@
 import pymongo
-from .objects import Sample
+from .objects import Sample, TYPES_TO_COLLECTION_NAMES
 
-
-TYPES_TO_COLLECTION_NAMES = {Sample: 'samples'}
 
 class Client:
     """
@@ -127,6 +125,8 @@ class CollectionAccessor:
         return self._client._new_document(self._obj_type, args, kwargs)
 
     def find(self, filter):
+        if filter is None:
+            filter = {}
         for document in self._collection.find(filter):
             yield self._client._document_to_obj(self._obj_type, document)
 
