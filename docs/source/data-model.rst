@@ -1,0 +1,29 @@
+==========
+Data Model
+==========
+
+The data model includes:
+
+* Sample
+* Container
+* Request
+
+For each type we document here the formal schema, given as a
+`JSON schema <https://json-schema.org/understanding-json-schema/>`_.
+When objects are created or updated, the proposed change is validated against
+the corresponding schema and rejected if it fails to satify it.
+
+Sample
+======
+
+.. literalinclude:: ../../amostra/schemas/sample.json
+
+Container
+=========
+
+.. literalinclude:: ../../amostra/schemas/container.json
+
+Request
+=======
+
+.. literalinclude:: ../../amostra/schemas/request.json

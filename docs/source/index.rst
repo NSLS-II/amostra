@@ -11,4 +11,5 @@ Amostra Documentation
 
    installation
    usage
+   data-model
    release-history
