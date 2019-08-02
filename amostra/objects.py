@@ -12,12 +12,16 @@ from traitlets import (
 from .utils import load_schema
 
 
-class VersionedDocument(HasTraits):
+class AmostraDocument(HasTraits):
     """
-    A HasTraits object with a uuuid, revision number, and convenience methods.
+    A HasTraits object with a reference to an amostra client.
     """
     uuid = Unicode(read_only=True)
     revision = Integer(0, read_only=True)
+
+    def __init__(self, _amostra_client, *args, **kwargs):
+        self._amostra_client = _amostra_client
+        super().__init__(*args, **kwargs)
 
     @default('uuid')
     def get_uuid(self):
@@ -32,6 +36,27 @@ class VersionedDocument(HasTraits):
     def to_dict(self):
         return {name: getattr(self, name) for name in self.trait_names()}
 
+    def revisions(self):
+        """
+        Access all revisions of this document.
+
+        Examples
+        --------
+
+        This returns a *generator* instance which lazily access the data, to
+        enable partial or paginated access in case the number of revisions is
+        large.
+
+        To pull all revisions, use ``list``.
+
+        >>> revisions = list(document.revisions())
+
+        To pull the most recent revision use ``next``.
+
+        >>> most_recent = next(document.revisions())
+        """
+        yield from self._amostra_client._revisions(self)
+
 
 def _validate_with_jsonschema(instance, proposal):
     """
@@ -43,7 +68,7 @@ def _validate_with_jsonschema(instance, proposal):
     return proposal['value']
 
 
-class Sample(VersionedDocument):
+class Sample(AmostraDocument):
     SCHEMA = load_schema('sample.json')
     name = Unicode()
 #     sample_desc": sample_desc,
@@ -67,11 +92,11 @@ class Sample(VersionedDocument):
 
     validate('name')(_validate_with_jsonschema)
 
-    def __init__(self, *, name, **kwargs):
-        super().__init__(name=name, **kwargs)
+    def __init__(self, _amostra_client, *, name, **kwargs):
+        super().__init__(_amostra_client, name=name, **kwargs)
 
 
-class Request(VersionedDocument):
+class Request(AmostraDocument):
     SCHEMA = load_schema('request.json')
     name = Unicode()
 #     sample_desc": sample_desc,
@@ -95,5 +120,5 @@ class Request(VersionedDocument):
 
     validate('name')(_validate_with_jsonschema)
 
-    def __init__(self, *, name, **kwargs):
+    def __init__(self, *, _amostra_client, name, **kwargs):
         super().__init__(name=name, **kwargs)

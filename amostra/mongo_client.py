@@ -33,7 +33,7 @@ class Client:
         Insert a new document with a new uuid.
         """
         # Make a new object (e.g. Sample)
-        obj = obj_type(*args, **kwargs)
+        obj = obj_type(self, *args, **kwargs)
 
         # Find the assocaited MongoDB collection.
         collection_name = self.COLLECTION_NAMES[obj_type]
@@ -83,7 +83,7 @@ class Client:
         # Handle the read_only traits separately.
         uuid = document.pop('uuid')
         revision = document.pop('revision')
-        obj = obj_type(**document)
+        obj = obj_type(self, **document)
         obj.set_trait('uuid', uuid)
         obj.set_trait('revision', revision)
 
@@ -92,7 +92,7 @@ class Client:
 
         return obj
 
-    def revisions(self, obj):
+    def _revisions(self, obj):
         """
         Access all revisions to an object with the most recent first.
         """
