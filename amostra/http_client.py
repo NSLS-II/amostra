@@ -96,10 +96,12 @@ class Client:
         """
         Access all revisions to an object with the most recent first.
         """
-        revisions = self._db[f'{self.COLLECTION_NAMES[type(obj)]}_revisions']
         type_ = type(obj)
-        for document in (revisions.find({'uuid': obj.uuid})
-                                  .sort('revision', pymongo.DESCENDING)):
+        collection_name = TYPES_TO_COLLECTION_NAMES[type_]
+        response = self._session.get(
+            self._make_url(collection_name, obj.uuid, 'revisions'))
+        response.raise_for_status()
+        for document in response.json()['revisions']:
             yield self._document_to_obj(type_, document)
 
 

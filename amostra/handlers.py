@@ -43,6 +43,15 @@ class ObjectHandler(web.RequestHandler):
         self.finish()
 
 
+class RevisionsHandler(web.RequestHandler):
+    def get(self, collection_name, uuid):
+        accessor = getattr(self.settings['mongo_client'], collection_name)
+        result = accessor.find_one({'uuid': uuid})
+        # TODO Add pagination.
+        revisions = result.revisions()
+        self.write({"revisions": [revision.to_dict() for revision in revisions]})
+
+
 def init_handlers():
     # POST /samples/new
     # POST /samples
@@ -50,5 +59,7 @@ def init_handlers():
     # PUT /samples/<uuid>
     return [(r'/([A-Za-z0-9_\.\-]+)/new/?', CreateHandler),
             (r'/([A-Za-z0-9_\.\-]+)/([A-Za-z0-9_\.\-]+)/?', ObjectHandler),
+            (r'/([A-Za-z0-9_\.\-]+)/([A-Za-z0-9_\.\-]+)/revisions/?',
+             RevisionsHandler),
             (r'/([A-Za-z0-9_\.\-]+)/?', SearchHandler),
             ]
