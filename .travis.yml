@@ -1,60 +1,20 @@
 language: python
-sudo: required
-env:
-  global:
-    BUILD_DOCS_BRANCH: master
-    DOCS_SUBDIR: doc/
-    TARGET_DEV_SUBDIR: amostra/
-    HTML_SUBDIR: build/html
-    DOCS_CONDA_DEPS: "matplotlib"
-    DOCS_PIP_DEPS: "tqdm"
-
-services:
-  - mongodb
-
-addons:
-  apt:
-    sources:
-    - mongodb-3.2-precise
-    packages:
-    - mongodb-org
-
-matrix:
-  include:
-    - python: 3.4
-      env: BUILD_DOCS=false
-    - python: 3.5
-      env: BUILD_DOCS=true
-
-before_install:
-  - git clone https://github.com/nsls-ii/nsls2-ci ~/scripts
-  - . ~/scripts/install-miniconda.sh
-  - mkdir ~/amostra_files
+python:
+  - 3.6
+cache:
+  directories:
+    - $HOME/.cache/pip
+    - $HOME/.ccache  # https://github.com/travis-ci/travis-ci/issues/5853
 
 install:
-  - mongo localhost:27017/admin ~/scripts/admin.js
-  - conda create -n testenv --yes nose python=$TRAVIS_PYTHON_VERSION pymongo ujson tornado jsonschema pyyaml pytz doct -c lightsource2
-  - source activate testenv
-  - pip install coveralls codecov mongoquery requests pytest pytest-cov
+  # Install this package and the packages listed in requirements.txt.
+  - pip install .
+  # Install extra requirements for running tests and building docs.
+  - pip install -r requirements-dev.txt
 
 script:
-  - nohup python startup.py --mongo-host localhost --mongo-port 27017 --timezone US/Easternm --database amostra_test --service-port 7770 --auth --mongo-user tom --mongo-pwd jerry &
-  - py.test -sv --cov=amostra --cov-report term-missing
-  - |
-    if [ $BUILD_DOCS == true ]; then
-      source ~/scripts/make-docs.sh
-    fi
-
-after_success:
-  - coveralls
-  - codecov
-  - rm -r ~/amostra_files
-  - |
-    if [[ $TRAVIS_PULL_REQUEST == false && $TRAVIS_REPO_SLUG == 'NSLS-II/amostra' && $BUILD_DOCS == true && $TRAVIS_BRANCH == 'master' ]]; then
-      echo "Adding encrypted deployment key for uploading docs"
-      openssl aes-256-cbc -K $encrypted_f281cbacb7d4_key -iv $encrypted_f281cbacb7d4_iv -in amostra_docs_deploy.enc -out amostra_docs_deploy -d
-      eval `ssh-agent -s`
-      chmod 600 amostra_docs_deploy
-      ssh-add amostra_docs_deploy
-      source ~/scripts/push-docs.sh
-    fi
+  - coverage run -m pytest  # Run the tests and check for test coverage.
+  - coverage report -m  # Generate test coverage report.
+  - codecov  # Upload the report to codecov.
+  - flake8 --max-line-length=115  # Enforce code style (but relax line length limit a bit).
+  - make -C docs html  # Build the documentation.
