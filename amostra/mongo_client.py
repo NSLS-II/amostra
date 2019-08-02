@@ -2,6 +2,8 @@ import pymongo
 from .objects import Sample
 
 
+TYPES_TO_COLLECTION_NAMES = {Sample: 'samples'}
+
 class Client:
     """
     This connects to several MongoDB collections for sample management.
@@ -14,7 +16,6 @@ class Client:
     stores previous version of the document. This approach was inspired by:
     https://www.mongodb.com/blog/post/building-with-patterns-the-document-versioning-pattern
     """
-    COLLECTION_NAMES = {Sample: 'samples'}
 
     def __init__(self, database):
         """
@@ -29,6 +30,14 @@ class Client:
         if isinstance(database, str):
             database = _get_database(database)
         self._db = database
+        self._samples = CollectionAccessor(self, Sample)
+
+    @property
+    def samples(self):
+        """
+        Accessor for creating and searching Samples
+        """
+        return self._samples
 
     def _new_document(self, obj_type, args, kwargs):
         """
@@ -38,7 +47,7 @@ class Client:
         obj = obj_type(self, *args, **kwargs)
 
         # Find the assocaited MongoDB collection.
-        collection_name = self.COLLECTION_NAMES[obj_type]
+        collection_name = TYPES_TO_COLLECTION_NAMES[obj_type]
         collection = self._db[collection_name]
 
         # Insert the new object.
@@ -59,7 +68,7 @@ class Client:
         if change['name'] == 'revision':
             return
         owner = change['owner']
-        collection_name = self.COLLECTION_NAMES[type(owner)]
+        collection_name = TYPES_TO_COLLECTION_NAMES[type(owner)]
         collection = self._db[collection_name]
         revisions = self._db[f'{collection_name}_revisions']
         filter = {'uuid': owner.uuid}
@@ -98,18 +107,32 @@ class Client:
         """
         Access all revisions to an object with the most recent first.
         """
-        revisions = self._db[f'{self.COLLECTION_NAMES[type(obj)]}_revisions']
+        revisions = self._db[f'{TYPES_TO_COLLECTION_NAMES[type(obj)]}_revisions']
         type_ = type(obj)
         for document in (revisions.find({'uuid': obj.uuid})
                                   .sort('revision', pymongo.DESCENDING)):
             yield self._document_to_obj(type_, document)
 
-    def new_sample(self, *args, **kwargs):
-        return self._new_document(Sample, args, kwargs)
 
-    def find_samples(self, filter):
-        for document in self._db['samples'].find(filter):
-            yield self._document_to_obj(Sample, document)
+class CollectionAccessor:
+    """
+    Accessor used on Clients
+    """
+    def __init__(self, client, obj_type):
+        self._client = client
+        self._obj_type = obj_type
+        self._collection = client._db[TYPES_TO_COLLECTION_NAMES[self._obj_type]]
+
+    def new(self, *args, **kwargs):
+        return self._client._new_document(self._obj_type, args, kwargs)
+
+    def find(self, filter):
+        for document in self._collection.find(filter):
+            yield self._client._document_to_obj(self._obj_type, document)
+
+    def find_one(self, filter):
+        return self._client._document_to_obj(
+            self._obj_type, self._collection.find_one(filter))
 
 
 def _get_database(uri):

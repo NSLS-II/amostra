@@ -20,7 +20,7 @@ Create a new Sample.
 
 .. ipython:: python
 
-   s = client.new_sample(name='peanut butter')
+   s = client.samples.new(name='peanut butter')
    s
    s.name
 
@@ -62,10 +62,18 @@ Create several more samples, and then search to find one.
 
 .. ipython:: python
 
-   client.new_sample(name='coffee')
-   client.new_sample(name='tea')
-   client.new_sample(name='water')
-   results = client.find_samples({'name': 'tea'})
+   client.samples.new(name='coffee')
+   client.samples.new(name='tea')
+   client.samples.new(name='water')
+   s = client.samples.find_one({'name': 'tea'})
+   s
+
+Searches that are expected to return potentially more than one result, such as
+a search for *all* samples, look like this.
+
+.. ipython:: python
+
+   results = client.samples.find({})
    results
 
 The search results are given as a *generator*, a lazy object that pulls data on
@@ -76,3 +84,13 @@ just one result we can use ``next``.
 
    s = next(results)
    s
+
+To pull them all we can use ``list``.
+
+.. ipython:: python
+
+   results = client.samples.find({})
+   list(results)
+
+Note that the ``revisions`` result above worked in the same way.
+
