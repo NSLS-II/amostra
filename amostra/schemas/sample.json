@@ -12,9 +12,13 @@
             "type": "number",
             "description": "Time the sample was created.  Unix epoch time"
         },
-        "uid": {
+        "uuid": {
             "type": "string",
-            "description": "Globally unique ID for tihs run"
+            "description": "Globally unique ID"
+        },
+        "revision": {
+            "type": "integer",
+            "description": "Revision number"
         },
         "owner": {
             "type": "string",
@@ -30,8 +34,8 @@
         }
     },
     "required": [
-        "uid",
-        "time",
+        "uuid",
+        "revision",
         "name"
      ],
     "type": "object",
