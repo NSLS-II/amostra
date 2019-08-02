@@ -32,6 +32,9 @@ with open(path.join(here, 'requirements.txt')) as requirements_file:
     requirements = [line for line in requirements_file.read().splitlines()
                     if not line.startswith('#')]
 
+extras_require = {'client': ['requests'],
+                  'server': ['tornado', 'pymongo'],
+                  'local': ['pymongo']}
 
 setup(
     name='amostra',
@@ -59,6 +62,7 @@ setup(
         ]
     },
     install_requires=requirements,
+    extra_require=extras_require,
     license="BSD (3-clause)",
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
