@@ -19,4 +19,5 @@ client for each of these modes that present identical interfaces to the user.
    installation
    usage
    data-model
+   reference
    release-history

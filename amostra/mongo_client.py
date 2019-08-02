@@ -1,5 +1,5 @@
 import pymongo
-from .objects import Sample, TYPES_TO_COLLECTION_NAMES
+from .objects import Container, Sample, Request, TYPES_TO_COLLECTION_NAMES
 
 
 class Client:
@@ -29,6 +29,8 @@ class Client:
             database = _get_database(database)
         self._db = database
         self._samples = CollectionAccessor(self, Sample)
+        self._containers = CollectionAccessor(self, Container)
+        self._requests = CollectionAccessor(self, Request)
 
     @property
     def samples(self):
@@ -36,6 +38,20 @@ class Client:
         Accessor for creating and searching Samples
         """
         return self._samples
+
+    @property
+    def containers(self):
+        """
+        Accessor for creating and searching Containers
+        """
+        return self._containers
+
+    @property
+    def requests(self):
+        """
+        Accessor for creating and searching Requests
+        """
+        return self._requests
 
     def _new_document(self, obj_type, args, kwargs):
         """

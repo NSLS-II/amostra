@@ -1,9 +1,13 @@
 {
     "properties": {
-        "uid": {
+        "uuid": {
             "type": "string",
-            "description": "Globally unique ID for this container"
+            "description": "Globally unique ID"
         },        
+        "revision": {
+            "type": "integer",
+            "description": "Revision number"
+        },
         "owner": {
             "type": "string",
             "description": "String descriptor to associate this request with. Can be user or process"
@@ -29,8 +33,8 @@
         }
     },
     "required": [
-        "uid",
-        "time"
+        "uuid",
+        "revision"
      ],
     "type": "object",
     "description": "Document created for group of containers."

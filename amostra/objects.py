@@ -4,6 +4,7 @@ import jsonschema
 from traitlets import (
     default,
     HasTraits,
+    Instance,
     Integer,
     Unicode,
     validate,
@@ -34,6 +35,9 @@ class AmostraDocument(HasTraits):
                           if not trait.read_only) + ')')
 
     def to_dict(self):
+        """
+        Represent the object as a JSON-serializable dictionary.
+        """
         return {name: getattr(self, name) for name in self.trait_names()}
 
     def revisions(self):
@@ -71,57 +75,76 @@ def _validate_with_jsonschema(instance, proposal):
 class Sample(AmostraDocument):
     SCHEMA = load_schema('sample.json')
     name = Unicode()
-#     sample_desc": sample_desc,
-#     "date_created": date_created,
-#     "user_id": user_id,
-#     "project_name": project_name,
-#     "institution_id": institution_id,
-#     "composition": composition,
-#     "density": density,
-#     "thickness": thickness,
-#     "notes": notes,
-#     "state": state,
-#     "current_bar_id": current_bar_id,
-#     "current_slot_name": current_slot_name,
-#     "past_bar_ids": past_bar_ids,
-#     "location_id": location_id,
-#     "requests": requests,
-#     "history": history,
-#     "priority": priority
-# }
 
     _validate = validate('name')(_validate_with_jsonschema)
 
     def __init__(self, _amostra_client, *, name, **kwargs):
+        """
+        This object should not be directly instantiated by this user. Use a client.
+
+        Parameters
+        ----------
+        _amostra_client: Client
+            The name is intended to avoid name collisions with any future
+            sample traits.
+        name: string
+            A required Sample trait
+        **kwargs
+            Other, optional sample traits
+        """
         super().__init__(_amostra_client, name=name, **kwargs)
+
+
+class Container(AmostraDocument):
+    SCHEMA = load_schema('container.json')
+
+    validate('name')(_validate_with_jsonschema)
+
+    def __init__(self, _amostra_client, **kwargs):
+        """
+        This object should not be directly instantiated by this user. Use a client.
+
+        Parameters
+        ----------
+        _amostra_client: Client
+            The name is intended to avoid name collisions with any future
+            sample traits.
+        **kwargs
+            Other, optional sample traits
+        """
+        super().__init__(_amostra_client, **kwargs)
 
 
 class Request(AmostraDocument):
     SCHEMA = load_schema('request.json')
-    name = Unicode()
-#     sample_desc": sample_desc,
-#     "date_created": date_created,
-#     "user_id": user_id,
-#     "project_name": project_name,
-#     "institution_id": institution_id,
-#     "composition": composition,
-#     "density": density,
-#     "thickness": thickness,
-#     "notes": notes,
-#     "state": state,
-#     "current_bar_id": current_bar_id,
-#     "current_slot_name": current_slot_name,
-#     "past_bar_ids": past_bar_ids,
-#     "location_id": location_id,
-#     "requests": requests,
-#     "history": history,
-#     "priority": priority
-# }
+    sample = Instance(Sample)
 
-    validate('name')(_validate_with_jsonschema)
+    validate('sample')(_validate_with_jsonschema)
 
-    def __init__(self, *, _amostra_client, name, **kwargs):
-        super().__init__(name=name, **kwargs)
+    def __init__(self, _amostra_client, *, sample, **kwargs):
+        """
+        This object should not be directly instantiated by this user. Use a client.
+
+        Parameters
+        ----------
+        _amostra_client: Client
+            The name is intended to avoid name collisions with any future
+            sample traits.
+        sample : Sample
+        **kwargs
+            Other, optional sample traits
+        """
+        super().__init__(_amostra_client, sample=sample, **kwargs)
+
+    def to_dict(self):
+        # Replace Sample object with Sample.uuid.
+        ret = super().to_dict()
+        ret['sample'] = ret['sample'].uuid
+        return ret
 
 
-TYPES_TO_COLLECTION_NAMES = {Sample: 'samples'}
+TYPES_TO_COLLECTION_NAMES = {
+    Container: 'containers',
+    Sample: 'samples',
+    Request: 'requests',
+    }

@@ -18,8 +18,7 @@ For direct connection to MongoDB without an HTTP server in the middle, use
 .. code:: python
 
    import amostra.mongo_client
-   URI = 'mongodb://localhost:27017/amostra_demo'
-   client = amostra.mongo_client.Client(URI)
+   client = amostra.mongo_client.Client('mongodb://localhost:27017/amostra_demo')
 
 HTTP Server and Client
 ----------------------
@@ -43,8 +42,7 @@ On any machine that can see that server, use
 .. code:: python
 
    import amostra.mongo_client
-   URI = 'http://localhost:5000'
-   client = amostra.http_client.Client(URI)
+   client = amostra.http_client.Client('http://localhost:5000')
 
 .. ipython:: python
    :suppress:
