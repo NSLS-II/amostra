@@ -24,6 +24,8 @@ class Client:
         ----------
         database: pymongo.Database or URI string
         """
+        if database is None:
+            raise ValueError("Database should be URI or pymongo-like object.")
         if isinstance(database, str):
             database = _get_database(database)
         self._db = database
