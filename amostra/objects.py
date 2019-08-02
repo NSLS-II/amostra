@@ -90,7 +90,7 @@ class Sample(AmostraDocument):
 #     "priority": priority
 # }
 
-    validate('name')(_validate_with_jsonschema)
+    _validate = validate('name')(_validate_with_jsonschema)
 
     def __init__(self, _amostra_client, *, name, **kwargs):
         super().__init__(_amostra_client, name=name, **kwargs)
