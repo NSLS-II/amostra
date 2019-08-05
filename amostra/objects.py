@@ -41,7 +41,7 @@ class AmostraDocument(HasTraits):
         return super().__new__(cls, *args, **kwargs)
 
     @default('uuid')
-    def get_uuid(self):
+    def _get_default_uuid(self):
         return str(uuid.uuid4())
 
     def __repr__(self):
