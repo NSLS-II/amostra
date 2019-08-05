@@ -1,5 +1,6 @@
 import pymongo
-from .objects import Container, Sample, Request, TYPES_TO_COLLECTION_NAMES
+
+from .objects import TYPES_TO_COLLECTION_NAMES, Container, Request, Sample
 
 
 class Client:

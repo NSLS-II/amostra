@@ -1,6 +1,6 @@
+from jsonschema.exceptions import ValidationError
 from tornado import web
 from tornado.escape import json_decode
-from jsonschema.exceptions import ValidationError
 
 
 class CreateHandler(web.RequestHandler):

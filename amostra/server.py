@@ -1,9 +1,10 @@
 import logging
 import os
 
-from tornado import httpserver, ioloop, log, web
 import tornado.options
-from tornado.options import options, define
+from tornado import httpserver, ioloop, log, web
+from tornado.options import define, options
+
 from .handlers import init_handlers
 from .mongo_client import Client
 
