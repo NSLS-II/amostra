@@ -13,6 +13,16 @@ from traitlets import (
 from .utils import load_schema
 
 
+def _validate_with_jsonschema(instance, proposal):
+    """
+    Validate that contents satisfy a jsonschema.
+
+    This is meant to be used with traitlets' @validate decorator.
+    """
+    jsonschema.validate(instance.to_dict(), instance.SCHEMA)
+    return proposal['value']
+
+
 class AmostraDocument(HasTraits):
     """
     A HasTraits object with a reference to an amostra client.
@@ -23,6 +33,12 @@ class AmostraDocument(HasTraits):
     def __init__(self, _amostra_client, *args, **kwargs):
         self._amostra_client = _amostra_client
         super().__init__(*args, **kwargs)
+
+    def __new__(cls, *args, **kwargs):
+        # Configure _validate_with_jsonschema to validate all traits.
+        trait_names = list(cls.class_traits())
+        cls._validate = validate(*trait_names)(_validate_with_jsonschema)
+        return super().__new__(cls, *args, **kwargs)
 
     @default('uuid')
     def get_uuid(self):
@@ -62,21 +78,9 @@ class AmostraDocument(HasTraits):
         yield from self._amostra_client._revisions(self)
 
 
-def _validate_with_jsonschema(instance, proposal):
-    """
-    Validate that contents satisfy a jsonschema.
-
-    This is meant to be used with traitlets' @validate decorator.
-    """
-    jsonschema.validate(instance.to_dict(), instance.SCHEMA)
-    return proposal['value']
-
-
 class Sample(AmostraDocument):
     SCHEMA = load_schema('sample.json')
     name = Unicode()
-
-    _validate = validate('name')(_validate_with_jsonschema)
 
     def __init__(self, _amostra_client, *, name, **kwargs):
         """
@@ -98,8 +102,6 @@ class Sample(AmostraDocument):
 class Container(AmostraDocument):
     SCHEMA = load_schema('container.json')
 
-    validate('name')(_validate_with_jsonschema)
-
     def __init__(self, _amostra_client, **kwargs):
         """
         This object should not be directly instantiated by this user. Use a client.
@@ -118,8 +120,6 @@ class Container(AmostraDocument):
 class Request(AmostraDocument):
     SCHEMA = load_schema('request.json')
     sample = Instance(Sample)
-
-    validate('sample')(_validate_with_jsonschema)
 
     def __init__(self, _amostra_client, *, sample, **kwargs):
         """
