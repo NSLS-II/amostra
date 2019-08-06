@@ -22,6 +22,3 @@ returned by a Client.
 
 .. autoclass:: amostra.objects.Container
    :members:
-
-.. autoclass:: amostra.objects.Request
-   :members:

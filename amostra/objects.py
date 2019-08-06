@@ -110,34 +110,7 @@ class Container(AmostraDocument):
         super().__init__(_amostra_client, **kwargs)
 
 
-class Request(AmostraDocument):
-    SCHEMA = load_schema('request.json')
-    sample = Instance(Sample)
-
-    def __init__(self, _amostra_client, *, sample, **kwargs):
-        """
-        This object should not be directly instantiated by this user. Use a client.
-
-        Parameters
-        ----------
-        _amostra_client: Client
-            The name is intended to avoid name collisions with any future
-            sample traits.
-        sample : Sample
-        **kwargs
-            Other, optional sample traits
-        """
-        super().__init__(_amostra_client, sample=sample, **kwargs)
-
-    def to_dict(self):
-        # Replace Sample object with Sample.uuid.
-        ret = super().to_dict()
-        ret['sample'] = ret['sample'].uuid
-        return ret
-
-
 TYPES_TO_COLLECTION_NAMES = {
     Container: 'containers',
     Sample: 'samples',
-    Request: 'requests',
     }

@@ -1,6 +1,6 @@
 import requests
 
-from .objects import TYPES_TO_COLLECTION_NAMES, Container, Request, Sample
+from .objects import TYPES_TO_COLLECTION_NAMES, Container, Sample
 from .utils import url_path_join
 
 
@@ -26,7 +26,6 @@ class Client:
         self._url = url
         self._samples = CollectionAccessor(self, Sample)
         self._containers = CollectionAccessor(self, Container)
-        self._requests = CollectionAccessor(self, Request)
 
     def _make_url(self, *pieces):
         return url_path_join(self._url, *pieces)
@@ -44,13 +43,6 @@ class Client:
         Accessor for creating and searching Containers
         """
         return self._containers
-
-    @property
-    def requests(self):
-        """
-        Accessor for creating and searching Requests
-        """
-        return self._requests
 
     def _new_document(self, obj_type, args, kwargs):
         """

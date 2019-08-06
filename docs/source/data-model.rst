@@ -6,7 +6,6 @@ The data model includes:
 
 * Sample
 * Container
-* Request
 
 For each type we document here the formal schema, given as a
 `JSON schema <https://json-schema.org/understanding-json-schema/>`_.
@@ -22,8 +21,3 @@ Container
 =========
 
 .. literalinclude:: ../../amostra/schemas/container.json
-
-Request
-=======
-
-.. literalinclude:: ../../amostra/schemas/request.json
