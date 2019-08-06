@@ -70,6 +70,19 @@ class AmostraDocument(HasTraits):
         """
         yield from self._amostra_client._revisions(self)
 
+    def copy(self):
+        # This gets, e.g. client.samples
+        accessor = getattr(self._amostra_client,
+                           TYPES_TO_COLLECTION_NAMES[type(self)])
+        d = self.to_dict()
+        d.pop('uuid')
+        d.pop('revision')
+        return accessor.new(**d)
+
+    def revert(self, revision):
+        ...
+
+
 
 class Sample(AmostraDocument):
     SCHEMA = load_schema('sample.json')
