@@ -148,7 +148,8 @@ class Container(AmostraDocument):
         **kwargs
             Other, optional sample traits
         """
-        super().__init__(_amostra_client, name, kind, contents)
+        super().__init__(_amostra_client, name=name, kind=kind,
+                         contents=contents)
 
 
 TYPES_TO_COLLECTION_NAMES = {
