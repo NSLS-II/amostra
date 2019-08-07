@@ -174,6 +174,18 @@ class Container(AmostraDocument):
         ret['contents'] = {k.uuid: v for k, v in ret['contents'].items()}
         return ret
 
+    @classmethod
+    def from_document(cls, amostra_client, document):
+        """
+        Convert a dict returned by the server to our traitlets-based object.
+        """
+        contents = {}
+        # Replace {sample_uuid: location} with {Sample: location}.
+        for sample_uuid, location in document['contents'].items():
+            sample = amostra_client.samples.find_one({'uuid': sample_uuid})
+            contents[sample] = location
+        document['contents'] = contents
+        return super().from_document(amostra_client, document)
 
 TYPES_TO_COLLECTION_NAMES = {
     Container: 'containers',
