@@ -1,0 +1,20 @@
+{
+    "properties": {
+        "uuid": {
+            "type": "string",
+            "description": "Globally unique ID"
+        },
+        "revision": {
+            "type": "integer",
+            "description": "Revision number"
+        },
+        "name": {
+            "type": "string",
+            "description": "Project name"
+        },
+        "owners": {
+            "type": "array",
+            "description": "Foreign key to an Owner"
+        }
+    }
+}

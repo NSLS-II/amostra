@@ -1,17 +1,5 @@
 {
     "properties": {
-        "project": {
-            "type": "string",
-            "description": "Name of project that this sample is part of"
-        },
-        "beamline_id": {
-            "type": "string",
-            "description": "The beamline ID"
-        },
-        "time": {
-            "type": "number",
-            "description": "Time the sample was created.  Unix epoch time"
-        },
         "uuid": {
             "type": "string",
             "description": "Globally unique ID"
@@ -20,17 +8,33 @@
             "type": "integer",
             "description": "Revision number"
         },
-        "owner": {
-            "type": "string",
-            "description": "String identifier that denotes the owner of this sample. Process/project/user"
+        "projects": {
+            "type": "array",
+            "description": "List of foreign keys to Projects"
         },
         "name": {
             "type": "string",
-            "description": "Sample name!"
+            "description": "Sample name"
         },
-        "container": {
+        "composition": {
             "type": "string",
-            "description": "Name of the container/group sample is contained within.Can be virtual or real. Sparsely indexed, not required"
+            "description": "Sample composition"
+        },
+        "IUCr chemical formula": {
+            "type": "string",
+            "description": "Foramlly specified expression of chemical composition"
+        },
+        "preparation": {
+            "type": "string",
+            "description": "How the sample was prepared specifically for measurement"
+        },
+        "tags": {
+            "type": "array",
+            "description": "Arbitrary useful labels"
+        },
+        "description": {
+            "type": "string",
+            "description": "Longer sample description"
         }
     },
     "required": [

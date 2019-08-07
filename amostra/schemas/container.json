@@ -8,14 +8,6 @@
             "type": "integer",
             "description": "Revision number"
         },
-        "owner": {
-            "type": "string",
-            "description": "String descriptor to associate this request with. Can be user or process"
-        },
-        "time": {
-            "type": "number",
-            "description": "Time the container was created.  Unix epoch time"
-        },
         "kind": {
             "type": "string",
             "description": "Type of the container"
@@ -24,17 +16,15 @@
             "type": "string",
             "description": "Container name"
         },
-        "content": {
-            "type": "array",
-            "items": {
-                "type": "string"
-            },
-            "description": "The items of this container"
+        "contents": {
+            "type": "object",
+            "description": "Maps a Sample Foreign key to a location"
         }
     },
     "required": [
         "uuid",
-        "revision"
+        "revision",
+        "name"
      ],
     "type": "object",
     "description": "Document created for group of containers."
