@@ -78,8 +78,11 @@ class Client:
         collection_name = TYPES_TO_COLLECTION_NAMES[type(owner)]
         collection = self._db[collection_name]
         revisions = self._db[f'{collection_name}_revisions']
+        # We need the JSON-safe value of the change, so do this instead of
+        # change['new'].
+        new = change['owner'].to_dict()[change['name']]
         filter = {'uuid': owner.uuid}
-        update = {'$set': {change['name']: change['new']},
+        update = {'$set': {change['name']: new},
                   '$inc': {'revision': 1}}
         # TODO Use transactions for this once we have MongoDB 4.0+.
         # Increment the revision number.
