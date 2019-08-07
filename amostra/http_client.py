@@ -87,22 +87,6 @@ class Client:
             json={'change': change})
         response.raise_for_status()
 
-    def _document_to_obj(self, obj_type, document):
-        """
-        Convert a dict returned by the server to our traitlets-based object.
-        """
-        # Handle the read_only traits separately.
-        uuid = document.pop('uuid')
-        revision = document.pop('revision')
-        obj = obj_type(self, **document)
-        obj.set_trait('uuid', uuid)
-        obj.set_trait('revision', revision)
-
-        # Observe any updates to the object and sync them to MongoDB.
-        obj.observe(self._update)
-
-        return obj
-
     def _revisions(self, obj):
         """
         Access all revisions to an object with the most recent first.
@@ -136,8 +120,11 @@ class CollectionAccessor:
             json={'filter': filter})
         response.raise_for_status()
         for document in response.json()['results']:
-            yield self._client._document_to_obj(self._obj_type, document)
+            yield self._obj_type.from_document(self._client, document)
 
     def find_one(self, filter):
         # TODO Improve the performance once pagination support is added.
-        return next(self.find(filter))
+        try:
+            return next(self.find(filter))
+        except StopIteration:
+            return None

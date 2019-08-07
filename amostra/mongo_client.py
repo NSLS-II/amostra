@@ -111,8 +111,6 @@ class Client:
         """
         Convert a dict returned by pymongo to our traitlets-based object.
         """
-        # Remove the internal MongoDB id.
-        document.pop('_id')
 
         # Handle the read_only traits separately.
         uuid = document.pop('uuid')
@@ -134,7 +132,8 @@ class Client:
         type_ = type(obj)
         for document in (revisions.find({'uuid': obj.uuid})
                                   .sort('revision', pymongo.DESCENDING)):
-            yield self._document_to_obj(type_, document)
+            document.pop('_id')  # Remove the internal MongoDB id.
+            yield type_.from_document(self, document)
 
 
 class CollectionAccessor:
@@ -153,11 +152,15 @@ class CollectionAccessor:
         if filter is None:
             filter = {}
         for document in self._collection.find(filter):
-            yield self._client._document_to_obj(self._obj_type, document)
+            document.pop('_id')  # Remove the internal MongoDB id.
+            yield self._obj_type.from_document(self._client, document)
 
     def find_one(self, filter):
-        return self._client._document_to_obj(
-            self._obj_type, self._collection.find_one(filter))
+        document = self._collection.find_one(filter)
+        if document is None:
+            return None
+        document.pop('_id')  # Remove the internal MongoDB id.
+        return self._obj_type.from_document(self._client, document)
 
 
 def _get_database(uri):

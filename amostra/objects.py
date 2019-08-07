@@ -49,6 +49,23 @@ class AmostraDocument(HasTraits):
         """
         return {name: getattr(self, name) for name in self.trait_names()}
 
+    @classmethod
+    def from_document(cls, amostra_client, document):
+        """
+        Convert a dict returned by the server to our traitlets-based object.
+        """
+        # Handle the read_only traits separately.
+        uuid = document.pop('uuid')
+        revision = document.pop('revision')
+        instance = cls(amostra_client, **document)
+        instance.set_trait('uuid', uuid)
+        instance.set_trait('revision', revision)
+
+        # Observe any updates to the instanceect and sync them to MongoDB.
+        instance.observe(amostra_client._update)
+
+        return instance
+
     def revisions(self):
         """
         Access all revisions of this document.
