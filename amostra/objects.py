@@ -151,6 +151,12 @@ class Container(AmostraDocument):
         super().__init__(_amostra_client, name=name, kind=kind,
                          contents=contents)
 
+    def to_dict(self):
+        # Replace Sample objects in contents with their uuids.
+        ret = super().to_dict()
+        ret['contents'] = {k.uuid: v for k, v in ret['contents'].items()}
+        return ret
+
 
 TYPES_TO_COLLECTION_NAMES = {
     Container: 'containers',
