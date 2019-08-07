@@ -82,6 +82,9 @@ class AmostraDocument(HasTraits):
     def revert(self, revision):
         ...
 
+    def purge(self):
+        self._amostra_client._purge(type(self), self.uuid)
+
 
 class Institution(AmostraDocument):
     SCHEMA = load_schema('institution.json')

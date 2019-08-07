@@ -91,6 +91,19 @@ class Client:
         # Insert the old version in {collection_name}_revisions
         revisions = revisions.insert(original)
 
+    def _purge(self, obj_type, uuid):
+        collection_name = TYPES_TO_COLLECTION_NAMES[obj_type]
+        collection = self._db[collection_name]
+        revisions = self._db[f'{collection_name}_revisions']
+        filter = {'uuid': uuid}
+        original = collection.find_one(filter)
+        # Remove the internal MongoDB id.
+        _id = original.pop('_id')
+        revisions = revisions.insert(original)
+        # Restore the internal MongoDB id.
+        original['_id'] = _id
+        collection.delete_one(original)
+
     def _document_to_obj(self, obj_type, document):
         """
         Convert a dict returned by pymongo to our traitlets-based object.
