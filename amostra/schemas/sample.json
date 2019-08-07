@@ -8,19 +8,19 @@
             "type": "integer",
             "description": "Revision number"
         },
-        "projects": {
-            "type": "array",
-            "description": "List of foreign keys to Projects"
-        },
         "name": {
             "type": "string",
             "description": "Sample name"
+        },
+        "projects": {
+            "type": "array",
+            "description": "List of foreign keys to Projects"
         },
         "composition": {
             "type": "string",
             "description": "Sample composition"
         },
-        "IUCr chemical formula": {
+        "IUCr_chemical_formula": {
             "type": "string",
             "description": "Foramlly specified expression of chemical composition"
         },

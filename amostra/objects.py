@@ -1,7 +1,7 @@
 import uuid
 
 import jsonschema
-from traitlets import HasTraits, Instance, Integer, Unicode, default, validate
+from traitlets import Dict, HasTraits, Instance, Integer, List, Unicode, default, validate
 
 from .utils import load_schema
 
@@ -83,10 +83,32 @@ class AmostraDocument(HasTraits):
         ...
 
 
+class Institution(AmostraDocument):
+    SCHEMA = load_schema('institution.json')
+    name = Unicode()
+
+
+class Owner(AmostraDocument):
+    SCHEMA = load_schema('owner.json')
+    name = Unicode()
+    institutions = List(Instance(Institution))
+
+
+class Project(AmostraDocument):
+    SCHEMA = load_schema('project.json')
+    name = Unicode()
+    owners = List(Instance(Owner))
+
 
 class Sample(AmostraDocument):
     SCHEMA = load_schema('sample.json')
     name = Unicode()
+    projects = List(Instance(Project))
+    composition = Unicode()
+    IUCr_chemical_formula = Unicode()
+    preparation = Unicode()
+    tags = List(Unicode())
+    description = Unicode()
 
     def __init__(self, _amostra_client, *, name, **kwargs):
         """
@@ -107,8 +129,11 @@ class Sample(AmostraDocument):
 
 class Container(AmostraDocument):
     SCHEMA = load_schema('container.json')
+    name = Unicode()
+    kind = Unicode()
+    contents = Dict()
 
-    def __init__(self, _amostra_client, **kwargs):
+    def __init__(self, _amostra_client, *, name, kind, contents):
         """
         This object should not be directly instantiated by this user. Use a client.
 
@@ -120,7 +145,7 @@ class Container(AmostraDocument):
         **kwargs
             Other, optional sample traits
         """
-        super().__init__(_amostra_client, **kwargs)
+        super().__init__(_amostra_client, name, kind, contents)
 
 
 TYPES_TO_COLLECTION_NAMES = {

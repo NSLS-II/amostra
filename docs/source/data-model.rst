@@ -21,3 +21,18 @@ Container
 =========
 
 .. literalinclude:: ../../amostra/schemas/container.json
+
+Project
+=======
+
+.. literalinclude:: ../../amostra/schemas/project.json
+
+Owner
+=====
+
+.. literalinclude:: ../../amostra/schemas/owner.json
+
+Institution
+===========
+
+.. literalinclude:: ../../amostra/schemas/institution.json

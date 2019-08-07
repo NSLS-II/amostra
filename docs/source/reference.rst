@@ -22,3 +22,12 @@ returned by a Client.
 
 .. autoclass:: amostra.objects.Container
    :members:
+
+.. autoclass:: amostra.objects.Project
+   :members:
+
+.. autoclass:: amostra.objects.Owner
+   :members:
+
+.. autoclass:: amostra.objects.Institution
+   :members:
