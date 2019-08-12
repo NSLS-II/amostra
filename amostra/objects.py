@@ -96,11 +96,23 @@ class AmostraDocument(HasTraits):
         d.pop('revision')
         return accessor.new(**d)
 
-    def revert(self, revision):
-        ...
-
     def purge(self):
         self._amostra_client._purge(type(self), self.uuid)
+
+    def revert(self, num):
+        # Find the one you want to revert to
+        for it in self.revisions():
+            if it.revision == num:
+                break
+        else:
+            raise ValueError(f'revision {num} you were' \
+                              'trying to revert to was not found')
+
+        # Update current sample
+        with self.hold_trait_notifications():
+            for name, trait in self.traits().items():
+                if not trait.read_only:
+                    setattr(self, name, getattr(it, name))
 
 
 class Institution(AmostraDocument):
