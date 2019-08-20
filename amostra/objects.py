@@ -114,8 +114,8 @@ class AmostraDocument(HasTraits):
             if it.revision == num:
                 break
         else:
-            raise ValueError(f'revision {num} you were' \
-                              'trying to revert to was not found')
+            raise ValueError(f'revision {num} you were'
+                             f'trying to revert to was not found')
 
         # Update current sample
         with self.hold_trait_notifications():
@@ -205,6 +205,7 @@ class Container(AmostraDocument):
             contents[sample] = location
         document['contents'] = contents
         return super().from_document(amostra_client, document)
+
 
 TYPES_TO_COLLECTION_NAMES = {
     Container: 'containers',
