@@ -64,7 +64,7 @@ setup(
         ]
     },
     install_requires=requirements,
-    extra_require=extras_require,
+    extras_require=extras_require,
     license="BSD (3-clause)",
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
