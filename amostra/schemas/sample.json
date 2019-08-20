@@ -18,15 +18,7 @@
         },
         "composition": {
             "type": "string",
-            "description": "Sample composition"
-        },
-        "IUCr_chemical_formula": {
-            "type": "string",
-            "description": "Foramlly specified expression of chemical composition"
-        },
-        "preparation": {
-            "type": "string",
-            "description": "How the sample was prepared specifically for measurement"
+            "description": "Sample composition (IUCr specification)"
         },
         "tags": {
             "type": "array",

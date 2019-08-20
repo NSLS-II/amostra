@@ -137,8 +137,6 @@ class Sample(AmostraDocument):
     name = Unicode()
     projects = List(Instance(Project))
     composition = Unicode()
-    IUCr_chemical_formula = Unicode()
-    preparation = Unicode()
     tags = List(Unicode())
     description = Unicode()
 
