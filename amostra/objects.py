@@ -1,7 +1,16 @@
 import uuid
 
 import jsonschema
-from traitlets import Dict, HasTraits, Instance, Integer, List, Unicode, default, validate
+from traitlets import (
+    Dict,
+    HasTraits,
+    Instance,
+    Integer,
+    List,
+    Unicode,
+    default,
+    validate,
+)
 
 from .utils import load_schema
 

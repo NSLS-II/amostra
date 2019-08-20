@@ -1,7 +1,9 @@
-import amostra.mongo_client
-import pytest
 import uuid
+
+import pytest
 from pymongo import MongoClient
+
+import amostra.mongo_client
 
 
 @pytest.fixture()

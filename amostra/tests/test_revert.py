@@ -1,7 +1,8 @@
-from hypothesis import given, strategies as st
-from hypothesis import settings
 import random
 import string
+
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 
 @given(names=st.lists(st.text(alphabet=string.ascii_lowercase,
