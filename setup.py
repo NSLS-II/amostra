@@ -36,6 +36,7 @@ with open(path.join(here, 'requirements.txt')) as requirements_file:
 extras_require = {'client': ['requests'],
                   'server': ['tornado', 'pymongo'],
                   'local': ['pymongo']}
+extras_require['complete'] = sorted(set(sum(extras_require.values(), [])))
 
 setup(
     name='amostra',
