@@ -5,6 +5,7 @@ coverage
 flake8
 flake8-bugbear
 hypothesis
+isort
 pytest
 sphinx
 # These are dependencies of various sphinx extensions for documentation.
