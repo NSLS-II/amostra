@@ -210,4 +210,4 @@ class Container(AmostraDocument):
 TYPES_TO_COLLECTION_NAMES = {
     Container: 'containers',
     Sample: 'samples',
-    }
+}

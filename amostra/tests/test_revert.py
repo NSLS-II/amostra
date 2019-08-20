@@ -16,13 +16,13 @@ def test_revert(client, names):
     for name in names[1:]:
         s.name = name
 
-    num = random.randint(0, n-2)
+    num = random.randint(0, n - 2)
 
     revert_target_cursor = client._db.samples_revisions.find({'revision': num,
                                                               'uuid': uuid})
     s.revert(num)
     target = next(revert_target_cursor)
-    for name, trait in s.traits().items():
+    for name in s.trait_names():
         if name == 'revision':
             continue
         else:
