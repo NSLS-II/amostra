@@ -1,10 +1,22 @@
 language: python
-python:
-  - 3.6
+sudo: false
 cache:
   directories:
     - $HOME/.cache/pip
     - $HOME/.ccache  # https://github.com/travis-ci/travis-ci/issues/5853
+services:
+  - mongodb
+matrix:
+  fast_finish: true
+  include:
+    - python: 3.6
+    - python: 3.7
+      dist: xenial
+      env: PUBLISH_DOCS=1
+    - python: nightly
+  allow_failures:
+    - python: nightly
+
 
 install:
   # Install this package and the packages listed in requirements.txt.
