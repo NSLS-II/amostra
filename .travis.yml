@@ -1,14 +1,26 @@
 language: python
-python:
-  - 3.6
+sudo: false
 cache:
   directories:
     - $HOME/.cache/pip
     - $HOME/.ccache  # https://github.com/travis-ci/travis-ci/issues/5853
+services:
+  - mongodb
+matrix:
+  fast_finish: true
+  include:
+    - python: 3.6
+    - python: 3.7
+      dist: xenial
+      env: PUBLISH_DOCS=1
+    - python: nightly
+  allow_failures:
+    - python: nightly
+
 
 install:
   # Install this package and the packages listed in requirements.txt.
-  - pip install .
+  - pip install .[complete]
   # Install extra requirements for running tests and building docs.
   - pip install -r requirements-dev.txt
 
@@ -16,5 +28,6 @@ script:
   - coverage run -m pytest  # Run the tests and check for test coverage.
   - coverage report -m  # Generate test coverage report.
   - codecov  # Upload the report to codecov.
+  - isort  --check-only  # Verify sorted imports.
   - flake8 --max-line-length=115  # Enforce code style (but relax line length limit a bit).
   - make -C docs html  # Build the documentation.

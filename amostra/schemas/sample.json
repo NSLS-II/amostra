@@ -1,37 +1,37 @@
 {
     "properties": {
-        "project": {
+        "uuid": {
             "type": "string",
-            "description": "Name of project that this sample is part of"
+            "description": "Globally unique ID"
         },
-        "beamline_id": {
-            "type": "string",
-            "description": "The beamline ID"
-        },
-        "time": {
-            "type": "number",
-            "description": "Time the sample was created.  Unix epoch time"
-        },
-        "uid": {
-            "type": "string",
-            "description": "Globally unique ID for tihs run"
-        },
-        "owner": {
-            "type": "string",
-            "description": "String identifier that denotes the owner of this sample. Process/project/user"
+        "revision": {
+            "type": "integer",
+            "description": "Revision number"
         },
         "name": {
             "type": "string",
-            "description": "Sample name!"
+            "description": "Sample name"
         },
-        "container": {
+        "projects": {
+            "type": "array",
+            "description": "List of foreign keys to Projects"
+        },
+        "composition": {
             "type": "string",
-            "description": "Name of the container/group sample is contained within.Can be virtual or real. Sparsely indexed, not required"
+            "description": "Sample composition (IUCr specification)"
+        },
+        "tags": {
+            "type": "array",
+            "description": "Arbitrary useful labels"
+        },
+        "description": {
+            "type": "string",
+            "description": "Longer sample description"
         }
     },
     "required": [
-        "uid",
-        "time",
+        "uuid",
+        "revision",
         "name"
      ],
     "type": "object",

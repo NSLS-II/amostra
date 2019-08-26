@@ -1,8 +1,9 @@
-from os import path
-from setuptools import setup, find_packages
 import sys
-import versioneer
+from os import path
 
+from setuptools import find_packages, setup
+
+import versioneer
 
 # NOTE: This file must remain Python 2 compatible for the foreseeable future,
 # to ensure that we error out properly for people with outdated setuptools
@@ -32,6 +33,10 @@ with open(path.join(here, 'requirements.txt')) as requirements_file:
     requirements = [line for line in requirements_file.read().splitlines()
                     if not line.startswith('#')]
 
+extras_require = {'client': ['requests'],
+                  'server': ['tornado', 'pymongo'],
+                  'local': ['pymongo']}
+extras_require['complete'] = sorted(set(sum(extras_require.values(), [])))
 
 setup(
     name='amostra',
@@ -59,6 +64,7 @@ setup(
         ]
     },
     install_requires=requirements,
+    extras_require=extras_require,
     license="BSD (3-clause)",
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',

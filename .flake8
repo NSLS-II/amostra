@@ -1,2 +1,5 @@
 [flake8]
 exclude = .git,__pycache__,build,dist,versioneer.py,amostra/_version.py,docs/source/conf.py
+max-line-length = 80
+ignore = E501,W504
+select = E,F,W,B,B901

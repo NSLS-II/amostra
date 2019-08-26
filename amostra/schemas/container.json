@@ -1,16 +1,12 @@
 {
     "properties": {
-        "uid": {
+        "uuid": {
             "type": "string",
-            "description": "Globally unique ID for this container"
+            "description": "Globally unique ID"
         },        
-        "owner": {
-            "type": "string",
-            "description": "String descriptor to associate this request with. Can be user or process"
-        },
-        "time": {
-            "type": "number",
-            "description": "Time the container was created.  Unix epoch time"
+        "revision": {
+            "type": "integer",
+            "description": "Revision number"
         },
         "kind": {
             "type": "string",
@@ -20,17 +16,15 @@
             "type": "string",
             "description": "Container name"
         },
-        "content": {
-            "type": "array",
-            "items": {
-                "type": "string"
-            },
-            "description": "The items of this container"
+        "contents": {
+            "type": "object",
+            "description": "Maps a Sample Foreign key to a location"
         }
     },
     "required": [
-        "uid",
-        "time"
+        "uuid",
+        "revision",
+        "name"
      ],
     "type": "object",
     "description": "Document created for group of containers."
