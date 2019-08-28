@@ -12,16 +12,13 @@
             "type": "string",
             "description": "Sample name"
         },
-        "projects": {
-            "type": "array",
-            "description": "List of foreign keys to Projects"
-        },
         "composition": {
             "type": "string",
             "description": "Sample composition (IUCr specification)"
         },
         "tags": {
             "type": "array",
+            "items": {"type": "string"},
             "description": "Arbitrary useful labels"
         },
         "description": {
