@@ -21,10 +21,13 @@
             "description": "Maps a Sample Foreign key to a location"
         }
     },
+    "additionalProperties": false,
     "required": [
         "uuid",
         "revision",
-        "name"
+        "name",
+        "kind",
+        "contents"
      ],
     "type": "object",
     "description": "Document created for group of containers."
