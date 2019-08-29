@@ -1,8 +1,8 @@
-from amostra.utils import load_schema
-from hypothesis import given, strategies as st
-from hypothesis import settings
 import hypothesis_jsonschema
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
+from amostra.utils import load_schema
 
 sample_dict = load_schema("sample.json")
 # Pop uuid and revision cause they are created automatically
