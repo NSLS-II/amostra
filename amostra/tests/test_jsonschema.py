@@ -8,20 +8,15 @@ sample_dict = load_schema("sample.json")
 # Pop uuid and revision cause they are created automatically
 sample_dict['properties'].pop('uuid')
 sample_dict['properties'].pop('revision')
-sample_dict['required'] = ['name']
-sample_dict['properties']['name']['minLength'] = 3
-sample_dict['properties']['name']['maxLength'] = 5
-sample_dict['additionalProperties'] = False
+#sample_dict['properties']['name']['minLength'] = 1
+sample_dict['required'] = sample_dict['required'][2:]
 st_sample = hypothesis_jsonschema.from_schema(sample_dict)
-
 
 container_dict = load_schema("container.json")
 container_dict['properties'].pop('uuid')
 container_dict['properties'].pop('revision')
-container_dict['required'] = ['name', 'kind', 'contents']
-container_dict['properties']['name']['minLength'] = 3
-container_dict['properties']['name']['maxLength'] = 5
-sample_dict['additionalProperties'] = False
+#container_dict['properties']['name']['minLength'] = 1
+container_dict['required'] = container_dict['required'][2:]
 st_container = hypothesis_jsonschema.from_schema(container_dict)
 
 
@@ -31,10 +26,10 @@ st_container = hypothesis_jsonschema.from_schema(container_dict)
 def test_new(client, samples_list, containers_list):
     contents_dict = dict()
     for sample in samples_list:
-        assert client.samples.new(**sample)
+        client.samples.new(**sample)
         s = client.samples.new(**sample)
         contents_dict[s] = 'LOCATION'
 
     for container in containers_list:
         container['contents'] = contents_dict
-        print(client.containers.new(**container))
+        client.containers.new(**container)
