@@ -144,7 +144,7 @@ class Project(AmostraDocument):
 class Sample(AmostraDocument):
     SCHEMA = load_schema('sample.json')
     name = Unicode()
-    projects = List(Instance(Project))
+    projects = List(Unicode())
     composition = Unicode()
     tags = List(Unicode())
     description = Unicode()

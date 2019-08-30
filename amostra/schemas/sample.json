@@ -12,6 +12,11 @@
             "type": "string",
             "description": "Sample name"
         },
+        "projects": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "List of foreign keys to Projects"
+        },
         "composition": {
             "type": "string",
             "description": "Sample composition (IUCr specification)"
@@ -26,6 +31,7 @@
             "description": "Longer sample description"
         }
     },
+    "additionalProperties": false,
     "required": [
         "uuid",
         "revision",
