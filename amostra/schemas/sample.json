@@ -10,7 +10,8 @@
         },
         "name": {
             "type": "string",
-            "description": "Sample name"
+            "description": "Sample name",
+            "minLength": 1
         },
         "projects": {
             "type": "array",
