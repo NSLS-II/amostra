@@ -39,8 +39,9 @@ class AmostraDocument(HasTraits):
     def __new__(cls, *args, **kwargs):
         # Configure _validate_with_jsonschema to validate all traits.
         trait_names = list(cls.class_traits())
-        cls._validate = validate(*trait_names)(_validate_with_jsonschema)
-        return super().__new__(cls, *args, **kwargs)
+        instance = super().__new__(cls, *args, **kwargs)
+        instance._validate = validate(*trait_names)(_validate_with_jsonschema)
+        return instance
 
     @default('uuid')
     def _get_default_uuid(self):
