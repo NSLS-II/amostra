@@ -35,9 +35,8 @@ class ObjectHandler(web.RequestHandler):
         change = json_decode(self.request.body)['change']
         accessor = getattr(self.settings['mongo_client'], collection_name)
         change['owner'] = accessor.find_one({'uuid': uuid})
-        client = self.settings['mongo_client']
         try:
-            client._update(change)
+            setattr(change['owner'], change['name'], change['new'])
         except ValidationError:
             self.write_error(403)
         self.finish()
