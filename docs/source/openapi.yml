@@ -34,7 +34,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Sample'
+                $ref: '../../amostra/schemas/sample.json'
         '400':
           description: Invalid uuid supplied
         '404':
@@ -97,7 +97,7 @@ paths:
                   revisons:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Sample'
+                      $ref: '../../amostra/schemas/sample.json'
         '400':
           description: Invalid uuid supplied
         '404':
@@ -162,37 +162,3 @@ paths:
           description: successful operation
         '405':
           description: Invalid input
-components:
-  schemas:
-    Sample:
-      properties:
-        uuid:
-          type: string
-          description: Globally unique ID
-        revision:
-          type: integer
-          description: Revision number
-        name:
-          type: string
-          description: Sample name
-        projects:
-          description: List of foreign keys to Projects
-          type: array
-          items:
-            type: string
-        composition:
-          type: string
-          description: Sample composition (IUCr specification)
-        tags:
-          type: array
-          items:
-            type: string
-          description: Arbitrary useful labels
-        description:
-          type: string
-          description: Longer sample description
-      required:
-        - uuid
-        - revision
-        - name
-      type: object
