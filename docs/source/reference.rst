@@ -31,3 +31,8 @@ returned by a Client.
 
 .. autoclass:: amostra.objects.Institution
    :members:
+
+API
+===
+
+.. openapi:: openapi.json
