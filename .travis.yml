@@ -38,5 +38,9 @@ script:
   - isort  --check-only  # Verify sorted imports.
   - flake8 --max-line-length=115  # Enforce code style (but relax line length limit a bit).
   - make -C docs html  # Build the documentation.
-  - pip install doctr 
-  - doctr deploy --deploy-repo NSLS-II/NSLS-II.github.io --deploy-branch-name master amostra;
+  - |
+    if [ $PUBLISH_DOCS ]; then
+      # Publish docs.
+      pip install doctr 
+      doctr deploy --deploy-repo NSLS-II/NSLS-II.github.io --deploy-branch-name master amostra;
+    fi
