@@ -24,6 +24,13 @@ install:
   # Install extra requirements for running tests and building docs.
   - pip install -r requirements-dev.txt
 
+
+env:
+  global:
+    # Doctr deploy key for NSLS-II/NSLS-II.github.io
+    - secure: "bt2XuWkYErOF+mWcBc5htV+jCNMiTc1IIj8LImZEqpYQYNANWoUrAHHw7akdl8ihRO7icrhM8Jhz6DV1yVJrUHxKBVm7Ot+ZXyal1fWIOVZk9fOWKRO3kxaiuMD2V83hKIFx/yN2mF70VqlW5zDSK9nv28kZ0ucc6y+8a7XiS8X4RyBgY0gLzbEYmvncjjiv5QgHhlcAnmwCJolRE+X01MOnwgVicRgi4ukuU/+y5oKkNi+LXc1BM/tnfJrWZ63a2zvqi4ZmluJlMFUxTYWmHWB7Y77i4nXRodDFlHLuvPr9LysfFIppdkbAz5s/1CZB7tUK1Z+4iVq5V7JSa0PX5bTlZeAgUQMsRe+E4bpEmNe3vkkscogcbB6eOnPfmc5Qj8/a+JPzYHWZhW7rmekDpjdavEw9GyYBmqM+TU6g3XNbo6bgtiMEJYn/gz6zsez2PAErz7k/Wpthn3nw+PCIICITaGFMPtr2i2A5XKeJyu7cW6g7VHapQ2WIFMh4LIHxrOCBeJ4osZXMmcg8+5Hc6J77VCvGHPQ+DOWp8U+XVOqsj868wmMHgB5W7ruJBUSaDDzlSlsbOQ7U8/e365w1aTB6l+JBHJQkuTL8NxfWMQuo8j+30LcpjXqMxzH2MFSMOgzEAuRGqRKUQ+Ws8xhRrjfWNRfuRBZKLrOCo6DcXGE="
+
+
 script:
   - coverage run -m pytest  # Run the tests and check for test coverage.
   - coverage report -m  # Generate test coverage report.
@@ -31,3 +38,9 @@ script:
   - isort  --check-only  # Verify sorted imports.
   - flake8 --max-line-length=115  # Enforce code style (but relax line length limit a bit).
   - make -C docs html  # Build the documentation.
+  - |
+    if [ $PUBLISH_DOCS ]; then
+      # Publish docs.
+      pip install doctr 
+      doctr deploy --deploy-repo NSLS-II/NSLS-II.github.io --deploy-branch-name master amostra;
+    fi

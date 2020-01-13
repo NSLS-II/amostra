@@ -12,5 +12,6 @@ sphinx
 ipython
 matplotlib
 numpydoc
+sphinxcontrib-openapi
 sphinx-copybutton
 sphinx_rtd_theme
