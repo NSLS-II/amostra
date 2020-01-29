@@ -39,19 +39,20 @@ class AmostraDocument(HasTraits):
     def __new__(cls, *args, **kwargs):
         # Configure _validate_with_jsonschema to validate all traits.
         trait_names = list(cls.class_traits())
-        instance = super().__new__(cls, *args, **kwargs)
-        instance._validate = validate(*trait_names)(_validate_with_jsonschema)
-        return instance
+        cls._validate = validate(*trait_names)(_validate_with_jsonschema)
+        return super().__new__(cls, *args, **kwargs)
 
     @default('uuid')
     def _get_default_uuid(self):
         return str(uuid.uuid4())
 
     def __repr__(self):
-        return (f'{self.__class__.__name__}(' +
+        with self.cross_validation_lock:
+            result = (f'{self.__class__.__name__}(' +
                 ', '.join(f'{name}={getattr(self, name)!r}'
                           for name, trait in self.traits().items()
                           if not trait.read_only) + ')')
+        return result
 
     def to_dict(self):
         """
