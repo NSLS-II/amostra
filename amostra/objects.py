@@ -47,18 +47,18 @@ class AmostraDocument(HasTraits):
         return str(uuid.uuid4())
 
     def __repr__(self):
-        with self.cross_validation_lock:
-            result = (f'{self.__class__.__name__}(' +
-                      ', '.join(f'{name}={getattr(self, name)!r}'
-                                for name, trait in self.traits().items()
-                                if not trait.read_only) + ')')
-        return result
+        return (f'{self.__class__.__name__}(' +
+                ', '.join(f'{name}={getattr(self, name)!r}'
+                          for name, trait in self.traits().items()
+                          if not trait.read_only) + ')')
 
     def to_dict(self):
         """
         Represent the object as a JSON-serializable dictionary.
         """
-        return {name: getattr(self, name) for name in self.trait_names()}
+        with self.cross_validation_lock:
+            result = {name: getattr(self, name) for name in self.trait_names()}
+        return result
 
     @classmethod
     def from_document(cls, amostra_client, document):
