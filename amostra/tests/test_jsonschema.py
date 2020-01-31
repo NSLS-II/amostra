@@ -22,13 +22,11 @@ st_container = hypothesis_jsonschema.from_schema(container_dict)
 
 @given(samples_list=st.lists(st_sample, unique_by=lambda x: x['name'], min_size=3, max_size=5),
        containers_list=st.lists(st_container, unique_by=lambda x: x['name'], min_size=3, max_size=5))
-@settings(max_examples=10, suppress_health_check=[HealthCheck.too_slow])
+@settings(max_examples=5, suppress_health_check=[HealthCheck.too_slow])
 def test_new(client, samples_list, containers_list):
     contents_dict = dict()
     for sample in samples_list:
-        client.samples.new(**sample)
         s = client.samples.new(**sample)
-        contents_dict[s] = 'LOCATION'
 
     for container in containers_list:
         container['contents'] = contents_dict
