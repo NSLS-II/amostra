@@ -47,10 +47,12 @@ class AmostraDocument(HasTraits):
         return str(uuid.uuid4())
 
     def __repr__(self):
-        return (f'{self.__class__.__name__}(' +
+        with self.cross_validation_lock:
+            result = (f'{self.__class__.__name__}(' +
                 ', '.join(f'{name}={getattr(self, name)!r}'
                           for name, trait in self.traits().items()
                           if not trait.read_only) + ')')
+        return result
 
     def to_dict(self):
         """
