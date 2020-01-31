@@ -58,7 +58,8 @@ class Client:
         collection = self._db[collection_name]
 
         # Insert the new object.
-        collection.insert_one(obj.to_dict())
+        with obj.cross_validation_lock:
+            collection.insert_one(obj.to_dict())
 
         # Observe any updates to the object and sync them to MongoDB.
         obj.observe(self._update)
