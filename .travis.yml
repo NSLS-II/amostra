@@ -23,7 +23,6 @@ install:
   - pip install .[complete]
   # Install extra requirements for running tests and building docs.
   - pip install -r requirements-dev.txt
-  - pip freeze
 
 script:
   - coverage run -m pytest  # Run the tests and check for test coverage.
