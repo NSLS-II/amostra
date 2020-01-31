@@ -49,9 +49,9 @@ class AmostraDocument(HasTraits):
     def __repr__(self):
         with self.cross_validation_lock:
             result = (f'{self.__class__.__name__}(' +
-                ', '.join(f'{name}={getattr(self, name)!r}'
-                          for name, trait in self.traits().items()
-                          if not trait.read_only) + ')')
+                      ', '.join(f'{name}={getattr(self, name)!r}'
+                                for name, trait in self.traits().items()
+                                if not trait.read_only) + ')')
         return result
 
     def to_dict(self):

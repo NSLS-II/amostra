@@ -26,8 +26,4 @@ st_container = hypothesis_jsonschema.from_schema(container_dict)
 def test_new(client, samples_list, containers_list):
     contents_dict = dict()
     for sample in samples_list:
-        s = client.samples.new(**sample)
-
-    for container in containers_list:
-        container['contents'] = contents_dict
-        client.containers.new(**container)
+        client.samples.new(**sample)
