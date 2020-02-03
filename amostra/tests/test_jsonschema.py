@@ -1,3 +1,5 @@
+from operator import itemgetter
+
 import hypothesis_jsonschema
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
@@ -20,8 +22,8 @@ container_dict['required'].remove('revision')
 st_container = hypothesis_jsonschema.from_schema(container_dict)
 
 
-@given(samples_list=st.lists(st_sample, unique_by=lambda x: x['name'], min_size=3, max_size=5),
-       containers_list=st.lists(st_container, unique_by=lambda x: x['name'], min_size=3, max_size=5))
+@given(samples_list=st.lists(st_sample, unique_by=itemgetter('name'), min_size=3, max_size=5),
+       containers_list=st.lists(st_container, unique_by=itemgetter('name'), min_size=3, max_size=5))
 @settings(max_examples=5, suppress_health_check=[HealthCheck.too_slow])
 def test_new(client, samples_list, containers_list):
     for sample in samples_list:
