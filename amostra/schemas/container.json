@@ -21,6 +21,7 @@
             "description": "Maps a Sample Foreign key to a location"
         }
     },
+    "additionalProperties": false,
     "required": [
         "uuid",
         "revision",

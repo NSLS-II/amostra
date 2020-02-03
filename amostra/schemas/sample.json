@@ -10,10 +10,12 @@
         },
         "name": {
             "type": "string",
-            "description": "Sample name"
+            "description": "Sample name",
+            "minLength": 0
         },
         "projects": {
             "type": "array",
+            "items": {"type": "string"},
             "description": "List of foreign keys to Projects"
         },
         "composition": {
@@ -22,6 +24,7 @@
         },
         "tags": {
             "type": "array",
+            "items": {"type": "string"},
             "description": "Arbitrary useful labels"
         },
         "description": {
@@ -29,6 +32,7 @@
             "description": "Longer sample description"
         }
     },
+    "additionalProperties": false,
     "required": [
         "uuid",
         "revision",

@@ -56,7 +56,9 @@ class AmostraDocument(HasTraits):
         """
         Represent the object as a JSON-serializable dictionary.
         """
-        return {name: getattr(self, name) for name in self.trait_names()}
+        with self.cross_validation_lock:
+            result = {name: getattr(self, name) for name in self.trait_names()}
+        return result
 
     @classmethod
     def from_document(cls, amostra_client, document):
@@ -144,7 +146,7 @@ class Project(AmostraDocument):
 class Sample(AmostraDocument):
     SCHEMA = load_schema('sample.json')
     name = Unicode()
-    projects = List(Instance(Project))
+    projects = List(Unicode())
     composition = Unicode()
     tags = List(Unicode())
     description = Unicode()
