@@ -25,9 +25,7 @@
     "required": [
         "uuid",
         "revision",
-        "name",
-        "kind",
-        "contents"
+        "name"
      ],
     "type": "object",
     "description": "Document created for group of containers."
