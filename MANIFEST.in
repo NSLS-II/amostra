@@ -3,3 +3,4 @@ include README.md
 include requirements.txt
 include versioneer.py
 include amostra/_version.py
+recursive-include docs *.rst conf.py Makefile
