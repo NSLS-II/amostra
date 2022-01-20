@@ -4,6 +4,8 @@ import versioneer
 import os
 
 
+here = os.path.abspath(os.path.dirname(__file__))
+
 with open(os.path.join(here, 'requirements.txt')) as requirements_file:
     # Parse requirements.txt, ignoring any commented-out lines.
     requirements = [line for line in requirements_file.read().splitlines()
