@@ -1,0 +1,9 @@
+doct
+jsonschema
+mongoquery
+pymongo
+pyyaml
+requests
+six
+tornado<5
+ujson
