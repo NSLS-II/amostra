@@ -5,5 +5,5 @@ pymongo
 pyyaml
 requests
 six
-tornado<5
+tornado
 ujson

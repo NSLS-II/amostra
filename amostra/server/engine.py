@@ -1,3 +1,4 @@
+from tornado import gen
 import tornado.web
 import pymongo
 import jsonschema
@@ -80,7 +81,7 @@ class DefaultHandler(tornado.web.RequestHandler):
     If you use multiple threads it is important to use IOLoop.add_callback
     to transfer control back to the main thread before finishing the request.
     """
-    @tornado.web.asynchronous
+    @gen.coroutine
     def set_default_headers(self):
         self.set_header('Access-Control-Allow-Origin', '*')
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
@@ -113,7 +114,7 @@ class SampleReferenceHandler(DefaultHandler):
     field. Otherwise, provide a dict that holds the new value and field name.
     Returns the total number of documents that are updated.
     """
-    @tornado.web.asynchronous
+    @gen.coroutine
     def get(self):
         database = self.settings['db']
         query = utils.unpack_params(self)
@@ -137,7 +138,7 @@ class SampleReferenceHandler(DefaultHandler):
         else:
             raise compose_err_msg(500, 'No results found!')
 
-    @tornado.web.asynchronous
+    @gen.coroutine
     def post(self):
         database = self.settings['db']
         data = ujson.loads(self.request.body.decode("utf-8"))
@@ -170,7 +171,7 @@ class SampleReferenceHandler(DefaultHandler):
                                       'SampleHandler expects list or dict')
         self.finish(ujson.dumps(uids))
 
-    @tornado.web.asynchronous
+    @gen.coroutine
     def put(self):
         database = self.settings['db']
         incoming = ujson.loads(self.request.body)
@@ -190,7 +191,7 @@ class SampleReferenceHandler(DefaultHandler):
 
 
 class RequestReferenceHandler(DefaultHandler):
-    @tornado.web.asynchronous
+    @gen.coroutine
     def get(self):
         database = self.settings['db']
         query = utils.unpack_params(self)
@@ -214,7 +215,7 @@ class RequestReferenceHandler(DefaultHandler):
         else:
             raise utils._compose_err_msg(500, 'No results found!')
 
-    @tornado.web.asynchronous
+    @gen.coroutine
     def post(self):
         database = self.settings['db']
         data = ujson.loads(self.request.body.decode("utf-8"))
@@ -257,7 +258,7 @@ class RequestReferenceHandler(DefaultHandler):
                                   status='SampleHandler expects list or dict')
         self.finish(ujson.dumps(uids))
 
-    @tornado.web.asynchronous
+    @gen.coroutine
     def put(self):
         database = self.settings['db']
         incoming = ujson.loads(self.request.body)
@@ -296,7 +297,7 @@ class ContainerReferenceHandler(DefaultHandler):
     field. Otherwise, provide a dict that holds the new value and field name.
     Returns the total number of documents that are updated.
     """
-    @tornado.web.asynchronous
+    @gen.coroutine
     def get(self):
         database = self.settings['db']
         query = utils.unpack_params(self)
@@ -319,7 +320,7 @@ class ContainerReferenceHandler(DefaultHandler):
         else:
             raise compose_err_msg(500, 'No results found!')
 
-    @tornado.web.asynchronous
+    @gen.coroutine
     def post(self):
         database = self.settings['db']
         data = ujson.loads(self.request.body.decode("utf-8"))
@@ -350,7 +351,7 @@ class ContainerReferenceHandler(DefaultHandler):
                                       'SampleHandler expects list or dict')
         self.finish(ujson.dumps(uids))
 
-    @tornado.web.asynchronous
+    @gen.coroutine
     def put(self):
         database = self.settings['db']
         incoming = ujson.loads(self.request.body)
@@ -371,18 +372,18 @@ class ContainerReferenceHandler(DefaultHandler):
 
 class SchemaHandler(DefaultHandler):
     """Provides the json used for schema validation provided collection name"""
-    @tornado.web.asynchronous
+    @gen.coroutine
     def get(self):
         col = utils.unpack_params(self)
         self.write(utils.schemas[col])
         self.finish()
 
-    @tornado.web.asynchronous
+    @gen.coroutine
     def put(self):
         raise utils._compose_err_msg(405,
                                      status='Not allowed on server')
 
-    @tornado.web.asynchronous
+    @gen.coroutine
     def post(self):
         raise utils._compose_err_msg(405,
                                      status='Not allowed on server')
