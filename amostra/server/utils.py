@@ -100,3 +100,8 @@ def default_timeuid(document):
     if 'time' not in document or document['time'] is None:
         document['time'] = ttime.time()
     return document
+
+def sanitize_return(result_dict):
+    OLD_KEYS = set(['electionId', 'opTime', '$clusterTime', 'signature', 'operationTime'])
+    cleaned_result_dict = {k: v for k, v in result_dict.items() if k not in OLD_KEYS}
+    return cleaned_result_dict

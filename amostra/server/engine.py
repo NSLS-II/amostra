@@ -187,7 +187,7 @@ class SampleReferenceHandler(DefaultHandler):
         res = database.sample.update_many(filter=query,
                                           update={'$set': update},
                                           upsert=False)
-        self.finish(ujson.dumps(res.raw_result))
+        self.finish(ujson.dumps(utils.sanitize_return(res.raw_result)))
 
 
 class RequestReferenceHandler(DefaultHandler):
@@ -274,7 +274,7 @@ class RequestReferenceHandler(DefaultHandler):
         res = database.request.update_many(filter=query,
                                            update={'$set': update},
                                            upsert=False)
-        self.finish(ujson.dumps(res.raw_result))
+        self.finish(ujson.dumps(utils.sanitize_return(res.raw_result)))
 
 
 class ContainerReferenceHandler(DefaultHandler):
@@ -367,7 +367,7 @@ class ContainerReferenceHandler(DefaultHandler):
         res = database.container.update_many(filter=query,
                                              update={'$set': update},
                                              upsert=False)
-        self.finish(ujson.dumps(res.raw_result))
+        self.finish(ujson.dumps(utils.sanitize_return(res.raw_result)))
 
 
 class SchemaHandler(DefaultHandler):
