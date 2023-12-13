@@ -28,4 +28,5 @@ setuptools.setup(
         "Development Status :: 3 - Alpha",
         'Programming Language :: Python :: 3',
     ],
+    entry_points={"console_scripts": ["amostra_startup = amostra.startup:start_server"]},
 )
