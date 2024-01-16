@@ -33,33 +33,6 @@ def db_connect(database, mongo_uri):
     except pymongo.errors.ConnectionFailure:
         raise utils.AmostraException("Unable to connect to MongoDB server...")
     database = client[database]
-    try:
-        database.sample.create_index([('uid', DESCENDING)],
-                                     unique=True, background=True)
-        database.sample.create_index([('time', DESCENDING),
-                                     ('name', DESCENDING)],
-                                     unique=False, background=True)
-        database.sample.create_index([('container', DESCENDING)],
-                                     unique=False, sparse=True)
-        database.sample.create_index([('uid', DESCENDING)],
-                                     unique=True, background=True)
-        database.sample.create_index([('time', DESCENDING)],
-                                     unique=False, background=True)
-        database.request.create_index([('uid', DESCENDING)],
-                                      unique=True, background=True)
-        database.request.create_index([('time', DESCENDING)],
-                                      unique=False, background=True)
-        database.request.create_index([('sample', DESCENDING)],
-                                      unique=False, background=True, sparse=True)
-        database.container.create_index([('uid', DESCENDING)],
-                                        unique=True, background=True)
-        database.container.create_index([('time', DESCENDING)],
-                                        unique=False, background=True)
-        database.container.create_index([('container', DESCENDING)],
-                                        unique=False, background=True,
-                                        sparse=True)
-    except PyMongoError:
-        raise compose_err_msg(500, 'Not connected to Mongo daemon')
     return database
 
 
