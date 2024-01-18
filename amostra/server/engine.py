@@ -29,7 +29,7 @@ def db_connect(database, mongo_uri):
     to pymongo
     """
     try:
-        client = pymongo.MongoClient(uri)
+        client = pymongo.MongoClient(mongo_uri)
     except pymongo.errors.ConnectionFailure:
         raise utils.AmostraException("Unable to connect to MongoDB server...")
     database = client[database]
