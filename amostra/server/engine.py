@@ -10,7 +10,7 @@ from pymongo import DESCENDING
 from .utils import compose_err_msg
 
 
-def db_connect(database, mongo_uri):
+def db_connect(database, mongo_uri, testing=False):
     """Helper function to deal with stateful connections to MongoDB
     Connection established lazily. Connects to the database on request.
     Same connection pool is used for all clients per recommended by
@@ -28,10 +28,14 @@ def db_connect(database, mongo_uri):
     multiple clients and makes no difference for a single client compared
     to pymongo
     """
-    try:
-        client = pymongo.MongoClient(mongo_uri)
-    except pymongo.errors.ConnectionFailure:
-        raise utils.AmostraException("Unable to connect to MongoDB server...")
+    if testing:
+        import mongomock
+        client = mongomock.MongClient(mongo_uri)
+    else:
+        try:
+            client = pymongo.MongoClient(mongo_uri)
+        except pymongo.errors.ConnectionFailure:
+            raise utils.AmostraException("Unable to connect to MongoDB server...")
     database = client[database]
     return database
 
