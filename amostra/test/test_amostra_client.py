@@ -1,49 +1,41 @@
 from doct import Document
 import time as ttime
 import pytest
-from ..testing import amostra_setup, amostra_teardown
 from ..client.api import AmostraClient
 from requests.exceptions import HTTPError, RequestException
-from ..testing import TESTING_CONFIG
+from .conftest import testing_config
 
 import uuid
 
 
-conn = AmostraClient(host=TESTING_CONFIG["host"], port=TESTING_CONFIG["port"])
-
-
-def teardown():
-    amostra_teardown()
-
-
-def test_client_constructor():
+def test_client_constructor(astore_client):
     pytest.raises(TypeError, AmostraClient)
 
 
-def test_connection_switch(conn=conn):
-    conn.host = "caesar"
-    pytest.raises(RequestException, conn.create_sample, "asterix")
-    conn.host = TESTING_CONFIG["host"]
+def test_connection_switch(astore_client):
+    astore_client.host = "caesar"
+    pytest.raises(RequestException, astore_client.create_sample, "asterix")
+    astore_client.host = testing_config["host"]
 
 
-def test_sample_create(conn=conn):
-    r1 = conn.create_sample(name="test1")
-    r2 = conn.create_sample(name="test2", uid=str(uuid.uuid4()))
+def test_sample_create(astore_server, astore_client):
+    r1 = astore_client.create_sample(name="test1")
+    r2 = astore_client.create_sample(name="test2", uid=str(uuid.uuid4()))
     m_kwargs = dict(owner="test", level="inferno", type="automated", material="CoFeB")
-    r3 = conn.create_sample(name="test3", uid=str(uuid.uuid4()), **m_kwargs)
+    r3 = astore_client.create_sample(name="test3", uid=str(uuid.uuid4()), **m_kwargs)
 
 
-def test_duplicate_sample(conn=conn):
+def test_duplicate_sample(astore_client):
     _com_uid = str(uuid.uuid4())
     conn.create_sample(name="test_sample", uid=_com_uid, custom=False)
     pytest.raises(HTTPError, conn.create_sample, name="test_duplicate", uid=_com_uid)
 
 
-def test_invalid_sample(conn=conn):
+def test_invalid_sample(astore_client):
     pytest.raises(TypeError, conn.create_sample)
 
 
-def test_find_sample(conn=conn):
+def test_find_sample(astore_client):
     m_sample = dict(
         name="comp_samp",
         uid=str(uuid.uuid4()),
@@ -57,7 +49,7 @@ def test_find_sample(conn=conn):
     assert s_ret[0]["uid"] == m_sample["uid"]
 
 
-def test_find_sample_as_doc(conn=conn):
+def test_find_sample_as_doc(astore_client):
     m_sample = dict(
         name="comp_sam",
         uid=str(uuid.uuid4()),
@@ -72,7 +64,7 @@ def test_find_sample_as_doc(conn=conn):
     assert s_ret[0] == Document("Sample", m_sample)
 
 
-def test_update_sample(conn=conn):
+def test_update_sample(astore_client):
     test_sample = dict(
         name="up_sam",
         uid=str(uuid.uuid4()),
@@ -92,7 +84,7 @@ def test_update_sample(conn=conn):
     assert updated_samp["state"] == "inactive"
 
 
-def test_update_sample_illegal(conn=conn):
+def test_update_sample_illegal(astore_client):
     test_sample = dict(
         name="up_sam",
         uid=str(uuid.uuid4()),
@@ -110,7 +102,7 @@ def test_update_sample_illegal(conn=conn):
     )
 
 
-def test_container_create(conn=conn):
+def test_container_create(astore_client):
     ast_cont = {
         "name": "obelix",
         "dog": "hidefix",
@@ -122,7 +114,7 @@ def test_container_create(conn=conn):
     assert cont1 == ast_cont["uid"]
 
 
-def test_find_container(conn=conn):
+def test_find_container(astore_client):
     f_cont = dict(
         name="comp_sam",
         uid=str(uuid.uuid4()),
@@ -138,7 +130,7 @@ def test_find_container(conn=conn):
     assert c_ret_doc["uid"] == c_uid
 
 
-def test_find_container_as_doc(conn=conn):
+def test_find_container_as_doc(astore_client):
     f_cont = dict(
         name="comp_sam",
         uid=str(uuid.uuid4()),
@@ -154,7 +146,7 @@ def test_find_container_as_doc(conn=conn):
     assert c_ret_doc["uid"] == c_uid
 
 
-def test_update_container(conn=conn):
+def test_update_container(astore_client):
     orig_cont = dict(
         name="obelix",
         uid=str(uuid.uuid4()),
@@ -174,7 +166,7 @@ def test_update_container(conn=conn):
     assert updated_cont["state"] == "inactive"
 
 
-def test_update_container_illegal(conn=conn):
+def test_update_container_illegal(astore_client):
     orig_cont = dict(
         name="obelix",
         uid=str(uuid.uuid4()),
@@ -195,7 +187,7 @@ def test_update_container_illegal(conn=conn):
     )
 
 
-def test_request_create(conn=conn):
+def test_request_create(astore_client):
     conn.create_request(
         sample="roman_sample",
         time=ttime.time(),
@@ -208,7 +200,7 @@ def test_request_create(conn=conn):
     )
 
 
-def test_duplicate_request(conn=conn):
+def test_duplicate_request(astore_client):
     m_uid = str(uuid.uuid4())
     conn.create_request(
         sample="hidefix",
@@ -234,7 +226,7 @@ def test_duplicate_request(conn=conn):
     )
 
 
-def test_request_find(conn=conn):
+def test_request_find(astore_client):
     req_dict = dict(
         sample="hidefix",
         time=ttime.time(),
@@ -250,7 +242,7 @@ def test_request_find(conn=conn):
     assert retrieved["uid"] == inserted
 
 
-def test_update_request(conn=conn):
+def test_update_request(astore_client):
     m_uid = str(uuid.uuid4())
     req_dict = dict(
         uid=m_uid,
