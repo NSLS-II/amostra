@@ -11,7 +11,7 @@ from  amostra.server.engine import (SampleReferenceHandler,
 from .server.conf import load_configuration
 
 
-def start_server(config=None):
+def start_server(config=None, testing=False):
     """
     Amostra service startup script.
     Returns tornado event loop provided configuration.
@@ -56,7 +56,7 @@ def start_server(config=None):
         service_port = 7770
     print(args)
     db = db_connect(database=config['database'],
-                    mongo_uri=config['mongo_uri'])
+                    mongo_uri=config['mongo_uri'], testing=testing)
     application = tornado.web.Application([
         (r'/sample', SampleReferenceHandler),
         (r'/request', RequestReferenceHandler),
