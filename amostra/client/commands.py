@@ -11,7 +11,7 @@ class AmostraException(Exception):
 
 class AmostraClient:
     def __init__(self, host, port):
-        """ Simplified client for Sample, Request, and Container
+        """Simplified client for Sample, Request, and Container
 
         Parameters
         ----------
@@ -25,25 +25,21 @@ class AmostraClient:
 
     @property
     def _sample_client(self):
-        """ Connection pool for Sample related tasks."""
-        return SampleReference(host=self.host,
-                               port=self.port)
+        """Connection pool for Sample related tasks."""
+        return SampleReference(host=self.host, port=self.port)
 
     @property
     def _container_client(self):
         """Connection pool for Container related tasks."""
-        return ContainerReference(host=self.host,
-                                  port=self.port)
+        return ContainerReference(host=self.host, port=self.port)
 
     @property
     def _request_client(self):
         """Connection pool for Request related tasks."""
-        return RequestReference(host=self.host,
-                                port=self.port)
+        return RequestReference(host=self.host, port=self.port)
 
-    def create_sample(self, name, time=None, uid=None, container=None,
-                       **kwargs):
-        """ Insert a sample to the database
+    def create_sample(self, name, time=None, uid=None, container=None, **kwargs):
+        """Insert a sample to the database
 
         Parameters
         ----------
@@ -61,12 +57,14 @@ class AmostraClient:
         str: The inserted document.
 
         """
-        return self._sample_client.create(name=name, time=time, uid=uid,
-                                          container=container, **kwargs)
+        return self._sample_client.create(
+            name=name, time=time, uid=uid, container=container, **kwargs
+        )
 
-    def create_request(self, sample=None, time=None,
-                       uid=None, state='active', seq_num=0, **kwargs):
-        """ Create a request entry in the dataase
+    def create_request(
+        self, sample=None, time=None, uid=None, state="active", seq_num=0, **kwargs
+    ):
+        """Create a request entry in the dataase
 
         Parameters
         ----------
@@ -86,12 +84,12 @@ class AmostraClient:
         str: The inserted Request document uid
 
         """
-        return self._request_client.create(sample=sample, time=time, uid=uid,
-                                           state=state, seq_num=seq_num,
-                                           **kwargs)
+        return self._request_client.create(
+            sample=sample, time=time, uid=uid, state=state, seq_num=seq_num, **kwargs
+        )
 
     def create_container(self, uid=None, time=None, **kwargs):
-        """ Insert a container document.
+        """Insert a container document.
 
         Parameters
         ----------
@@ -167,20 +165,19 @@ class AmostraClient:
     def find_sample(self, as_document=True, **kwargs):
         """Given a set of mongo search parameters, return a requests iterator
 
-        Parameters
-        -----------
-        as_document: bool
-            Format return type to doct.Document if set
+         Parameters
+         -----------
+         as_document: bool
+             Format return type to doct.Document if set
 
-        Yields
-        ----------
-       list
-            Result of the query, list of samples doct.Document
+         Yields
+         ----------
+        list
+             Result of the query, list of samples doct.Document
 
 
         """
-        return list(self._sample_client.find(as_document=as_document,
-                                                 **kwargs))
+        return list(self._sample_client.find(as_document=as_document, **kwargs))
 
     def find_request(self, as_document=True, **kwargs):
         """Given a set of mongo search parameters, return a list of requests
@@ -196,30 +193,29 @@ class AmostraClient:
             Result of the query, list of doct.Document
 
         """
-        return list(self._request_client.find(as_document=as_document,
-                                              **kwargs))
+        return list(self._request_client.find(as_document=as_document, **kwargs))
 
     def find_container(self, as_document=True, **kwargs):
         """Given a set of mongo search parameters, return a requests iterator
 
-        Parameters
-        -----------
-        as_document: bool
-            Format return type to doct.Document if set
+         Parameters
+         -----------
+         as_document: bool
+             Format return type to doct.Document if set
 
-        Yields
-        ----------
-       list
-            Result of the query, list of containers doct.Document
+         Yields
+         ----------
+        list
+             Result of the query, list of containers doct.Document
 
         """
-        return list(self._container_client.find(as_document=as_document,
-                                                **kwargs))
+        return list(self._container_client.find(as_document=as_document, **kwargs))
+
 
 class SampleReference(object):
     """Reference implementation of generic sample manager"""
-    def __init__(self, host=conf.conn_config['host'],
-                 port=conf.conn_config['port']):
+
+    def __init__(self, host=conf.conn_config["host"], port=conf.conn_config["port"]):
         """Constructor.
 
         Parameters
@@ -236,20 +232,19 @@ class SampleReference(object):
     @property
     def _server_path(self):
         """URL to the Amostra server"""
-        return 'http://{}:{}/' .format(self.host, self.port)
+        return "http://{}:{}/".format(self.host, self.port)
 
     @property
     def _samp_url(self):
         """URL to the sample reference handler in the server side"""
-        return self._server_path + 'sample'
+        return self._server_path + "sample"
 
     @property
     def _schema_url(self):
         """URL to the schema reference handler in the server side"""
-        return self._server_path + 'schema'
+        return self._server_path + "schema"
 
-    def create(self, name, time=None, uid=None, container=None,
-               **kwargs):
+    def create(self, name, time=None, uid=None, container=None, **kwargs):
         """Insert a sample to the database
 
         Parameters
@@ -269,10 +264,13 @@ class SampleReference(object):
             The inserted document uid
 
         """
-        doc = dict(uid=uid,
-                   name=name, time=time,
-                   container=doc_or_uid_to_uid(container) if container else 'NULL',
-                   **kwargs)
+        doc = dict(
+            uid=uid,
+            name=name,
+            time=time,
+            container=doc_or_uid_to_uid(container) if container else "NULL",
+            **kwargs
+        )
         ins_doc = _post(self._samp_url, doc)
         return ins_doc[0]
 
@@ -331,7 +329,7 @@ class SampleReference(object):
         content = _get(self._samp_url, params=kwargs)
         if as_document:
             for c in content:
-                yield Document('Sample', c)
+                yield Document("Sample", c)
         else:
             for c in content:
                 yield c
@@ -345,15 +343,15 @@ class SampleReference(object):
             Returns the json schema dict used for validation
 
         """
-        r = requests.get(self._schema_url,
-                         params=ujson.dumps('sample'))
+        r = requests.get(self._schema_url, params=ujson.dumps("sample"))
         r.raise_for_status()
         return ujson.loads(r.text)
 
 
 class RequestReference(object):
     """Reference implementation of generic request"""
-    def __init__(self, host=conf.conn_config['host'], port=conf.conn_config['port']):
+
+    def __init__(self, host=conf.conn_config["host"], port=conf.conn_config["port"]):
         """Constructor
 
         Parameters
@@ -370,21 +368,22 @@ class RequestReference(object):
     @property
     def _server_path(self):
         """URL to the Amostra server"""
-        return 'http://{}:{}/' .format(self.host, self.port)
+        return "http://{}:{}/".format(self.host, self.port)
 
     @property
     def _req_url(self):
         """URL to the request reference handler in the server side"""
-        return self._server_path + 'request'
+        return self._server_path + "request"
 
     @property
     def _schema_url(self):
         """URL to the schema reference handler in the server side"""
-        return self._server_path + 'schema'
+        return self._server_path + "schema"
 
-    def create(self, sample=None, time=None,
-               uid=None, state='active', seq_num=0, **kwargs):
-        """ Create a request entry in the dataase
+    def create(
+        self, sample=None, time=None, uid=None, state="active", seq_num=0, **kwargs
+    ):
+        """Create a request entry in the dataase
         Parameters
         ----------
         sample: dict, doct.Document, optional
@@ -405,10 +404,14 @@ class RequestReference(object):
 
         """
 
-        payload = dict(uid=uid,
-                       sample=doc_or_uid_to_uid(sample),
-                       time=time, state=state,
-                       seq_num=seq_num, **kwargs)
+        payload = dict(
+            uid=uid,
+            sample=doc_or_uid_to_uid(sample),
+            time=time,
+            state=state,
+            seq_num=seq_num,
+            **kwargs
+        )
         ins_doc = _post(self._req_url, payload)
         return ins_doc[0]
 
@@ -435,7 +438,7 @@ class RequestReference(object):
         content = _get(self._req_url, kwargs)
         if as_document:
             for c in content:
-                yield Document('Request', c)
+                yield Document("Request", c)
         else:
             for c in content:
                 yield c
@@ -466,15 +469,15 @@ class RequestReference(object):
         dict
             Returns the json schema dict used for validation
         """
-        r = requests.get(self._schema_url,
-                         params=ujson.dumps('request'))
+        r = requests.get(self._schema_url, params=ujson.dumps("request"))
         r.raise_for_status()
         return ujson.loads(r.text)
 
 
 class ContainerReference(object):
     """Reference implementation of generic container"""
-    def __init__(self, host=conf.conn_config['host'], port=conf.conn_config['port']):
+
+    def __init__(self, host=conf.conn_config["host"], port=conf.conn_config["port"]):
         """Handles connection configuration to the service backend.
         Either initiate with a request or use purely as a client for requests.
         """
@@ -484,17 +487,17 @@ class ContainerReference(object):
     @property
     def _server_path(self):
         """URL to the Amostra server"""
-        return 'http://{}:{}/' .format(self.host, self.port)
+        return "http://{}:{}/".format(self.host, self.port)
 
     @property
     def _cont_url(self):
         """URL to the container reference handler in the server side"""
-        return self._server_path + 'container'
+        return self._server_path + "container"
 
     @property
     def _schema_url(self):
         """URL to the schema reference handler in the server side"""
-        return self._server_path + 'schema'
+        return self._server_path + "schema"
 
     def create(self, uid=None, time=None, **kwargs):
         """Insert a container document. Schema validation done
@@ -513,8 +516,7 @@ class ContainerReference(object):
         ins_doc: str
             Inserted Container document uid
         """
-        payload = dict(uid=uid,
-                       time=time, **kwargs)
+        payload = dict(uid=uid, time=time, **kwargs)
         ins_doc = _post(self._cont_url, payload)
         return ins_doc[0]
 
@@ -523,7 +525,7 @@ class ContainerReference(object):
         content = _get(self._cont_url, kwargs)
         if as_document:
             for c in content:
-                yield Document('container', c)
+                yield Document("container", c)
         else:
             for c in content:
                 yield c
@@ -559,6 +561,6 @@ class ContainerReference(object):
         dict
             Returns the json schema dict used for validation
         """
-        r = requests.get(self._schema_url, params=ujson.dumps('container'))
+        r = requests.get(self._schema_url, params=ujson.dumps("container"))
         r.raise_for_status()
         return ujson.loads(r.text)

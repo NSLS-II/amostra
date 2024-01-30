@@ -25,17 +25,17 @@ def _find_local(fname, qparams, as_doct=False):
     """
     res_list = []
     try:
-        with open(fname, 'r') as fp:
+        with open(fname, "r") as fp:
             local_payload = ujson.load(fp)
         qobj = mongoquery.Query(qparams)
         for i in local_payload:
             if qobj.match(i):
                 res_list.append(i)
     except FileNotFoundError:
-        raise RuntimeWarning('Local file {} does not exist'.format(fname))
+        raise RuntimeWarning("Local file {} does not exist".format(fname))
     if as_doct:
         for c in res_list:
-            yield Document(fname.split('.')[0], c)
+            yield Document(fname.split(".")[0], c)
     else:
         for c in res_list:
             yield c
@@ -54,7 +54,7 @@ def _update_local(fname, qparams, replacement):
         such as time and uid
     """
     try:
-        with open(fname, 'r') as fp:
+        with open(fname, "r") as fp:
             local_payload = ujson.load(fp)
         qobj = mongoquery.Query(qparams)
         for _sample in local_payload:
@@ -64,28 +64,28 @@ def _update_local(fname, qparams, replacement):
                         _sample[k] = v
             except mongoquery.QueryError:
                 pass
-        with open(fname, 'w') as fp:
+        with open(fname, "w") as fp:
             ujson.dump(local_payload, fp)
     except FileNotFoundError:
-        raise RuntimeWarning('Local file {} does not exist'.format(fname))
+        raise RuntimeWarning("Local file {} does not exist".format(fname))
 
 
 class LocalSampleReference:
     """Handle sample information locally via json files"""
-    def __init__(self, top_dir=conf.local_conn_config['top']):
+
+    def __init__(self, top_dir=conf.local_conn_config["top"]):
         self.top_dir = top_dir
 
     @property
     def sample_list(self):
         try:
-            with open(self._samp_fname, 'r') as fp:
+            with open(self._samp_fname, "r") as fp:
                 _sample_list = ujson.load(fp)
             return _sample_list
         except (FileNotFoundError, ValueError):
             return []
 
-    def create(self, name=None, time=None, uid=None, container=None,
-               **kwargs):
+    def create(self, name=None, time=None, uid=None, container=None, **kwargs):
         """Create a sample locally
 
         Parameters
@@ -105,22 +105,25 @@ class LocalSampleReference:
             Document dict that was inserted
         """
         # TODO: Allow container to be an object
-        tmp =  self.sample_list
+        tmp = self.sample_list
         if container:
             container = doc_or_uid_to_uid(container)
-        payload = dict(uid=uid if uid else str(uuid4()),
-                       name=name, time=time if time else ttime.time(),
-                       container=container if container else 'NULL',
-                       **kwargs)
+        payload = dict(
+            uid=uid if uid else str(uuid4()),
+            name=name,
+            time=time if time else ttime.time(),
+            container=container if container else "NULL",
+            **kwargs
+        )
 
         tmp.append(payload)
-        with open(self._samp_fname, 'w+') as fp:
+        with open(self._samp_fname, "w+") as fp:
             ujson.dump(tmp, fp)
         return payload
 
     @property
     def _samp_fname(self):
-        return expanduser(self.top_dir + '/samples.json')
+        return expanduser(self.top_dir + "/samples.json")
 
     def update(self, query, replacement):
         _update_local(self._samp_fname, query, replacement)
@@ -131,7 +134,8 @@ class LocalSampleReference:
 
 class LocalRequestReference:
     """Handle request information locally via json files"""
-    def __init__(self, top_dir=conf.local_conn_config['top']):
+
+    def __init__(self, top_dir=conf.local_conn_config["top"]):
         """Try to access files. If no file exists, create empty list
 
         Parameters
@@ -144,7 +148,7 @@ class LocalRequestReference:
     @property
     def request_list(self):
         try:
-            with open(self._req_fname, 'r') as fp:
+            with open(self._req_fname, "r") as fp:
                 _req_list = ujson.load(fp)
             return _req_list
         except (FileNotFoundError, ValueError):
@@ -152,10 +156,11 @@ class LocalRequestReference:
 
     @property
     def _req_fname(self):
-        return expanduser(self.top_dir + '/requests.json')
+        return expanduser(self.top_dir + "/requests.json")
 
-    def create(self, sample=None, time=None, uid=None, state='active',
-               seq_num=0, **kwargs):
+    def create(
+        self, sample=None, time=None, uid=None, state="active", seq_num=0, **kwargs
+    ):
         """Create a request locally
 
         Parameters
@@ -180,12 +185,16 @@ class LocalRequestReference:
         tmp = self.request_list
         if sample:
             sample = doc_or_uid_to_uid(sample)
-        payload = dict(uid=uid if uid else str(uuid4()),
-                       sample=sample if sample else 'NULL',
-                       time=time if time else ttime.time(), state=state,
-                       seq_num=seq_num, **kwargs)
+        payload = dict(
+            uid=uid if uid else str(uuid4()),
+            sample=sample if sample else "NULL",
+            time=time if time else ttime.time(),
+            state=state,
+            seq_num=seq_num,
+            **kwargs
+        )
         tmp.append(payload)
-        with open(self._req_fname, 'w+') as fp:
+        with open(self._req_fname, "w+") as fp:
             ujson.dump(tmp, fp)
         return payload
 
@@ -198,12 +207,14 @@ class LocalRequestReference:
 
 class LocalContainerReference:
     """Handle container information locally via json files"""
-    def __init__(self, top_dir=conf.local_conn_config['top']):
+
+    def __init__(self, top_dir=conf.local_conn_config["top"]):
         self.top_dir = top_dir
+
     @property
     def container_list(self):
         try:
-            with open(self._cont_fname, 'r') as fp:
+            with open(self._cont_fname, "r") as fp:
                 _cont_list = ujson.load(fp)
             return _cont_list
         except (FileNotFoundError, ValueError):
@@ -211,10 +222,10 @@ class LocalContainerReference:
 
     @property
     def _cont_fname(self):
-        return expanduser(self.top_dir + '/containers.json')
+        return expanduser(self.top_dir + "/containers.json")
 
     def create(self, uid=None, time=None, container=None, **kwargs):
-        """ Create a container locally.
+        """Create a container locally.
 
         Parameters
         ----------
@@ -233,11 +244,14 @@ class LocalContainerReference:
         tmp = self.container_list
         if container:
             container = doc_or_uid_to_uid(container)
-        payload = dict(uid=uid if uid else str(uuid4()),
-                       container=container if container else 'NULL',
-                       time=time if time else ttime.time(), **kwargs)
+        payload = dict(
+            uid=uid if uid else str(uuid4()),
+            container=container if container else "NULL",
+            time=time if time else ttime.time(),
+            **kwargs
+        )
         tmp.append(payload)
-        with open(self._cont_fname, 'w+') as fp:
+        with open(self._cont_fname, "w+") as fp:
             ujson.dump(tmp, fp)
         return payload
 

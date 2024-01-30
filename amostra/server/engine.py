@@ -44,13 +44,14 @@ class DefaultHandler(tornado.web.RequestHandler):
     If you use multiple threads it is important to use IOLoop.add_callback
     to transfer control back to the main thread before finishing the request.
     """
+
     @gen.coroutine
     def set_default_headers(self):
-        self.set_header('Access-Control-Allow-Origin', '*')
-        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
-        self.set_header('Access-Control-Max-Age', 1000)
-        self.set_header('Access-Control-Allow-Headers', '*')
-        self.set_header('Content-type', 'application/json')
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+        self.set_header("Access-Control-Max-Age", 1000)
+        self.set_header("Access-Control-Allow-Headers", "*")
+        self.set_header("Content-type", "application/json")
 
     def data_received(self, chunk):
         """Abstract method, overwrite potential default"""
@@ -77,166 +78,145 @@ class SampleReferenceHandler(DefaultHandler):
     field. Otherwise, provide a dict that holds the new value and field name.
     Returns the total number of documents that are updated.
     """
+
     @gen.coroutine
     def get(self):
-        database = self.settings['db']
+        database = self.settings["db"]
         query = utils.unpack_params(self)
         num = query.pop("num", None)
         if num:
             try:
-                docs = database.sample.find().sort('time',
-                                                   direction=DESCENDING).\
-                                                             limit(num)
+                docs = (
+                    database.sample.find().sort("time", direction=DESCENDING).limit(num)
+                )
             except pymongo.errors.PyMongoError:
-                raise compose_err_msg(500, 'Query on sample has failed',
-                                      query)
+                raise compose_err_msg(500, "Query on sample has failed", query)
         else:
             try:
-                docs = database.sample.find(query).sort('time',
-                                                        direction=DESCENDING)
+                docs = database.sample.find(query).sort("time", direction=DESCENDING)
             except pymongo.errors.PyMongoError:
-                raise compose_err_msg(500, 'Query Failed: ', query)
+                raise compose_err_msg(500, "Query Failed: ", query)
         if docs:
             utils.return2client(self, docs)
         else:
-            raise compose_err_msg(500, 'No results found!')
+            raise compose_err_msg(500, "No results found!")
 
     @gen.coroutine
     def post(self):
-        database = self.settings['db']
+        database = self.settings["db"]
         data = ujson.loads(self.request.body.decode("utf-8"))
         uids = []
         if isinstance(data, list):
             for d in data:
                 d = utils.default_timeuid(d)
                 try:
-                    jsonschema.validate(d,
-                                        utils.schemas['sample'])
+                    jsonschema.validate(d, utils.schemas["sample"])
                 except (ValidationError, SchemaError):
-                    raise compose_err_msg(400,
-                                          "Invalid schema on document(s)",
-                                          d)
-                uids.append(d['uid'])
+                    raise compose_err_msg(400, "Invalid schema on document(s)", d)
+                uids.append(d["uid"])
                 res = database.sample.insert(d)
         elif isinstance(data, dict):
             data = utils.default_timeuid(data)
             try:
-                jsonschema.validate(data,
-                                    utils.schemas['sample'])
+                jsonschema.validate(data, utils.schemas["sample"])
             except (ValidationError, SchemaError):
-                raise compose_err_msg(400,
-                                      "Invalid schema on document(s)",
-                                      data)
-            uids.append(data['uid'])
+                raise compose_err_msg(400, "Invalid schema on document(s)", data)
+            uids.append(data["uid"])
             res = database.sample.insert(data)
             if not res:
-                raise compose_err_msg(500,
-                                      'SampleHandler expects list or dict')
+                raise compose_err_msg(500, "SampleHandler expects list or dict")
         self.finish(ujson.dumps(uids))
 
     @gen.coroutine
     def put(self):
-        database = self.settings['db']
+        database = self.settings["db"]
         incoming = ujson.loads(self.request.body)
         try:
-            query = incoming.pop('query')
-            update = incoming.pop('update')
+            query = incoming.pop("query")
+            update = incoming.pop("update")
         except KeyError:
-            raise compose_err_msg(500,
-                                  'filter and update are both required fields')
-        if any(x in update.keys() for x in ['uid']):
-            raise compose_err_msg(500,
-                                  'Uid cannot be updated')
-        res = database.sample.update_many(filter=query,
-                                          update={'$set': update},
-                                          upsert=False)
+            raise compose_err_msg(500, "filter and update are both required fields")
+        if any(x in update.keys() for x in ["uid"]):
+            raise compose_err_msg(500, "Uid cannot be updated")
+        res = database.sample.update_many(
+            filter=query, update={"$set": update}, upsert=False
+        )
         self.finish(ujson.dumps(utils.sanitize_return(res.raw_result)))
 
 
 class RequestReferenceHandler(DefaultHandler):
     @gen.coroutine
     def get(self):
-        database = self.settings['db']
+        database = self.settings["db"]
         query = utils.unpack_params(self)
         num = query.pop("num", None)
         if num:
             try:
-                docs = database.reference.find().\
-                                          sort('time',
-                                               direction=pymongo.DESCENDING).\
-                                                         limit(num)
+                docs = (
+                    database.reference.find()
+                    .sort("time", direction=pymongo.DESCENDING)
+                    .limit(num)
+                )
             except pymongo.errors.PyMongoError:
-                raise utils._compose_err_msg(500, '', query)
+                raise utils._compose_err_msg(500, "", query)
         else:
             try:
-                docs = database.request.find(query).sort('time',
-                                                         direction=DESCENDING)
+                docs = database.request.find(query).sort("time", direction=DESCENDING)
             except pymongo.errors.PyMongoError:
-                raise utils._compose_err_msg(500, 'Query Failed: ', query)
+                raise utils._compose_err_msg(500, "Query Failed: ", query)
         if docs:
             utils.return2client(self, docs)
         else:
-            raise utils._compose_err_msg(500, 'No results found!')
+            raise utils._compose_err_msg(500, "No results found!")
 
     @gen.coroutine
     def post(self):
-        database = self.settings['db']
+        database = self.settings["db"]
         data = ujson.loads(self.request.body.decode("utf-8"))
         uids = []
         if isinstance(data, list):
             for d in data:
                 d = utils.default_timeuid(d)
                 try:
-                    jsonschema.validate(d,
-                                        utils.schemas['request'])
+                    jsonschema.validate(d, utils.schemas["request"])
                 except (ValidationError, SchemaError):
-                    raise compose_err_msg(400,
-                                          "Invalid schema on document(s)",
-                                          d)
+                    raise compose_err_msg(400, "Invalid schema on document(s)", d)
                 try:
                     database.request.insert(d)
-                    uids.append(d['uid'])
+                    uids.append(d["uid"])
                 except pymongo.errors.PyMongoError:
-                    raise compose_err_msg(500,
-                                         'Validated data can not be inserted',
-                                                 data)
+                    raise compose_err_msg(
+                        500, "Validated data can not be inserted", data
+                    )
         elif isinstance(data, dict):
             data = utils.default_timeuid(data)
             try:
-                jsonschema.validate(data,
-                                    utils.schemas['request'])
+                jsonschema.validate(data, utils.schemas["request"])
             except (ValidationError, SchemaError):
-                raise compose_err_msg(400,
-                                      "Invalid schema on document(s)",
-                                      data)
+                raise compose_err_msg(400, "Invalid schema on document(s)", data)
             try:
                 database.request.insert(data)
-                uids.append(data['uid'])
+                uids.append(data["uid"])
             except pymongo.errors.PyMongoError:
-                raise compose_err_msg(500,
-                                      'Validated data can not be inserted',
-                                      data)
+                raise compose_err_msg(500, "Validated data can not be inserted", data)
         else:
-            raise compose_err_msg(500,
-                                  status='SampleHandler expects list or dict')
+            raise compose_err_msg(500, status="SampleHandler expects list or dict")
         self.finish(ujson.dumps(uids))
 
     @gen.coroutine
     def put(self):
-        database = self.settings['db']
+        database = self.settings["db"]
         incoming = ujson.loads(self.request.body)
         try:
-            query = incoming.pop('query')
-            update = incoming.pop('update')
+            query = incoming.pop("query")
+            update = incoming.pop("update")
         except KeyError:
-            raise compose_err_msg(500,
-                                  'filter and update are both required fields')
-        if any(x in update.keys() for x in ['uid']):
-            raise compose_err_msg(500,
-                                  status='Uid cannot be updated')
-        res = database.request.update_many(filter=query,
-                                           update={'$set': update},
-                                           upsert=False)
+            raise compose_err_msg(500, "filter and update are both required fields")
+        if any(x in update.keys() for x in ["uid"]):
+            raise compose_err_msg(500, status="Uid cannot be updated")
+        res = database.request.update_many(
+            filter=query, update={"$set": update}, upsert=False
+        )
         self.finish(ujson.dumps(utils.sanitize_return(res.raw_result)))
 
 
@@ -260,81 +240,75 @@ class ContainerReferenceHandler(DefaultHandler):
     field. Otherwise, provide a dict that holds the new value and field name.
     Returns the total number of documents that are updated.
     """
+
     @gen.coroutine
     def get(self):
-        database = self.settings['db']
+        database = self.settings["db"]
         query = utils.unpack_params(self)
         num = query.pop("num", None)
         if num:
             try:
-                docs = database.sample.find().sort('time',
-                                                   direction=DESCENDING).\
-                                                             limit(num)
+                docs = (
+                    database.sample.find().sort("time", direction=DESCENDING).limit(num)
+                )
             except pymongo.errors.PyMongoError:
-                raise compose_err_msg(500, '', query)
+                raise compose_err_msg(500, "", query)
         else:
             try:
-                docs = database.container.find(query).sort('time',
-                                                      direction=DESCENDING)
+                docs = database.container.find(query).sort("time", direction=DESCENDING)
             except pymongo.errors.PyMongoError:
-                raise compose_err_msg(500, 'Query Failed: ', query)
+                raise compose_err_msg(500, "Query Failed: ", query)
         if docs:
             utils.return2client(self, docs)
         else:
-            raise compose_err_msg(500, 'No results found!')
+            raise compose_err_msg(500, "No results found!")
 
     @gen.coroutine
     def post(self):
-        database = self.settings['db']
+        database = self.settings["db"]
         data = ujson.loads(self.request.body.decode("utf-8"))
         uids = []
         if isinstance(data, list):
             for d in data:
                 d = utils.default_timeuid(d)
                 try:
-                    jsonschema.validate(d,
-                                        utils.schemas['container'])
+                    jsonschema.validate(d, utils.schemas["container"])
                 except (ValidationError, SchemaError):
-                    raise compose_err_msg(400,
-                                          "Invalid schema on document(s)", d)
-                uids.append(d['uid'])
+                    raise compose_err_msg(400, "Invalid schema on document(s)", d)
+                uids.append(d["uid"])
                 res = database.container.insert(d)
         elif isinstance(data, dict):
             data = utils.default_timeuid(data)
             try:
-                jsonschema.validate(data,
-                                    utils.schemas['container'])
+                jsonschema.validate(data, utils.schemas["container"])
             except (ValidationError, SchemaError):
-                raise compose_err_msg(400,
-                                      "Invalid schema on document(s)", data)
-            uids.append(data['uid'])
+                raise compose_err_msg(400, "Invalid schema on document(s)", data)
+            uids.append(data["uid"])
             res = database.container.insert(data)
             if not res:
-                raise compose_err_msg(500,
-                                      'SampleHandler expects list or dict')
+                raise compose_err_msg(500, "SampleHandler expects list or dict")
         self.finish(ujson.dumps(uids))
 
     @gen.coroutine
     def put(self):
-        database = self.settings['db']
+        database = self.settings["db"]
         incoming = ujson.loads(self.request.body)
         try:
-            query = incoming.pop('query')
-            update = incoming.pop('update')
+            query = incoming.pop("query")
+            update = incoming.pop("update")
         except KeyError:
-            raise compose_err_msg(500,
-                                  'filter and update are both required fields')
-        if any(x in update.keys() for x in ['uid']):
-            raise compose_err_msg(500,
-                                  'Uid cannot be updated')
-        res = database.container.update_many(filter=query,
-                                             update={'$set': update},
-                                             upsert=False)
+            raise compose_err_msg(500, "filter and update are both required fields")
+        if any(x in update.keys() for x in ["uid"]):
+            raise compose_err_msg(500, "Uid cannot be updated")
+        res = database.container.update_many(
+            filter=query, update={"$set": update}, upsert=False
+        )
         self.finish(ujson.dumps(utils.sanitize_return(res.raw_result)))
 
 
 class SchemaHandler(DefaultHandler):
     """Provides the json used for schema validation provided collection name"""
+
     @gen.coroutine
     def get(self):
         col = utils.unpack_params(self)
@@ -343,10 +317,8 @@ class SchemaHandler(DefaultHandler):
 
     @gen.coroutine
     def put(self):
-        raise utils._compose_err_msg(405,
-                                     status='Not allowed on server')
+        raise utils._compose_err_msg(405, status="Not allowed on server")
 
     @gen.coroutine
     def post(self):
-        raise utils._compose_err_msg(405,
-                                     status='Not allowed on server')
+        raise utils._compose_err_msg(405, status="Not allowed on server")

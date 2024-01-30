@@ -5,26 +5,28 @@ import pymongo
 import uuid
 import time as ttime
 
+
 class AmostraException(Exception):
     pass
 
 
-SCHEMA_PATH = 'schemas'
-SCHEMA_NAMES = {'sample': 'sample.json',
-                'request': 'request.json',
-                'container': 'container.json'}
-fn = '{}/{{}}'.format(SCHEMA_PATH)
+SCHEMA_PATH = "schemas"
+SCHEMA_NAMES = {
+    "sample": "sample.json",
+    "request": "request.json",
+    "container": "container.json",
+}
+fn = "{}/{{}}".format(SCHEMA_PATH)
 schemas = {}
 for name, filename in SCHEMA_NAMES.items():
     try:
-        with open(rs_fn('amostra',
-                        resource_name=fn.format(filename))) as fin:
+        with open(rs_fn("amostra", resource_name=fn.format(filename))) as fin:
             schemas[name] = ujson.load(fin)
     except FileNotFoundError:
-        raise AmostraException('Schema file not found or does not exist')
+        raise AmostraException("Schema file not found or does not exist")
 
 
-def compose_err_msg(code, status, m_str=''):
+def compose_err_msg(code, status, m_str=""):
     fmsg = str(status) + str(m_str)
     return tornado.web.HTTPError(status_code=code, reason=fmsg)
 
@@ -58,26 +60,26 @@ def return2client(handler, payload):
     """
     # TODO: Solve precision issue with json precision
     if isinstance(payload, pymongo.cursor.Cursor):
-            l = []
-            for p in payload:
-                del(p['_id'])
-                l.append(p)
-            handler.write(ujson.dumps(l))
+        l = []
+        for p in payload:
+            del p["_id"]
+            l.append(p)
+        handler.write(ujson.dumps(l))
     elif isinstance(payload, dict):
-        del(payload['_id'])
+        del payload["_id"]
         handler.write(ujson.dumps(list(payload)))
     else:
-        handler.write('[')
+        handler.write("[")
         d = next(payload)
         while True:
             try:
-                del(d['_id'])
+                del d["_id"]
                 handler.write(ujson.dumps(d))
                 d = next(payload)
-                handler.write(',')
+                handler.write(",")
             except StopIteration:
                 break
-        handler.write(']')
+        handler.write("]")
     handler.finish()
 
 
@@ -95,13 +97,16 @@ def default_timeuid(document):
     dict
         Document with defaults
     """
-    if 'uid' not in document or document['uid'] is None:
-        document['uid'] = str(uuid.uuid4())
-    if 'time' not in document or document['time'] is None:
-        document['time'] = ttime.time()
+    if "uid" not in document or document["uid"] is None:
+        document["uid"] = str(uuid.uuid4())
+    if "time" not in document or document["time"] is None:
+        document["time"] = ttime.time()
     return document
 
+
 def sanitize_return(result_dict):
-    OLD_KEYS = set(['electionId', 'opTime', '$clusterTime', 'signature', 'operationTime'])
+    OLD_KEYS = set(
+        ["electionId", "opTime", "$clusterTime", "signature", "operationTime"]
+    )
     cleaned_result_dict = {k: v for k, v in result_dict.items() if k not in OLD_KEYS}
     return cleaned_result_dict

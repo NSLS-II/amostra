@@ -1,6 +1,11 @@
 # Smoketest the api
-from amostra.client.api import (SampleReference, RequestReference,
-                                ContainerReference, AmostraClient)
+from amostra.client.api import (
+    SampleReference,
+    RequestReference,
+    ContainerReference,
+    AmostraClient,
+)
+
 
 def test_api_smoke():
     s_create = SampleReference.create

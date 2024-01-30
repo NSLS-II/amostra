@@ -17,7 +17,7 @@ def doc_or_uid_to_uid(doc_or_uid):
         A string version of the uid of the given document
     """
     try:
-        return str(doc_or_uid['uid'])
+        return str(doc_or_uid["uid"])
     except TypeError:
         return doc_or_uid
 
@@ -54,8 +54,7 @@ def _post(url, data):
         Entries to be inserted to database
 
     """
-    r = requests.post(url,
-                      data=ujson.dumps(data))
+    r = requests.post(url, data=ujson.dumps(data))
     r.raise_for_status()
     return r.json()
 
@@ -82,7 +81,6 @@ def _put(url, query, update):
         In case update fails, appropriate HTTPError and message string returned
 
     """
-    update_cont = {'query': query, 'update': update}
-    r = requests.put(url,
-                     data=ujson.dumps(update_cont))
+    update_cont = {"query": query, "update": update}
+    r = requests.put(url, data=ujson.dumps(update_cont))
     r.raise_for_status()
