@@ -43,7 +43,7 @@ def start_server(config=None, testing=False):
         "--database", dest="database", type=str, help="name of database to use"
     )
     parser.add_argument(
-        "--mongo-uri",
+        "--mongo_uri",
         dest="mongo_uri",
         type=str,
         help="URI for connecting to central MongoDB",
@@ -56,18 +56,18 @@ def start_server(config=None, testing=False):
         help="port listen to for clients",
     )
     args = parser.parse_args()
-    print(args)
     if args.database is not None:
         config["database"] = args.database
     if args.mongo_uri is not None:
         config["mongo_uri"] = args.mongo_uri
-    else:
+    elif not config["mongo_uri"]:
         raise KeyError("mongo_uri must be defined")
     if args.timezone is not None:
         config["timezone"] = args.timezone
     service_port = args.service_port
     if service_port is None:
         service_port = 7770
+    print(args)
     db = db_connect(database=config["database"], mongo_uri=config["mongo_uri"], testing=testing)
     application = tornado.web.Application(
         [
