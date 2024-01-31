@@ -30,7 +30,7 @@ def db_connect(database, mongo_uri, testing=False):
     """
     if testing:
         import mongomock
-        client = mongomock.MongClient(mongo_uri)
+        client = mongomock.MongoClient(mongo_uri)
     else:
         try:
             client = pymongo.MongoClient(mongo_uri)
