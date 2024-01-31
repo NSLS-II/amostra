@@ -121,7 +121,7 @@ class SampleReferenceHandler(DefaultHandler):
                                           "Invalid schema on document(s)",
                                           d)
                 uids.append(d['uid'])
-                res = database.sample.insert(d)
+                res = database.sample.insert_one(d)
         elif isinstance(data, dict):
             data = utils.default_timeuid(data)
             try:
@@ -132,7 +132,7 @@ class SampleReferenceHandler(DefaultHandler):
                                       "Invalid schema on document(s)",
                                       data)
             uids.append(data['uid'])
-            res = database.sample.insert(data)
+            res = database.sample.insert_one(data)
             if not res:
                 raise compose_err_msg(500,
                                       'SampleHandler expects list or dict')
@@ -198,7 +198,7 @@ class RequestReferenceHandler(DefaultHandler):
                                           "Invalid schema on document(s)",
                                           d)
                 try:
-                    database.request.insert(d)
+                    database.request.insert_one(d)
                     uids.append(d['uid'])
                 except pymongo.errors.PyMongoError:
                     raise compose_err_msg(500,
@@ -214,7 +214,7 @@ class RequestReferenceHandler(DefaultHandler):
                                       "Invalid schema on document(s)",
                                       data)
             try:
-                database.request.insert(data)
+                database.request.insert_one(data)
                 uids.append(data['uid'])
             except pymongo.errors.PyMongoError:
                 raise compose_err_msg(500,
@@ -302,7 +302,7 @@ class ContainerReferenceHandler(DefaultHandler):
                     raise compose_err_msg(400,
                                           "Invalid schema on document(s)", d)
                 uids.append(d['uid'])
-                res = database.container.insert(d)
+                res = database.container.insert_one(d)
         elif isinstance(data, dict):
             data = utils.default_timeuid(data)
             try:
@@ -312,7 +312,7 @@ class ContainerReferenceHandler(DefaultHandler):
                 raise compose_err_msg(400,
                                       "Invalid schema on document(s)", data)
             uids.append(data['uid'])
-            res = database.container.insert(data)
+            res = database.container.insert_one(data)
             if not res:
                 raise compose_err_msg(500,
                                       'SampleHandler expects list or dict')
