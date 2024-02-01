@@ -28,13 +28,14 @@ def astore_startup():
             [
                 sys.executable,
                 "-c",
-                f"from amostra.ignition import start_server; start_server(config={testing_config}, testing=True) ",
+                f"from amostra.ignition import start_server; start_server(config={testing_config}, testing=True)",
             ],
         )
         ttime.sleep(1.3)  # make sure the process is started
         yield ps
     finally:
         ps.terminate()
+
 
 @pytest.fixture(scope="session")
 def astore_server():
