@@ -22,7 +22,7 @@ testing_config = {
 
 
 @contextlib.contextmanager
-def astore_startup():
+def amostra_startup():
     try:
         ps = subprocess.Popen(
             [
@@ -38,12 +38,12 @@ def astore_startup():
 
 
 @pytest.fixture(scope="session")
-def astore_server():
-    with astore_startup() as astore_fixture:
+def amostra_server():
+    with amostra_startup() as amostra_fixture:
         yield
 
 
 @pytest.fixture(scope="function")
-def astore_client():
+def amostra_client():
     conn = AmostraClient(host=testing_config["host"], port=testing_config["port"])
     return conn

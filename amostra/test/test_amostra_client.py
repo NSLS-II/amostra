@@ -8,36 +8,36 @@ from .conftest import testing_config
 import uuid
 
 
-def test_client_constructor(astore_client):
+def test_client_constructor(amostra_client):
     pytest.raises(TypeError, AmostraClient)
 
 
-def test_connection_switch(astore_client):
-    astore_client.host = "caesar"
-    pytest.raises(RequestException, astore_client.create_sample, "asterix")
-    astore_client.host = testing_config["host"]
+def test_connection_switch(amostra_client):
+    amostra_client.host = "caesar"
+    pytest.raises(RequestException, amostra_client.create_sample, "asterix")
+    amostra_client.host = testing_config["host"]
 
 
-def test_sample_create(astore_server, astore_client):
-    r1 = astore_client.create_sample(name="test1")
-    r2 = astore_client.create_sample(name="test2", uid=str(uuid.uuid4()))
+def test_sample_create(amostra_server, amostra_client):
+    r1 = amostra_client.create_sample(name="test1")
+    r2 = amostra_client.create_sample(name="test2", uid=str(uuid.uuid4()))
     m_kwargs = dict(owner="test", level="inferno", type="automated", material="CoFeB")
-    r3 = astore_client.create_sample(name="test3", uid=str(uuid.uuid4()), **m_kwargs)
+    r3 = amostra_client.create_sample(name="test3", uid=str(uuid.uuid4()), **m_kwargs)
 
 
-def test_duplicate_sample(astore_client):
+def test_duplicate_sample(amostra_client):
     _com_uid = str(uuid.uuid4())
-    astore_client.create_sample(name="test_sample", uid=_com_uid, custom=False)
+    amostra_client.create_sample(name="test_sample", uid=_com_uid, custom=False)
     pytest.raises(
-        HTTPError, astore_client.create_sample, name="test_duplicate", uid=_com_uid
+        HTTPError, amostra_client.create_sample, name="test_duplicate", uid=_com_uid
     )
 
 
-def test_invalid_sample(astore_client):
-    pytest.raises(TypeError, astore_client.create_sample)
+def test_invalid_sample(amostra_client):
+    pytest.raises(TypeError, amostra_client.create_sample)
 
 
-def test_find_sample(astore_client):
+def test_find_sample(amostra_client):
     m_sample = dict(
         name="comp_samp",
         uid=str(uuid.uuid4()),
@@ -46,12 +46,12 @@ def test_find_sample(astore_client):
         project="ci-tests",
         beamline_id="test-ci",
     )
-    s = astore_client.create_sample(**m_sample)
-    s_ret = astore_client.find_sample(uid=m_sample["uid"])
+    s = amostra_client.create_sample(**m_sample)
+    s_ret = amostra_client.find_sample(uid=m_sample["uid"])
     assert s_ret[0]["uid"] == m_sample["uid"]
 
 
-def test_find_sample_as_doc(astore_client):
+def test_find_sample_as_doc(amostra_client):
     m_sample = dict(
         name="comp_sam",
         uid=str(uuid.uuid4()),
@@ -61,12 +61,12 @@ def test_find_sample_as_doc(astore_client):
         beamline_id="trial_b",
         container="legion1",
     )
-    astore_client.create_sample(**m_sample)
-    s_ret = astore_client.find_sample(uid=m_sample["uid"], as_document=True)
+    amostra_client.create_sample(**m_sample)
+    s_ret = amostra_client.find_sample(uid=m_sample["uid"], as_document=True)
     assert s_ret[0] == Document("Sample", m_sample)
 
 
-def test_update_sample(astore_server, astore_client):
+def test_update_sample(amostra_server, amostra_client):
     test_sample = dict(
         name="up_sam",
         uid=str(uuid.uuid4()),
@@ -77,16 +77,16 @@ def test_update_sample(astore_server, astore_client):
         state="active",
         container="legion2",
     )
-    astore_client.create_sample(**test_sample)
-    astore_client.update_sample(
+    amostra_client.create_sample(**test_sample)
+    amostra_client.update_sample(
         query={"uid": test_sample["uid"]},
         update={"state": "inactive", "time": ttime.time()},
     )
-    updated_samp = astore_client.find_sample(name="up_sam")[0]
+    updated_samp = amostra_client.find_sample(name="up_sam")[0]
     assert updated_samp["state"] == "inactive"
 
 
-def test_update_sample_illegal(astore_client):
+def test_update_sample_illegal(amostra_client):
     test_sample = dict(
         name="up_sam",
         uid=str(uuid.uuid4()),
@@ -98,13 +98,13 @@ def test_update_sample_illegal(astore_client):
     )
     pytest.raises(
         HTTPError,
-        astore_client.update_sample,
+        amostra_client.update_sample,
         query={"name": test_sample["name"]},
         update={"uid": "illegal"},
     )
 
 
-def test_container_create(astore_client):
+def test_container_create(amostra_client):
     ast_cont = {
         "name": "obelix",
         "dog": "hidefix",
@@ -112,11 +112,11 @@ def test_container_create(astore_client):
         "container": "gauls",
         "uid": str(uuid.uuid4()),
     }
-    cont1 = astore_client.create_container(**ast_cont)
+    cont1 = amostra_client.create_container(**ast_cont)
     assert cont1 == ast_cont["uid"]
 
 
-def test_find_container(astore_client):
+def test_find_container(amostra_client):
     f_cont = dict(
         name="comp_sam",
         uid=str(uuid.uuid4()),
@@ -126,13 +126,13 @@ def test_find_container(astore_client):
         container="gauls",
         beamline_id="fiction",
     )
-    c_uid = astore_client.create_container(**f_cont)
-    c_ret_doc = astore_client.find_container(uid=c_uid, as_document=True)[0]
+    c_uid = amostra_client.create_container(**f_cont)
+    c_ret_doc = amostra_client.find_container(uid=c_uid, as_document=True)[0]
     assert Document == type(c_ret_doc)
     assert c_ret_doc["uid"] == c_uid
 
 
-def test_find_container_as_doc(astore_client):
+def test_find_container_as_doc(amostra_client):
     f_cont = dict(
         name="comp_sam",
         uid=str(uuid.uuid4()),
@@ -142,13 +142,13 @@ def test_find_container_as_doc(astore_client):
         container="gauls",
         beamline_id="fiction",
     )
-    c_uid = astore_client.create_container(**f_cont)
-    c_ret_doc = astore_client.find_container(uid=c_uid, as_document=True)[0]
+    c_uid = amostra_client.create_container(**f_cont)
+    c_ret_doc = amostra_client.find_container(uid=c_uid, as_document=True)[0]
     assert Document == type(c_ret_doc)
     assert c_ret_doc["uid"] == c_uid
 
 
-def test_update_container(astore_client):
+def test_update_container(amostra_client):
     orig_cont = dict(
         name="obelix",
         uid=str(uuid.uuid4()),
@@ -159,16 +159,16 @@ def test_update_container(astore_client):
         state="active",
         container="SPQR",
     )
-    m_uid = astore_client.create_container(**orig_cont)
-    astore_client.update_container(
+    m_uid = amostra_client.create_container(**orig_cont)
+    amostra_client.update_container(
         query={"uid": orig_cont["uid"]},
         update={"state": "inactive", "time": ttime.time()},
     )
-    updated_cont = astore_client.find_container(uid=m_uid)[0]
+    updated_cont = amostra_client.find_container(uid=m_uid)[0]
     assert updated_cont["state"] == "inactive"
 
 
-def test_update_container_illegal(astore_client):
+def test_update_container_illegal(amostra_client):
     orig_cont = dict(
         name="obelix",
         uid=str(uuid.uuid4()),
@@ -179,18 +179,18 @@ def test_update_container_illegal(astore_client):
         state="active",
         container="SPQR",
     )
-    m_uid = astore_client.create_container(**orig_cont)
+    m_uid = amostra_client.create_container(**orig_cont)
     test_time = ttime.time()
     pytest.raises(
         HTTPError,
-        astore_client.update_container,
+        amostra_client.update_container,
         query={"uid": orig_cont["uid"]},
         update={"uid": str(uuid.uuid4())},
     )
 
 
-def test_request_create(astore_client):
-    astore_client.create_request(
+def test_request_create(amostra_client):
+    amostra_client.create_request(
         sample="roman_sample",
         time=ttime.time(),
         uid=None,
@@ -202,9 +202,9 @@ def test_request_create(astore_client):
     )
 
 
-def test_duplicate_request(astore_client):
+def test_duplicate_request(amostra_client):
     m_uid = str(uuid.uuid4())
-    astore_client.create_request(
+    amostra_client.create_request(
         sample="hidefix",
         time=ttime.time(),
         uid=m_uid,
@@ -216,7 +216,7 @@ def test_duplicate_request(astore_client):
     )
     pytest.raises(
         HTTPError,
-        astore_client.create_request,
+        amostra_client.create_request,
         sample="hidefix",
         time=ttime.time(),
         uid=m_uid,
@@ -228,7 +228,7 @@ def test_duplicate_request(astore_client):
     )
 
 
-def test_request_find(astore_client):
+def test_request_find(amostra_client):
     req_dict = dict(
         sample="hidefix",
         time=ttime.time(),
@@ -239,12 +239,12 @@ def test_request_find(astore_client):
         hero="obelix",
         antihero="romans",
     )
-    inserted = astore_client.create_request(**req_dict)
-    retrieved = astore_client.find_request(uid=inserted)[0]
+    inserted = amostra_client.create_request(**req_dict)
+    retrieved = amostra_client.find_request(uid=inserted)[0]
     assert retrieved["uid"] == inserted
 
 
-def test_update_request(astore_client):
+def test_update_request(amostra_client):
     m_uid = str(uuid.uuid4())
     req_dict = dict(
         uid=m_uid,
@@ -255,7 +255,7 @@ def test_update_request(astore_client):
         hero="obelix",
         antihero="romans",
     )
-    astore_client.create_request(**req_dict)
-    astore_client.update_request(query={"uid": m_uid}, update={"state": "inactive"})
-    updated_req = astore_client.find_request(uid=m_uid)[0]
+    amostra_client.create_request(**req_dict)
+    amostra_client.update_request(query={"uid": m_uid}, update={"state": "inactive"})
+    updated_req = amostra_client.find_request(uid=m_uid)[0]
     assert updated_req["state"] == "inactive"
