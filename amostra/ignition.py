@@ -68,7 +68,9 @@ def start_server(config=None, testing=False):
     if service_port is None:
         service_port = 7770
     print(args)
-    db = db_connect(database=config["database"], mongo_uri=config["mongo_uri"], testing=testing)
+    db = db_connect(
+        database=config["database"], mongo_uri=config["mongo_uri"], testing=testing
+    )
     application = tornado.web.Application(
         [
             (r"/sample", SampleReferenceHandler),
