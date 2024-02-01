@@ -78,11 +78,11 @@ def test_find_container(amostra_server, amostra_client):
         beamline_id="fiction",
     )
     c_uid = amostra_client.create_container(**f_cont)
-    c_ret = next(amostra_client.find_container(uid=c_uid))
+    c_ret = amostra_client.find_container(uid=c_uid)[0]
     assert c_ret["uid"] == c_uid
 
 
-def test_find_container_as_doc(amostra_serer, amostra_client):
+def test_find_container_as_doc(amostra_server, amostra_client):
     f_cont = dict(
         name="comp_sam",
         uid=str(uuid.uuid4()),
@@ -93,7 +93,7 @@ def test_find_container_as_doc(amostra_serer, amostra_client):
         beamline_id="fiction",
     )
     c_uid = amostra_client.create_container(**f_cont)
-    c_ret_doc = next(amostra_client.find_container(uid=c_uid, as_document=True))
+    c_ret_doc = amostra_client.find_container(uid=c_uid, as_document=True)[0]
     assert Document == type(c_ret_doc)
     assert c_ret_doc["uid"] == c_uid
 
@@ -114,7 +114,7 @@ def test_update_container(amostra_server, amostra_client):
         query={"uid": orig_cont["uid"]},
         update={"state": "inactive", "time": time.time()},
     )
-    updated_cont = next(amostra_client.find_container(uid=m_uid))
+    updated_cont = amostra_client.find_container(uid=m_uid)[0]
     assert updated_cont["state"] == "inactive"
 
 
