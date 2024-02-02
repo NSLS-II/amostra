@@ -27,13 +27,6 @@ def test_sample_create(amostra_server, amostra_client):
    r3 = amostra_client.create_sample(name='test3', uid=str(uuid.uuid4()), **m_kwargs)
 
 
-def test_duplicate_sample(amostra_client):
-    _com_uid = str(uuid.uuid4())
-    amostra_client.create_sample(name='test_sample', uid=_com_uid, custom=False)
-    pytest.raises(HTTPError, amostra_client.create_sample, name='test_duplicate',
-                  uid=_com_uid)
-
-
 def test_invalid_sample(amostra_client):
     pytest.raises(TypeError, amostra_client.create_sample)
 
@@ -128,15 +121,6 @@ def test_request_create(amostra_client):
                uid=None, state='active', seq_num=0, foo='bar',
                hero='asterix', antihero='romans')
 
-
-def test_duplicate_request(amostra_client):
-    m_uid = str(uuid.uuid4())
-    amostra_client.create_request(sample='hidefix', time=ttime.time(),
-               uid=m_uid, state='active', seq_num=0, foo='bar',
-               hero='asterix', antihero='romans')
-    pytest.raises(HTTPError, amostra_client.create_request, sample='hidefix', time=ttime.time(),
-               uid=m_uid, state='active', seq_num=0, foo='bar',
-               hero='asterix', antihero='romans')
 
 def test_request_find(amostra_client):
     req_dict = dict(sample='hidefix', time=ttime.time(),

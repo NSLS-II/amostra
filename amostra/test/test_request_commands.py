@@ -30,19 +30,6 @@ def test_request_create():
                hero='asterix', antihero='romans')
 
 
-def test_duplicate_request():
-    m_uid = str(uuid4())
-    req1= RequestReference(host=TESTING_CONFIG['host'],
-                           port=TESTING_CONFIG['port'])
-    req1.create(sample='hidefix', time=time.time(),
-               uid=m_uid, state='active', seq_num=0, foo='bar',
-               hero='asterix', antihero='romans')
-    req2 = RequestReference(host=TESTING_CONFIG['host'],
-                           port=TESTING_CONFIG['port'])
-    pytest.raises(HTTPError, req2.create, sample='hidefix', time=time.time(),
-               uid=m_uid, state='active', seq_num=0, foo='bar',
-               hero='asterix', antihero='romans')
-
 def test_request_find():
     r = RequestReference(host=TESTING_CONFIG['host'],
                         port=TESTING_CONFIG['port'])

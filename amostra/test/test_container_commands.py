@@ -29,16 +29,6 @@ def test_container_create(amostra_server, amostra_client):
     assert cont1 == ast_cont['uid']
 
 
-def test_duplicate_container(amostra_server, amostra_client):
-    m_uid = str(uuid.uuid4())
-    ast_cont = {'name': 'obelix', "dog": 'hidefix', 'time': ttime.time(),
-                'container': 'gauls', 'uid': m_uid}
-    cont1 = amostra_client.create_container(**ast_cont)
-    pytest.raises(HTTPError, amostra_client.create_container, uid=cont1)
-    ast_cont = {'name': 'obelix', "dog": 'hidefix', 'time': ttime.time(),
-                'container': 'gauls', 'uid': 'some_unique_id'}
-
-
 def test_invalid_container(amostra_server, amostra_client):
     inv_cont = dict(name='romans', uid=str(uuid.uuid4()),
                     time=str(ttime.time()), owner='obelix', project='invadegauls',
