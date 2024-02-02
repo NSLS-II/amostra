@@ -1,26 +1,21 @@
-import time as ttime
-import pytest
 import time
-from amostra.testing import amostra_setup, amostra_teardown
 from amostra.client.api import RequestReference
-from requests.exceptions import HTTPError, ConnectionError
 from amostra.testing import TESTING_CONFIG
 from uuid import uuid4
-from requests.exceptions import ConnectionError
 
 
-def teardown():
-    amostra_teardown()
+def test_request_constructor_config(amostra_server, amostra_client):
+    amostra_client = RequestReference(
+        host=TESTING_CONFIG["host"], port=TESTING_CONFIG["port"]
+    )
+    assert amostra_client.host == TESTING_CONFIG["host"]
+    assert amostra_client.port == TESTING_CONFIG["port"]
 
 
-def test_request_constructor_config():
-    r1 = RequestReference(host=TESTING_CONFIG["host"], port=TESTING_CONFIG["port"])
-    assert r1.host == TESTING_CONFIG["host"]
-    assert r1.port == TESTING_CONFIG["port"]
-
-
-def test_request_create():
-    req1 = RequestReference(host=TESTING_CONFIG["host"], port=TESTING_CONFIG["port"])
+def test_request_create(amostra_server, amostra_client):
+    amostra_client = RequestReference(
+        host=TESTING_CONFIG["host"], port=TESTING_CONFIG["port"]
+    )
 
     req2 = RequestReference(host=TESTING_CONFIG["host"], port=TESTING_CONFIG["port"])
     req2.create(
@@ -35,8 +30,10 @@ def test_request_create():
     )
 
 
-def test_request_find():
-    r = RequestReference(host=TESTING_CONFIG["host"], port=TESTING_CONFIG["port"])
+def test_request_find(amostra_server, amostra_client):
+    amostra_client = RequestReference(
+        host=TESTING_CONFIG["host"], port=TESTING_CONFIG["port"]
+    )
     req_dict = dict(
         sample="hidefix",
         time=time.time(),
@@ -47,13 +44,15 @@ def test_request_find():
         hero="obelix",
         antihero="romans",
     )
-    inserted = r.create(**req_dict)
-    retrieved = next(r.find(foo="bar"))
+    inserted = amostra_client.create(**req_dict)
+    retrieved = next(amostra_client.find(foo="bar"))
     assert retrieved["uid"] == inserted
 
 
-def test_update_request():
-    r = RequestReference(host=TESTING_CONFIG["host"], port=TESTING_CONFIG["port"])
+def test_update_request(amostra_server, amostra_client):
+    amostra_client = RequestReference(
+        host=TESTING_CONFIG["host"], port=TESTING_CONFIG["port"]
+    )
     m_uid = str(uuid4())
     req_dict = dict(
         sample="hidefix",
@@ -65,14 +64,7 @@ def test_update_request():
         hero="obelix",
         antihero="romans",
     )
-    r.create(**req_dict)
-    r.update(query={"uid": m_uid}, update={"state": "inactive"})
-    updated_req = next(r.find(uid=m_uid))
+    amostra_client.create(**req_dict)
+    amostra_client.update(query={"uid": m_uid}, update={"state": "inactive"})
+    updated_req = next(amostra_client.find(uid=m_uid))
     assert updated_req["state"] == "inactive"
-
-
-def setup():
-    amostra_setup()
-    global sample_uids, document_insertion_time
-    document_insertion_time = ttime.time()
-    # TODO: Get sample data!!!!!! and populate
