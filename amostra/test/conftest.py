@@ -2,10 +2,17 @@ import uuid
 import pytest
 import subprocess
 import contextlib
+import os
 import time as ttime
+import shutil
 import sys
 
 from amostra.client.commands import AmostraClient
+from amostra.client.local_commands import (
+    LocalContainerReference,
+    LocalRequestReference,
+    LocalSampleReference,
+)
 
 testing_config = {
     "database": "mds_testing_disposable_{}".format(str(uuid.uuid4())),
@@ -47,3 +54,36 @@ def amostra_server():
 def amostra_client():
     conn = AmostraClient(host=testing_config["host"], port=testing_config["port"])
     return conn
+
+
+@pytest.fixture(scope="function")
+def amostra_local_container():
+    try:
+        usr_path = os.path.expanduser(testing_config["local_files"])
+        os.mkdir(usr_path)
+    except FileExistsError:
+        pass
+    local_container = LocalContainerReference()
+    return local_container
+
+
+@pytest.fixture(scope="function")
+def amostra_local_request():
+    try:
+        usr_path = os.path.expanduser(testing_config["local_files"])
+        os.mkdir(usr_path)
+    except FileExistsError:
+        pass
+    local_request = LocalRequestReference()
+    return local_request
+
+
+@pytest.fixture(scope="function")
+def amostra_local_sample():
+    try:
+        usr_path = os.path.expanduser(testing_config["local_files"])
+        os.mkdir(usr_path)
+    except FileExistsError:
+        pass
+    local_sample = LocalSampleReference()
+    return local_sample
