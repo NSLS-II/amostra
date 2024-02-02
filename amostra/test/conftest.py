@@ -3,6 +3,7 @@ import pytest
 import subprocess
 import contextlib
 import os
+from pathlib import Path
 import time as ttime
 import shutil
 import sys
@@ -57,33 +58,57 @@ def amostra_client():
 
 
 @pytest.fixture(scope="function")
-def amostra_local_container():
+def amostra_local_container(request):
     try:
         usr_path = os.path.expanduser(testing_config["local_files"])
         os.mkdir(usr_path)
     except FileExistsError:
         pass
     local_container = LocalContainerReference()
+
+    def clear_files():
+        try:
+            shutil.rmtree(Path(testing_config["local_files"]).expanduser())
+        except FileNotFoundError:
+            pass
+
+    request.addfinalizer(lambda: clear_files())
     return local_container
 
 
 @pytest.fixture(scope="function")
-def amostra_local_request():
+def amostra_local_request(request):
     try:
         usr_path = os.path.expanduser(testing_config["local_files"])
         os.mkdir(usr_path)
     except FileExistsError:
         pass
     local_request = LocalRequestReference()
+
+    def clear_files():
+        try:
+            shutil.rmtree(Path(testing_config["local_files"]).expanduser())
+        except FileNotFoundError:
+            pass
+
+    request.addfinalizer(lambda: clear_files())
     return local_request
 
 
 @pytest.fixture(scope="function")
-def amostra_local_sample():
+def amostra_local_sample(request):
     try:
         usr_path = os.path.expanduser(testing_config["local_files"])
         os.mkdir(usr_path)
     except FileExistsError:
         pass
     local_sample = LocalSampleReference()
+
+    def clear_files():
+        try:
+            shutil.rmtree(Path(testing_config["local_files"]).expanduser())
+        except FileNotFoundError:
+            pass
+
+    request.addfinalizer(lambda: clear_files())
     return local_sample
