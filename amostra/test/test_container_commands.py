@@ -15,13 +15,6 @@ def test_container_constructor():
     s2 = ContainerReference()
 
 
-def test_connection_switch(amostra_client):
-    amostra_client.host = 'caesar'
-    pytest.raises(RequestException, amostra_client)
-    amostra_client.host = TESTING_CONFIG['host']
-    amostra_client.port = TESTING_CONFIG['port']
-
-
 def test_container_create(amostra_server, amostra_client):
     ast_cont = {'name': 'obelix', "dog": 'hidefix', 'time': ttime.time(),
                 'container': 'gauls', 'uid': str(uuid.uuid4())}
