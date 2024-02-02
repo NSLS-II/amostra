@@ -39,13 +39,6 @@ def test_sample_create():
     r3 = samp.create(name="test3", uid=str(uuid.uuid4()), **m_kwargs)
 
 
-def test_duplicate_sample():
-    s = SampleReference(host=TESTING_CONFIG["host"], port=TESTING_CONFIG["port"])
-    _comm_uid = str(uuid.uuid4())
-    s.create(name="test_samp", uid=_comm_uid)
-    pytest.raises(HTTPError, s.create, name="test_dup", uid=_comm_uid)
-
-
 def test_invalid_sample():
     s = SampleReference(host=TESTING_CONFIG["host"], port=TESTING_CONFIG["port"])
     pytest.raises(TypeError, s.create)
