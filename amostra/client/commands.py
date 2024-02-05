@@ -351,7 +351,7 @@ class SampleReference(object):
 class RequestReference(object):
     """Reference implementation of generic request"""
 
-    def __init__(self, host=conf.conn_config["host"], port=conf.conn_config["port"]):
+    def __init__(self, host=conf.conn_config["host"], service_port=conf.conn_config["service_port"]):
         """Constructor
 
         Parameters
