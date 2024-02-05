@@ -26,17 +26,17 @@ class AmostraClient:
     @property
     def _sample_client(self):
         """Connection pool for Sample related tasks."""
-        return SampleReference(host=self.host, port=self.service_port)
+        return SampleReference(host=self.host, service_port=self.service_port)
 
     @property
     def _container_client(self):
         """Connection pool for Container related tasks."""
-        return ContainerReference(host=self.host, port=self.service_port)
+        return ContainerReference(host=self.host, service_port=self.service_port)
 
     @property
     def _request_client(self):
         """Connection pool for Request related tasks."""
-        return RequestReference(host=self.host, port=self.service_port)
+        return RequestReference(host=self.host, service_port=self.service_port)
 
     def create_sample(self, name, time=None, uid=None, container=None, **kwargs):
         """Insert a sample to the database
