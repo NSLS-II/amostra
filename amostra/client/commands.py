@@ -10,33 +10,33 @@ class AmostraException(Exception):
 
 
 class AmostraClient:
-    def __init__(self, host, port):
+    def __init__(self, host, service_port):
         """Simplified client for Sample, Request, and Container
 
         Parameters
         ----------
         host: str, optional
             Machine name/address for Amostra server
-        port: int, optional
+        service_port: int, optional
             Port Amostra server is initiated on
         """
         self.host = host
-        self.port = port
+        self.service_port = service_port
 
     @property
     def _sample_client(self):
         """Connection pool for Sample related tasks."""
-        return SampleReference(host=self.host, port=self.port)
+        return SampleReference(host=self.host, port=self.service_port)
 
     @property
     def _container_client(self):
         """Connection pool for Container related tasks."""
-        return ContainerReference(host=self.host, port=self.port)
+        return ContainerReference(host=self.host, port=self.service_port)
 
     @property
     def _request_client(self):
         """Connection pool for Request related tasks."""
-        return RequestReference(host=self.host, port=self.port)
+        return RequestReference(host=self.host, port=self.service_port)
 
     def create_sample(self, name, time=None, uid=None, container=None, **kwargs):
         """Insert a sample to the database
@@ -215,24 +215,24 @@ class AmostraClient:
 class SampleReference(object):
     """Reference implementation of generic sample manager"""
 
-    def __init__(self, host=conf.conn_config["host"], port=conf.conn_config["port"]):
+    def __init__(self, host=conf.conn_config["host"], service_port=conf.conn_config["service_port"]):
         """Constructor.
 
         Parameters
         ----------
         host: str, optional
             Machine name/address for Amostra server
-        port: int, optional
+        service_port: int, optional
             Port Amostra server is initiated on
 
         """
         self.host = host
-        self.port = port
+        self.service_port = service_port
 
     @property
     def _server_path(self):
         """URL to the Amostra server"""
-        return "http://{}:{}/".format(self.host, self.port)
+        return "http://{}:{}/".format(self.host, self.service_port)
 
     @property
     def _samp_url(self):
@@ -358,17 +358,17 @@ class RequestReference(object):
         ----------
         host: str, optional
             Machine name/address for amostra server
-        port: int, optional
+        service_port: int, optional
             Port amostra server is initiated on
 
         """
         self.host = host
-        self.port = port
+        self.service_port = service_port
 
     @property
     def _server_path(self):
         """URL to the Amostra server"""
-        return "http://{}:{}/".format(self.host, self.port)
+        return "http://{}:{}/".format(self.host, self.service_port)
 
     @property
     def _req_url(self):
@@ -477,17 +477,17 @@ class RequestReference(object):
 class ContainerReference(object):
     """Reference implementation of generic container"""
 
-    def __init__(self, host=conf.conn_config["host"], port=conf.conn_config["port"]):
+    def __init__(self, host=conf.conn_config["host"], service_port=conf.conn_config["service_port"]):
         """Handles connection configuration to the service backend.
         Either initiate with a request or use purely as a client for requests.
         """
-        self.port = port
+        self.service_port = service_port
         self.host = host
 
     @property
     def _server_path(self):
         """URL to the Amostra server"""
-        return "http://{}:{}/".format(self.host, self.port)
+        return "http://{}:{}/".format(self.host, self.service_port)
 
     @property
     def _cont_url(self):
