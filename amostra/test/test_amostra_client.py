@@ -1,7 +1,6 @@
 from doct import Document
 import time as ttime
 import pytest
-from ..testing import amostra_setup, amostra_teardown
 from ..client.api import AmostraClient
 from requests.exceptions import HTTPError, RequestException
 from ..testing import TESTING_CONFIG

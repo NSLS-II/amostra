@@ -31,7 +31,7 @@ def test_find_sample(amostra_local_sample):
     samp_dict = dict(uid=str(uuid.uuid4()), time=ttime.time(), name='hidefix',
                      kind='dog', breed='multigree')
     amostra_local_sample.create(**samp_dict)
-    assert next(amostra)_local_sample.find(uid=samp_dict['uid']))['uid'] == samp_dict['uid']
+    assert next(amostra_local_sample.find(uid=samp_dict['uid']))['uid'] == samp_dict['uid']
 
 
 def test_find_container(amostra_local_container):
