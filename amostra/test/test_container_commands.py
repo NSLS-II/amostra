@@ -18,7 +18,7 @@ def test_container_constructor():
 def test_container_create(amostra_server, amostra_client):
     ast_cont = {'name': 'obelix', "dog": 'hidefix', 'time': ttime.time(),
                 'container': 'gauls', 'uid': str(uuid.uuid4())}
-    cont1 = amostra_client.create(**ast_cont)
+    cont1 = amostra_client.create_container(**ast_cont)
     assert cont1 == ast_cont['uid']
 
 
@@ -36,7 +36,8 @@ def test_find_container(amostra_server, amostra_client):
                     container='gauls',
                     beamline_id='fiction')
     c_uid = amostra_client.create_container(**f_cont)
-    c_ret = amostra_client.find_container(uid=c_uid)
+    c_ret = amostra_client.find_container(uid=c_uid)[0]
+    print(c_ret)
     assert c_ret['uid'] == c_uid
 
 
@@ -58,7 +59,7 @@ def test_update_container(amostra_server, amostra_client):
     m_uid = amostra_client.create_container(**orig_cont)
     amostra_client.update_container(query={'uid': orig_cont['uid']},
              update={'state': 'inactive','time': time.time()})
-    updated_cont = amostra_client.find_container(uid=m_uid)
+    updated_cont = amostra_client.find_container(uid=m_uid)[0]
     assert updated_cont['state'] == 'inactive'
 
 
