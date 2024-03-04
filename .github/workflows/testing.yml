@@ -53,7 +53,7 @@ jobs:
         if: matrix.dependencies == 'conda'
         run: |
           set -vxeo pipefail
-          conda install -y -c conda-forge doct jsonschema mock mongomock mongoquery pymongo pytest pyyaml requests six tornado ujson
+          conda install -y -c conda-forge doct jsonschema mongomock mongoquery pymongo pytest pyyaml requests six tornado ujson
 
       - name: Install the package
         run: |
