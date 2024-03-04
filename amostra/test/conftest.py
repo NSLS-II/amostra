@@ -25,7 +25,7 @@ testing_config = {
     "timezone": "US/Eastern",
     "mongo_user": "tom",
     "mongo_pwd": "jerry",
-    "local_files": "~/amostra_files",
+    "local_files": "/tmp/amostra_files",
 }
 
 
@@ -65,7 +65,7 @@ def amostra_local_container(request):
         os.mkdir(usr_path)
     except FileExistsError:
         pass
-    local_container = LocalContainerReference()
+    local_container = LocalContainerReference(top_dir=testing_config["local_files"])
 
     def clear_files():
         try:
@@ -84,7 +84,7 @@ def amostra_local_request(request):
         os.mkdir(usr_path)
     except FileExistsError:
         pass
-    local_request = LocalRequestReference()
+    local_request = LocalRequestReference(top_dir=testing_config["local_files"])
 
     def clear_files():
         try:
@@ -103,7 +103,7 @@ def amostra_local_sample(request):
         os.mkdir(usr_path)
     except FileExistsError:
         pass
-    local_sample = LocalSampleReference()
+    local_sample = LocalSampleReference(top_dir=testing_config["local_files"])
 
     def clear_files():
         try:
