@@ -25,7 +25,7 @@ testing_config = {
     "timezone": "US/Eastern",
     "mongo_user": "tom",
     "mongo_pwd": "jerry",
-    "local_files": "/tmp/amostra_files",
+    "local_files": "~/amostra_files",
 }
 
 
