@@ -23,6 +23,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_package_data = True,
     install_requires=requirements,
+    package_data={'amostra': ['schemas/*.json']},
     classifiers=[
         "License :: OSI Approved :: BSD License",
         "Development Status :: 3 - Alpha",
