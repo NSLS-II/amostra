@@ -34,7 +34,8 @@ def db_connect(database, mongo_uri, testing=False):
     else:
         try:
             client = pymongo.MongoClient(mongo_uri)
-        except pymongo.errors.ConnectionFailure:
+            client.server_info()
+        except (pymongo.errors.ConnectionFailure, pymongo.errors.ServerSelectionTimeoutError):
             raise utils.AmostraException("Unable to connect to MongoDB server...")
     database = client[database]
     return database
