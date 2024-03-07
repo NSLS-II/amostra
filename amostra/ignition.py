@@ -40,7 +40,7 @@ def start_server(config=None, testing=False):
                         help='URI for connecting to central MongoDB')
     parser.add_argument('--timezone', dest='timezone', type=str,
                         help='Local timezone')
-    parser.add_argument('--service-port', dest='service_port', type=int,
+    parser.add_argument('--service_port', dest='service_port', type=int,
                         help='port listen to for clients')
     args = parser.parse_args()
     if args.database is not None:
