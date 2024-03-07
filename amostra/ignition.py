@@ -54,6 +54,7 @@ def start_server(config=None, testing=False):
     service_port = args.service_port
     if service_port is None:
         service_port = 7770
+    config['service_port'] = service_port
     print(args)
     db = db_connect(database=config['database'],
                     mongo_uri=config['mongo_uri'], testing=testing)
