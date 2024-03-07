@@ -8,8 +8,7 @@ import shutil
 TESTING_CONFIG = {
     'database': "mds_testing_disposable_{}".format(str(uuid.uuid4())),
     'mongo_server': 'localhost',
-    'mongo_uri': 'mongodb://localhost',
-    'mongo_port': 27017,
+    'mongo_uri': 'mongodb://localhost:27017',
     'host': 'localhost',
     'port': 7770,
     'timezone': 'US/Eastern',
