@@ -2,6 +2,9 @@ import requests
 import ujson
 
 
+session = requests.Session()
+
+
 def doc_or_uid_to_uid(doc_or_uid):
     """Given Document or uid return the uid
 
@@ -38,7 +41,7 @@ def _get(url, params):
         Results of the query
 
     """
-    r = requests.get(url, ujson.dumps(params))
+    r = session.get(url, ujson.dumps(params))
     r.raise_for_status()
     return ujson.loads(r.text)
 
@@ -54,7 +57,7 @@ def _post(url, data):
         Entries to be inserted to database
 
     """
-    r = requests.post(url,
+    r = session.post(url,
                       data=ujson.dumps(data))
     r.raise_for_status()
     return r.json()
@@ -83,6 +86,6 @@ def _put(url, query, update):
 
     """
     update_cont = {'query': query, 'update': update}
-    r = requests.put(url,
+    r = session.put(url,
                      data=ujson.dumps(update_cont))
     r.raise_for_status()
