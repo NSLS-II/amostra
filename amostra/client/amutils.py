@@ -41,7 +41,7 @@ def _get(url, params):
         Results of the query
 
     """
-    r = session.get(url, ujson.dumps(params))
+    r = session.get(url, params=ujson.dumps(params))
     r.raise_for_status()
     return ujson.loads(r.text)
 
