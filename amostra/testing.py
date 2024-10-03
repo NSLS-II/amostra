@@ -8,30 +8,13 @@ import shutil
 TESTING_CONFIG = {
     'database': "mds_testing_disposable_{}".format(str(uuid.uuid4())),
     'mongo_server': 'localhost',
-    'mongo_port': 27017,
+    'mongo_uri': 'mongodb://localhost:27017',
     'host': 'localhost',
     'port': 7770,
     'timezone': 'US/Eastern',
     'mongo_user': 'tom',
     'mongo_pwd': 'jerry',
     'local_files': '~/amostra_files'}
-
-
-def amostra_setup():
-    # start_server(config=TESTING_CONFIG)
-    # ensure tornado server started prior to tests
-    ttime.sleep(1)
-
-
-def amostra_teardown():
-    uri = 'mongodb://{0}:{1}@{2}:{3}/'.format(TESTING_CONFIG['mongo_user'],
-                                              TESTING_CONFIG['mongo_pwd'],
-                                              TESTING_CONFIG['mongo_server'],
-                                              TESTING_CONFIG['mongo_port'])
-    conn = MongoClient(uri)
-    conn.amostra.drop_collection('sample')
-    conn.amostra.drop_collection('request')
-    conn.amostra.drop_collection('container')
 
 
 def amostra_local_setup():

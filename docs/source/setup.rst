@@ -29,14 +29,14 @@ Once the environment installation is complete, the server can be started via com
 
 .. code-block:: python
    
-   python startup.py --mongo_port <mongo-daemon-port> --mongo_host <mongo-daemon-host> --database amostra --service-port 7770 --log_file_prefix <full-path-to-logfile>
+   python startup.py --mongo_uri <mongo-daemon-host> --database amostra --service_port 7770 --log_file_prefix <full-path-to-logfile>
 
 Once successful, the service will prompt:
 
 .. code-block:: bash
 
-   (dev)➜  amostra git:(master) ✗ python startup.py --mongo_port 27017 --mongo_host localhost --database amostra --log_file_prefix /tmp/amostra.log --service-port 7770
-   Starting Amostra service with configuration  {'mongo_port': 27017, 'database': 'amostra', 'mongo_host': 'localhost'}
+   (dev)➜  amostra git:(master) ✗ python startup.py --mongo_uri mongodb://localhost --database amostra --log_file_prefix /tmp/amostra.log --service_port 7770 --timezone US/Eastern
+   Starting Amostra service with configuration  {'database': 'amostra', 'mongo_uri': 'mongodb://localhost', 'timezone': 'US/Eastern', 'service_port': 7770}
 
 
 4. Client Installation
