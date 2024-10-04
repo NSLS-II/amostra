@@ -1,2 +1,2 @@
-mongomock
+mongomock>=4.2.0
 pytest

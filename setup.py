@@ -28,5 +28,10 @@ setuptools.setup(
         "License :: OSI Approved :: BSD License",
         "Development Status :: 3 - Alpha",
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
     ],
 )
